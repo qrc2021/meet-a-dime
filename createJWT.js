@@ -2,6 +2,11 @@ const jwt = require("jsonwebtoken");
 
 require("dotenv").config();
 
+exports.createToken = function ( fn, ln, id )
+{
+    return _createToken( fn, ln, id );
+}
+
 _createToken = function(fn, ln, id)
 {
     try
