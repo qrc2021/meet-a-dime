@@ -21,6 +21,12 @@ function CardUI()
     {
 	    event.preventDefault();
 
+        if (card.value.trim()=== '')
+        {
+            setMessage("Card cannot be empty");
+            return;
+        }
+            
         var obj = {userId:userId,card:card.value};
         var js = JSON.stringify(obj);
 

@@ -2,6 +2,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
 const path = require('path')
+var api = require("./api.js")
 
 require('dotenv').config();const url = process.env.MONGODB_URI;
 const MongoClient = require('mongodb').MongoClient;
@@ -25,7 +26,7 @@ app.use((req, res, next) => {
     next();
 });
 
-var api = require("./api.js")
+
 api.setApp(app, client);
 
 app.listen(PORT, () => {  console.log('Server listening on port ' + PORT);});
