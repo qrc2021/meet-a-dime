@@ -5,11 +5,12 @@ import Login from '../components/Login';
 
 const LoginPage = () =>
 {
+
     return(
-        <div>
-            <PageTitle />
-            <Login />
-        </div>
+      <div>
+        <PageTitle />
+        <Login />
+      </div>
     );
 };
 
