@@ -9,23 +9,13 @@ function CardUI()
     const [searchResults,setResults] = useState('');
     const [cardList,setCardList] = useState('');
 
-   var _ud = localStorage.getItem('user_data');
+    var _ud = localStorage.getItem('user_data');
     var ud = JSON.parse(_ud);
     var userId = ud.id;
     var firstName = ud.firstName;
     var lastName = ud.lastName;
 	
-    const app_name = 'meetadime'
-    function buildPath(route){    
-        if (process.env.NODE_ENV === 'production')     
-        {
-            return 'https://' + app_name +  '.herokuapp.com/' + route;
-        }
-        else
-        {
-            return 'http://localhost:5000/' + route;    
-        }
-    }
+    var bp = require('./Path.js');
     
     const addCard = async event => 
     {
@@ -36,7 +26,7 @@ function CardUI()
 
         try
         {
-            const response = await fetch(buildPath("api/addcard"),
+            const response = await fetch(bp.buildPath("api/addcard"),
             {method:'POST',body:js,headers:{'Content-Type': 'application/json'}});
 
             var txt = await response.text();
@@ -67,7 +57,7 @@ function CardUI()
 
         try
         {
-            const response = await fetch(buildPath("api/searchcards"),
+            const response = await fetch(bp.buildPath("api/searchcards"),
             {method:'POST',body:js,headers:{'Content-Type': 'application/json'}});
 
             var txt = await response.text();
