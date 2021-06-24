@@ -36,7 +36,7 @@ function CardUI()
 
         try
         {
-            const response = await fetch(buildPath("/api/addcard"),
+            const response = await fetch(buildPath("api/addcard"),
             {method:'POST',body:js,headers:{'Content-Type': 'application/json'}});
 
             var txt = await response.text();
@@ -67,7 +67,7 @@ function CardUI()
 
         try
         {
-            const response = await fetch(buildPath("/api/searchcards"),
+            const response = await fetch(buildPath("api/searchcards"),
             {method:'POST',body:js,headers:{'Content-Type': 'application/json'}});
 
             var txt = await response.text();
