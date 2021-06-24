@@ -7,7 +7,7 @@ function Login()
 
     const [message,setMessage] = useState('');
 
-    const app_name = 'meet-a-dime'
+    const app_name = 'meetadime'
     function buildPath(route){    
         if (process.env.NODE_ENV === 'production')     
         {
