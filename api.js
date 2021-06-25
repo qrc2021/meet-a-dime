@@ -1,4 +1,5 @@
 var token = require('./createJWT.js');
+var bcrypt = require('bcrypt')
 exports.setApp = function (app, client)
 {
 
@@ -60,7 +61,7 @@ exports.setApp = function (app, client)
         // outgoing: id, firstName, lastName, error
         var error = 'OK';
         const { login, password, id, firstName, lastName} = req.body;
-        const newCard = {Login:login,Password:password, id:id, firstName:firstName, lastName:lastName};
+        const newCard = {Login:login,Password:password, userId:id, firstName:firstName, lastName:lastName};
         try{
         const db = client.db();
         const results = await db.collection('Users').insertOne(newCard);
