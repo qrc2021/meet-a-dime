@@ -5,7 +5,7 @@ function CardUI()
     var card = '';
     var search = '';
     var storage = require('../tokenStorage.js');
-    const jwt = require("jsonwebtoken");
+    // const jwt = require("jsonwebtoken"); ------------------------------ unused rn
 
     const [message,setMessage] = useState('');
     const [searchResults,setResults] = useState('');
@@ -14,8 +14,8 @@ function CardUI()
     var _ud = localStorage.getItem('user_data');
     var ud = JSON.parse(_ud);
     var userId = ud.id;
-    var firstName = ud.firstName;
-    var lastName = ud.lastName;
+    // var firstName = ud.firstName; ------------------------------ unused rn
+    // var lastName = ud.lastName;------------------------------ unused rn
 	
     var bp = require('./Path.js');
     

@@ -3,18 +3,26 @@ import React from 'react';
 function LoggedInName()
 {
 
-    try {
-        var _ud = localStorage.getItem('user_data');
-        var ud = JSON.parse(_ud);
-        var userId = ud.id;
-        var firstName = ud.firstName;
-        var lastName = ud.lastName;
-    
-    } catch (error) {
-        // console.log(error);
+//     try {
+    if (!localStorage.getItem('user_data'))
+    {
         window.location.href = '/';
-        return;
     }
+    if (!localStorage.getItem('token_data'))
+    {
+        window.location.href = '/';
+    }
+    var _ud = localStorage.getItem('user_data');
+    var ud = JSON.parse(_ud);
+//     var userId = ud.id; ---------------------------------------- unused
+    var firstName = ud.firstName;
+    var lastName = ud.lastName;
+    
+    // } catch (error) {
+    //     // console.log(error);
+    //     window.location.href = '/';
+    //     return;
+    // }
     
 
     const doLogout = event => 
@@ -22,6 +30,7 @@ function LoggedInName()
 	    event.preventDefault();
 
         localStorage.removeItem("user_data")
+        localStorage.removeItem("token_data")
         window.location.href = '/';
 
     };    

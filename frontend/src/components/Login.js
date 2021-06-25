@@ -38,6 +38,8 @@ function Login()
 
                 var user = {firstName:firstName,lastName:lastName,id:userId}
                 localStorage.setItem('user_data', JSON.stringify(user));
+                console.log(ud);
+                console.log(JSON.stringify(user));
                 window.location.href = '/cards';
             }
         } 
