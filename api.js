@@ -4,9 +4,9 @@ var schemas = require('./schemas.js')
 exports.setApp = function (app, db, mongoose)
 {
 
-    var schema_set = schemas.getSchemas(mongoose);
-    var Users = schema_set.Users;
-    var Cards = schema_set.Cards;
+    var model_object = schemas.getModels();
+    var Users = model_object.Users;
+    var Cards = model_object.Cards;
     // .. more here
     
     app.post('/api/login', async (req, res, next) =>    
@@ -23,7 +23,15 @@ exports.setApp = function (app, db, mongoose)
         {
           // const db = client.db();
           // results = await db.collection('Users').find({Login:login,Password:password}).toArray();
-          results = await Users.find({ Login: login, Password: password });
+          results = await Users.find({ Login: login});
+          if (results.length != 0)
+          {
+            const hash = results[0].Password;
+            console.log(hash);
+            var isValid = await bcrypt.compare(password, hash);
+            console.log('valid?' + isValid) 
+          }
+          
         }
         catch(error)
         {
@@ -38,7 +46,7 @@ exports.setApp = function (app, db, mongoose)
         var fn = '';
         var ln = '';
 
-        if( results.length > 0 )
+        if( results.length > 0 && isValid)
         {
             id = results[0].userId;
             fn = results[0].firstName;
@@ -161,7 +169,7 @@ exports.setApp = function (app, db, mongoose)
       
       // const db = client.db();
       // const results = await db.collection('Cards').find({"Card":{$regex:_search+'.*', $options:'i'}}).toArray();
-      const results = await Cards.find({"Card":{$regex:_search+'.*', $options:'i'}});
+      const results = await Cards.find({"Card":{$regex:_search+'.*', $options:'i'}, "UserId": userId});
 
       var _ret = [];
       for( var i=0; i<results.length; i++ )

@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+const bcrypt = require('bcrypt');
 
 function Login()
 {

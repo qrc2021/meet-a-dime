@@ -1,4 +1,6 @@
-exports.getSchemas = function(mongoose)
+const bcrypt = require('bcrypt');
+const mongoose = require('mongoose');
+exports.getModels = function()
 {
     const UsersSchema = new mongoose.Schema({
         Login : {
@@ -34,7 +36,22 @@ exports.getSchemas = function(mongoose)
         }
     });
 
+    
+    UsersSchema.pre("save", function(next){
+        if (!this.isModified("Password")){
+            return next();
+        }
+        else
+        {
+            hash = bcrypt.hash(this.Password, 10, (err, hash) => {
+                if (err){return next(err)}
+                else this.Password = hash;
+                next();
+            });   
+        }
+    });
 
+    
     const Users = mongoose.model('Users', UsersSchema, 'Users');
     const Cards = mongoose.model('Cards', CardsSchema, 'Cards');
 
