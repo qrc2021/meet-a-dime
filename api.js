@@ -12,10 +12,18 @@ exports.setApp = function (app, client)
         var error = '';
 
         const { login, password } = req.body;
-
-        const db = client.db();
-        const results = await db.collection('Users').find({Login:login,Password:password}).toArray();
-
+        var results = [];
+        try
+        {
+          const db = client.db();
+          results = await db.collection('Users').find({Login:login,Password:password}).toArray();
+        }
+        catch(error)
+        {
+          ret = {error: "Database error"};
+          console.log(error);
+          return;
+        }
         var ret = '';
         var id = -1;
         var fn = '';
