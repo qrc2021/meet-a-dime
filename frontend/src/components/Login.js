@@ -1,6 +1,5 @@
 import React, {useState} from 'react';
-const bcrypt = require('bcrypt');
-
+import md5 from '../md5.js';
 function Login()
 {
     var loginName;
@@ -14,7 +13,16 @@ function Login()
     {
         event.preventDefault();
         
-        var obj = {login:loginName.value,password:loginPassword.value};
+        
+        try {
+            // var hash = await bcrypt.hash(loginPassword.value, 10);
+            // var obj = {login:loginName.value,password:hash};
+            var obj = {login:loginName.value,password:md5(loginPassword.value)};
+
+        } catch (error) {
+            console.log(error);
+            return;
+        }
         var js = JSON.stringify(obj);
 
         var storage = require('../tokenStorage.js');
