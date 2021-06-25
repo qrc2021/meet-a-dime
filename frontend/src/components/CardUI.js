@@ -4,7 +4,9 @@ function CardUI()
 {
     var card = '';
     var search = '';
-    
+    var storage = require('../tokenStorage.js');
+    const jwt = require("jsonwebtoken");
+
     const [message,setMessage] = useState('');
     const [searchResults,setResults] = useState('');
     const [cardList,setCardList] = useState('');
@@ -24,10 +26,12 @@ function CardUI()
         if (card.value.trim()=== '')
         {
             setMessage("Card cannot be empty");
+            
             return;
         }
             
-        var obj = {userId:userId,card:card.value};
+        var tok = storage.retrieveToken();
+        var obj = {userId:userId,card:card.value,jwtToken:tok};
         var js = JSON.stringify(obj);
 
         try
@@ -37,7 +41,7 @@ function CardUI()
 
             var txt = await response.text();
             var res = JSON.parse(txt);
-
+            var retTok = res.jwtToken;
             if( res.error.length > 0 )
             {
                 setMessage( "API Error:" + res.error );
@@ -45,6 +49,8 @@ function CardUI()
             else
             {
                 setMessage('Card has been added');
+                // storage.storeToken({accessToken: retTok});
+                storage.storeToken(retTok);
             }
         }
         catch(e)
@@ -58,7 +64,8 @@ function CardUI()
     {
         event.preventDefault();
         		
-        var obj = {id:userId,search:search.value};
+        var tok = storage.retrieveToken();
+        var obj = {userId:userId,search:search.value,jwtToken:tok};
         var js = JSON.stringify(obj);
 
         try
@@ -68,6 +75,8 @@ function CardUI()
 
             var txt = await response.text();
             var res = JSON.parse(txt);
+            var retTok = res.jwtToken;
+
             var _results = res.results;
             var resultText = '';
             for( var i=0; i<_results.length; i++ )
@@ -80,6 +89,9 @@ function CardUI()
             }
             setResults('Card(s) have been retrieved');
             setCardList(resultText);
+            // storage.storeToken({accessToken: retTok});
+            storage.storeToken(retTok);
+            // console.log(retTok)
         }
         catch(e)
         {
