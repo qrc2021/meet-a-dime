@@ -3,6 +3,14 @@
   "version": "1.0.0",
   "description": "test",
   "main": "server.js",
+  "prettier": {
+    "trailingComma": "es5",
+    "tabWidth": 2,
+    "semi": false,
+    "singleQuote": true,
+    "jsxBracketSameLine": true,
+    "bracketSpacing": true
+  },
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",

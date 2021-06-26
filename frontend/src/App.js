@@ -1,13 +1,18 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Redirect, Switch } from 'react-router-dom';
-import './App.css';
+import React from 'react'
+import {
+  BrowserRouter as Router,
+  Route,
+  Redirect,
+  Switch,
+} from 'react-router-dom'
+import './App.css'
 
-import LoginPage from './pages/LoginPage';
-import CardPage from './pages/CardPage';
+import LoginPage from './pages/LoginPage'
+import CardPage from './pages/CardPage'
 
 function App() {
   return (
-    <Router >
+    <Router>
       <Switch>
         <Route path="/" exact>
           <LoginPage />
@@ -16,12 +21,12 @@ function App() {
           <CardPage />
         </Route>
         <Redirect to="/" />
-      </Switch>  
+      </Switch>
     </Router>
-  );
+  )
 }
 
-export default App;
+export default App
 // import React from 'react';
 // import './App.css';
 
@@ -35,7 +40,6 @@ export default App;
 // }
 
 // export default App;
-
 
 // import logo from './logo.svg';
 // import './App.css';

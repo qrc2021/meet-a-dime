@@ -1,112 +1,125 @@
-import React, {useState} from 'react';
-import md5 from '../md5.js';
-function Login()
-{
-    var loginName;
-    var loginPassword;
+import React, { useState } from 'react'
+import md5 from '../md5.js'
+function Login() {
+  var loginName
+  var loginPassword
 
-    const [message,setMessage] = useState('');
+  const [message, setMessage] = useState('')
 
-    var bp = require('./Path.js');
+  var bp = require('./Path.js')
 
-    const doLogin = async event => 
-    {
-        event.preventDefault();
-        
-        
-        try {
-            // var hash = await bcrypt.hash(loginPassword.value, 10);
-            // var obj = {login:loginName.value,password:hash};
-            var obj = {login:loginName.value,password:md5(loginPassword.value)};
+  const doLogin = async (event) => {
+    event.preventDefault()
 
-        } catch (error) {
-            console.log(error);
-            return;
+    try {
+      // var hash = await bcrypt.hash(loginPassword.value, 10);
+      // var obj = {login:loginName.value,password:hash};
+      var obj = {
+        login: loginName.value,
+        password: md5(loginPassword.value),
+      }
+    } catch (error) {
+      console.log(error)
+      return
+    }
+    var js = JSON.stringify(obj)
+
+    var storage = require('../tokenStorage.js')
+    try {
+      const response = await fetch(bp.buildPath('api/login'), {
+        method: 'POST',
+        body: js,
+        headers: { 'Content-Type': 'application/json' },
+      })
+
+      var res = JSON.parse(await response.text())
+      console.log(res)
+      if (res.error) {
+        setMessage(res.error)
+      } else {
+        storage.storeToken(res)
+        var jwt = require('jsonwebtoken')
+        var ud = jwt.decode(storage.retrieveToken(), { complete: true })
+        var userId = ud.payload.id
+        var firstName = ud.payload.firstName
+        var lastName = ud.payload.lastName
+
+        var user = {
+          firstName: firstName,
+          lastName: lastName,
+          id: userId,
         }
-        var js = JSON.stringify(obj);
+        localStorage.setItem('user_data', JSON.stringify(user))
+        console.log(ud)
+        console.log(JSON.stringify(user))
+        window.location.href = '/cards'
+      }
+    } catch (error) {
+      alert(error.toString())
+      return
+    }
+  }
 
-        var storage = require('../tokenStorage.js');
-        try
-        {
-            const response = await fetch(bp.buildPath('api/login'), 
-            {method:'POST',body:js,headers:{'Content-Type': 'application/json'}});
+  // this was previously inside do login.
+  //         var obj = {login:loginName.value,password:loginPassword.value};
+  //         var js = JSON.stringify(obj);
 
-            var res = JSON.parse(await response.text());
-            console.log(res);
-            if (res.error)
-            {
-                setMessage(res.error);
-            }
-            else
-            {
-                storage.storeToken(res);
-                var jwt = require('jsonwebtoken');
-                var ud = jwt.decode(storage.retrieveToken(), {complete:true});
-                var userId = ud.payload.id;
-                var firstName = ud.payload.firstName;
-                var lastName = ud.payload.lastName;
+  //         try
+  //         {
+  //             const response = await fetch(bp.buildPath('api/login'),
+  //                 {method:'POST',body:js,headers:{'Content-Type': 'application/json'}});
 
-                var user = {firstName:firstName,lastName:lastName,id:userId}
-                localStorage.setItem('user_data', JSON.stringify(user));
-                console.log(ud);
-                console.log(JSON.stringify(user));
-                window.location.href = '/cards';
-            }
-        } 
-        catch (error)
-        {
-            alert(error.toString());
-            return;
-        }
-};
+  //             var res = JSON.parse(await response.text());
 
-    // this was previously inside do login.
-//         var obj = {login:loginName.value,password:loginPassword.value};
-//         var js = JSON.stringify(obj);
+  //             if( res.id <= 0 )
+  //             {
+  //                 setMessage('User/Password combination incorrect');
+  //             }
+  //             else
+  //             {
+  //                 var user = {firstName:res.firstName,lastName:res.lastName,id:res.id}
+  //                 localStorage.setItem('user_data', JSON.stringify(user));
 
-//         try
-//         {    
-//             const response = await fetch(bp.buildPath('api/login'),
-//                 {method:'POST',body:js,headers:{'Content-Type': 'application/json'}});
+  //                 setMessage('');
+  //                 window.location.href = '/cards';
+  //             }
+  //         }
+  //         catch(e)
+  //         {
+  //             alert(e.toString());
+  //             return;
+  //         }
 
-//             var res = JSON.parse(await response.text());
-
-//             if( res.id <= 0 )
-//             {
-//                 setMessage('User/Password combination incorrect');
-//             }
-//             else
-//             {
-//                 var user = {firstName:res.firstName,lastName:res.lastName,id:res.id}
-//                 localStorage.setItem('user_data', JSON.stringify(user));
-
-//                 setMessage('');
-//                 window.location.href = '/cards';
-//             }
-//         }
-//         catch(e)
-//         {
-//             alert(e.toString());
-//             return;
-//         }    
-
-
-    return(
-        <div id="loginDiv">
-        <form onSubmit={doLogin}>
-        <span id="inner-title">PLEASE LOG IN</span><br />
-        <input type="text" id="loginName" placeholder="Username" 
-        ref={(c) => loginName = c} />
-        <input type="password" id="loginPassword" placeholder="Password" 
-        ref={(c) => loginPassword = c} />
+  return (
+    <div id="loginDiv">
+      <form onSubmit={doLogin}>
+        <span id="inner-title">PLEASE LOG IN</span>
+        <br />
+        <input
+          type="text"
+          id="loginName"
+          placeholder="Username"
+          ref={(c) => (loginName = c)}
+        />
+        <input
+          type="password"
+          id="loginPassword"
+          placeholder="Password"
+          ref={(c) => (loginPassword = c)}
+        />
         {/* <input type="text" id="loginName" placeholder="Username" /><br />
         <input type="password" id="loginPassword" placeholder="Password" /><br /> */}
-        <input type="submit" id="loginButton" className="buttons" value = "Do It"
-            onClick={doLogin} />
-        </form>
-        <span id="loginResult">{message}</span>
-        </div>
-    );
-};
+        <input
+          type="submit"
+          id="loginButton"
+          className="buttons"
+          value="Do It"
+          onClick={doLogin}
+        />
+      </form>
+      <span id="loginResult">{message}</span>
+    </div>
+  )
+}
 
-export default Login;
+export default Login
