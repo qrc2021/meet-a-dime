@@ -11,6 +11,6 @@ const app = firebase.initializeApp({
   appId: process.env.REACT_APP_FB_appId,
   measurementId: process.env.REACT_APP_FB_measurementId,
 });
-console.log(process.env);
+
 export const auth = app.auth();
 export default app;
