@@ -6,6 +6,14 @@ var api = require("./api.js");
 
 require("dotenv").config();
 
+var admin = require("firebase-admin");
+
+var serviceAccount = require("./fireauth");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+
 // const url = process.env.MONGODB_URI
 // // const MongoClient = require('mongodb').MongoClient;
 // // const client = new MongoClient(url, { useUnifiedTopology: true });
@@ -43,6 +51,20 @@ app.use((req, res, next) => {
 });
 
 api.setApp(app);
+
+app.post("/api/firetest", async (req, res) => {
+  const snapshot = await admin.firestore().collection("users").get();
+
+  let users = [];
+  snapshot.forEach((doc) => {
+    let id = doc.id;
+    let data = doc.data();
+
+    users.push({ id, ...data });
+  });
+
+  res.status(200).send(JSON.stringify(users));
+});
 
 app.listen(PORT, () => {
   console.log("Server listening on port " + PORT);
