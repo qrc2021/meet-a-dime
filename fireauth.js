@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 module.exports = {
   type: process.env.TYPE,
   project_id: process.env.PROJECT_ID,
