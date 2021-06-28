@@ -17,15 +17,9 @@ function App() {
         <Switch>
           <PrivateRoute exact path="/" component={Home} />
           <PrivateRoute exact path="/Home2" component={Home2} />
-          <Container
-            className="d-flex align-items-center justify-content-center"
-            style={{ minHeight: '100vh' }}>
-            <div className="w-100" style={{ maxWidth: '400px' }}>
-              <Route path="/signup" component={SignUp} />
-              <Route path="/login" component={Login} />
-              <Route path="/forgot" component={Forgot} />
-            </div>
-          </Container>
+          <Route path="/signup" component={SignUp} />
+          <Route path="/login" component={Login} />
+          <Route path="/forgot" component={Forgot} />
         </Switch>
       </AuthProvider>
     </Router>
@@ -33,3 +27,13 @@ function App() {
 }
 
 export default App;
+
+// <Container
+//             className="d-flex align-items-center justify-content-center"
+//             style={{ minHeight: '100vh' }}>
+//             <div className="w-100" style={{ maxWidth: '400px' }}>
+//               <Route path="/signup" component={SignUp} />
+//               <Route path="/login" component={Login} />
+//               <Route path="/forgot" component={Forgot} />
+//             </div>
+//           </Container>
