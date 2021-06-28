@@ -8,6 +8,7 @@ import PrivateRoute from './PrivateRoute';
 import Home from './Home';
 import Login from './Login';
 import Forgot from './Forgot';
+import Home2 from './Home2';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
       <AuthProvider>
         <Switch>
           <PrivateRoute exact path="/" component={Home} />
+          <PrivateRoute exact path="/Home2" component={Home2} />
           <Container
             className="d-flex align-items-center justify-content-center"
             style={{ minHeight: '100vh' }}>
