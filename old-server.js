@@ -31,28 +31,6 @@ admin.initializeApp({
 const PORT = process.env.PORT || 5000;
 
 const app = express();
-var http = require("http").createServer(app);
-var io = require("socket.io")(http, {
-  cors: {
-    origin: ["http://localhost:3000", "https://meetadime.herokuapp.com/"],
-  },
-});
-
-http.listen(process.env.PORT || 5000, function () {
-  var host = http.address().address;
-  var port = http.address().port;
-  console.log("App listening to port: ", port);
-});
-
-io.on("connection", (socket) => {
-  console.log(`Chatroom id: ${socket.id}`);
-  socket.on("disconnect", () => {
-    console.log("Client disconnected");
-  });
-  socket.on("message", (string) => {
-    console.log(string);
-  });
-});
 
 app.set("port", process.env.PORT || 5000);
 
@@ -88,9 +66,9 @@ app.post("/api/firetest", async (req, res) => {
   res.status(200).send(JSON.stringify(users));
 });
 
-// app.listen(PORT, () => {
-//   console.log("Server listening on port " + PORT);
-// });
+app.listen(PORT, () => {
+  console.log("Server listening on port " + PORT);
+});
 
 ///////////////////////////////////////////////////// For Heroku deployment
 // Server static assets if in production
