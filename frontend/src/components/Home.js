@@ -21,7 +21,7 @@ export default function Home() {
 
   return (
     <>
-      <h2 className="text-center mb-4">Welcome! WE GOOD! </h2>
+      <h2 className="text-center mb-4">Welcome! WE GOOD :D </h2>
       {error && <Alert variant="danger">{error}</Alert>}
       <Container>
         <strong>Email:</strong> {currentUser.email}
