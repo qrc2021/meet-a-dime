@@ -24,7 +24,7 @@ export default function Home2() {
   }
 
   return (
-    <>
+    <React.Fragment>
       <h2 className="text-center mb-4">Welcome! WE GOOD HOME 2</h2>
       {error && <Alert variant="danger">{error}</Alert>}
       <Container>
@@ -38,6 +38,6 @@ export default function Home2() {
           Log Out
         </Button>
       </div>
-    </>
+    </React.Fragment>
   );
 }
