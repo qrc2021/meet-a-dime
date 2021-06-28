@@ -72,21 +72,7 @@ app.use((req, res, next) => {
   next();
 });
 
-api.setApp(app);
-
-app.post("/api/firetest", async (req, res) => {
-  const snapshot = await admin.firestore().collection("users").get();
-
-  let users = [];
-  snapshot.forEach((doc) => {
-    let id = doc.id;
-    let data = doc.data();
-
-    users.push({ id, ...data });
-  });
-
-  res.status(200).send(JSON.stringify(users));
-});
+api.setApp(app, admin);
 
 // app.listen(PORT, () => {
 //   console.log("Server listening on port " + PORT);
