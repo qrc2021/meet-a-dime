@@ -25,6 +25,8 @@ export default function Home() {
       {error && <Alert variant="danger">{error}</Alert>}
       <Container>
         <strong>Email:</strong> {currentUser.email}
+        <br></br>
+        <strong>User ID:</strong> {currentUser.uid}
       </Container>
       <div className="w-100 text-center mt-2">
         <Button variant="link" onClick={handleLogout}>
