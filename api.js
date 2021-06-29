@@ -25,6 +25,7 @@ exports.setApp = function (app, admin) {
       email,
       sex,
       sexOrientation,
+      phone,
       birth,
       exitMessage,
       userID,

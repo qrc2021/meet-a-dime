@@ -33,6 +33,10 @@ export function AuthProvider({ children }) {
     return currentUser.reload();
   }
 
+  function deleteUser(){
+    return currentUser.delete();
+  }
+
   // This is done in useEffect so its done once only, not each render.
   // only when component is mounted.
   useEffect(() => {
@@ -52,6 +56,7 @@ export function AuthProvider({ children }) {
     resetPassword,
     verify,
     reload,
+    deleteUser,
   };
   return (
     <AuthContext.Provider value={value}>
