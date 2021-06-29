@@ -3,7 +3,7 @@ import { Button, Alert, Container } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
 import { useHistory } from 'react-router-dom';
 
-export default function Home2() {
+export default function Profile() {
   const [error, setError] = useState('');
   const { currentUser, logout } = useAuth();
   const history = useHistory();
@@ -22,20 +22,20 @@ export default function Home2() {
     }
   }
 
-  function redirectToHome2() {
+  function redirectToHome() {
     history.push('/');
   }
 
   return (
     <React.Fragment>
-      <h2 className="text-center mb-4">Welcome! WE GOOD HOME 2</h2>
+      <h2 className="text-center mb-4">Profile</h2>
       {error && <Alert variant="danger">{error}</Alert>}
       <Container>
         <strong>Email:</strong> {currentUser.email}
         <br></br>
         <strong>User ID:</strong> {currentUser.uid}
       </Container>
-      <Button onClick={redirectToHome2}>test</Button>
+      <Button onClick={redirectToHome}>Home</Button>
       <div className="w-100 text-center mt-2">
         <Button variant="link" onClick={handleLogout}>
           Log Out

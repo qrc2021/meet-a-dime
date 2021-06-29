@@ -8,7 +8,7 @@ import PrivateRoute from './PrivateRoute';
 import Home from './Home';
 import Login from './Login';
 import Forgot from './Forgot';
-import Home2 from './Home2';
+import Profile from './Profile';
 import Verify from './Verify';
 
 function App() {
@@ -17,7 +17,7 @@ function App() {
       <AuthProvider>
         <Switch>
           <PrivateRoute exact path="/" component={Home} />
-          <PrivateRoute exact path="/Home2" component={Home2} />
+          <PrivateRoute exact path="/Profile" component={Profile} />
           <Route exact path="/verify" component={Verify} />
           <Route path="/signup" component={SignUp} />
           <Route path="/login" component={Login} />

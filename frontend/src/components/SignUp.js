@@ -2,18 +2,20 @@ import React, { useRef, useState } from 'react';
 import { Card, Form, Button, Alert } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
 import { Link, useHistory } from 'react-router-dom';
+import axios from 'axios';
 
 export default function SignUp() {
   const emailRef = useRef();
   const passwordRef = useRef();
   const passwordConfirmRef = useRef();
-  const { signup } = useAuth();
+  const { signup, currentUser, logout } = useAuth();
   const [error, setError] = useState('');
   const [loading, setLoading] = useState('');
   const history = useHistory();
 
   async function handleSubmit(e) {
     e.preventDefault();
+    var bp = require('../Path.js');
 
     if (passwordRef.current.value !== passwordConfirmRef.current.value) {
       return setError('Passwords do not match.');
@@ -26,14 +28,101 @@ export default function SignUp() {
     try {
       setError('');
       setLoading(true);
-      await signup(emailRef.current.value, passwordRef.current.value);
-      history.push('/verify');
-    } catch (error) {
-      setError('Failed to create an account');
-    }
+      var newUser_cred = await signup(
+        emailRef.current.value,
+        passwordRef.current.value
+      );
+      var newUser = newUser_cred.user;
+      var obj = {
+        email: newUser.email,
+        sex: '',
+        sexOrientation: '',
+        birth: '',
+        exitMessage: '',
+        userID: newUser.uid,
+        photo: newUser.photoURL == null ? '' : newUser.photoURL,
+        displayName: newUser.displayName == null ? '' : newUser.displayName,
+        initializedProfile: 0,
+        FailMatch: [],
+        SuccessMatch: [],
+      };
 
-    setLoading(false);
+      var config = {
+        method: 'post',
+        url: bp.buildPath('api/newuser'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: obj,
+      };
+
+      var response = await axios(config);
+      // var parsedRes = JSON.parse(response);
+      if (response.data.error === '') {
+        setLoading(false);
+        history.push('/verify');
+      } else {
+        setError('Axios error');
+      }
+    } catch (error) {
+      setError('Failed to create an account: ' + error);
+      try {
+        await logout();
+      } catch (err) {
+        setError('Secondary logout error : ' + err);
+      }
+      setLoading(false);
+    }
   }
+
+  //   // setLoading(false);
+  //   if (!loading) {
+  //     try {
+  //       setError('');
+  //       setLoading(true);
+  //       var obj = {
+  //         email: currentUser.email,
+  //         sex: '',
+  //         sexOrientation: '',
+  //         birth: '',
+  //         exitMessage: '',
+  //         userID: currentUser.uid,
+  //         photo: currentUser.photoURL,
+  //         displayName: currentUser.displayName,
+  //         initializedProfile: 0,
+  //         FailMatch: [],
+  //         SuccessMatch: [],
+  //       };
+  //       var js = JSON.stringify(obj);
+
+  //       var config = {
+  //         method: 'post',
+  //         url: bp.buildPath('api/newuser'),
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //         },
+  //         data: js,
+  //       };
+
+  //       var response = await axios(config);
+  //       var parsedRes = JSON.parse(response);
+  //       if (parsedRes.error === '') {
+  //         history.push('/verify');
+  //       } else {
+  //         setError('Axios error');
+  //       }
+  //     } catch (error) {
+  //       setError('Failed to create an account: ' + error);
+  //       try {
+  //         await logout();
+  //       } catch (err) {
+  //         setError('Secondary logout error : ' + err);
+  //       }
+  //     }
+
+  //     setLoading(false);
+  //   }
+  // }
 
   return (
     <>

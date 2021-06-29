@@ -28,8 +28,8 @@ export default function Home() {
     }
   }
 
-  function redirectToHome2() {
-    history.push('/home2');
+  function redirectToProfile() {
+    history.push('/Profile');
   }
 
   return (
@@ -46,7 +46,7 @@ export default function Home() {
         <strong>Verified email:</strong>{' '}
         {currentUser.emailVerified ? 'verified' : 'not verified'}
       </Container>
-      <Button onClick={redirectToHome2}>test</Button>
+      <Button onClick={redirectToProfile}>Profile</Button>
       <div className="w-100 text-center mt-2">
         <Button variant="link" onClick={handleLogout}>
           Log Out
