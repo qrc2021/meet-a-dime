@@ -1,4 +1,4 @@
-const app_name = 'meet-a-dime';
+const app_name = 'meetadime';
 exports.buildPath = function buildPath(route) {
   if (process.env.NODE_ENV === 'production') {
     return 'https://' + app_name + '.herokuapp.com/' + route;
