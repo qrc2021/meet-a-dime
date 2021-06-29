@@ -18,9 +18,9 @@ export default function Login() {
       setError('');
       setLoading(true);
       await login(emailRef.current.value, passwordRef.current.value);
-      history.push('/');
+      history.push('/verify');
     } catch (error) {
-      setError('Failed to login');
+      setError('Failed to login: ' + error.message);
     }
 
     setLoading(false);

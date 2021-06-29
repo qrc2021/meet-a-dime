@@ -19,11 +19,15 @@ export default function SignUp() {
       return setError('Passwords do not match.');
     }
 
+    if (passwordRef.current.value.length <= 6) {
+      return setError('Password should be more than six characters');
+    }
+
     try {
       setError('');
       setLoading(true);
       await signup(emailRef.current.value, passwordRef.current.value);
-      history.push('/');
+      history.push('/verify');
     } catch (error) {
       setError('Failed to create an account');
     }

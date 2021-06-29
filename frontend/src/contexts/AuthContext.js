@@ -26,6 +26,12 @@ export function AuthProvider({ children }) {
   function resetPassword(email) {
     return auth.sendPasswordResetEmail(email);
   }
+  function verify() {
+    return currentUser.sendEmailVerification();
+  }
+  function reload() {
+    return currentUser.reload();
+  }
 
   // This is done in useEffect so its done once only, not each render.
   // only when component is mounted.
@@ -44,6 +50,8 @@ export function AuthProvider({ children }) {
     login,
     logout,
     resetPassword,
+    verify,
+    reload,
   };
   return (
     <AuthContext.Provider value={value}>

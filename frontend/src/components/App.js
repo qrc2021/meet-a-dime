@@ -9,6 +9,7 @@ import Home from './Home';
 import Login from './Login';
 import Forgot from './Forgot';
 import Home2 from './Home2';
+import Verify from './Verify';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Switch>
           <PrivateRoute exact path="/" component={Home} />
           <PrivateRoute exact path="/Home2" component={Home2} />
+          <Route exact path="/verify" component={Verify} />
           <Route path="/signup" component={SignUp} />
           <Route path="/login" component={Login} />
           <Route path="/forgot" component={Forgot} />

@@ -7,7 +7,10 @@ export default function Home2() {
   const [error, setError] = useState('');
   const { currentUser, logout } = useAuth();
   const history = useHistory();
-
+  // Redirect users if they are not verified.
+  if (!currentUser.emailVerified) {
+    history.push('/verify');
+  }
   async function handleLogout() {
     setError('');
 
