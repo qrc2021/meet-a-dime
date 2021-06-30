@@ -1,7 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button, Alert, Container } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
 import { useHistory } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 
 import { useCollectionData } from 'react-firebase-hooks/firestore';
@@ -9,6 +10,7 @@ import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
 import moment from 'moment';
+import e from 'cors';
 
 var bp = require('../Path.js');
 
@@ -19,12 +21,67 @@ export default function Home() {
   const { currentUser, logout } = useAuth();
   const [match, setMatch] = useState('Not searching.');
   const [id_of_match, setId] = useState('none');
+  const MS_BEFORE_ABANDON_SEARCH = 30000;
 
+  useEffect(() => {
+    async function purgeOld() {
+      setLockout(true);
+      console.log('I SHOULD ONLY PRINT ONCE PER PAGE LOAD');
+      try {
+        try {
+          await firestore
+            .collection('searching')
+            .doc(currentUser.uid)
+            .update({ match: '' });
+          console.log('cleared old match before delete');
+        } catch (error) {
+          console.log('tried to clear match before delete, but failed');
+          console.log('most of the time this is ok');
+
+          // console.log(error);
+        }
+
+        var res = await firestore
+          .collection('searching')
+          .doc(currentUser.uid)
+          .delete();
+        // console.log(res);
+
+        // console.log(id_of_match);
+        res = firestore
+          .collection('searching')
+          .where('match', '==', currentUser.uid)
+          .get()
+          .then((querySnapshot) => {
+            querySnapshot.forEach((doc) => {
+              // doc.data() is never undefined for query doc snapshots
+              // console.log(doc.id, ' => ', doc.data());
+              try {
+                firestore
+                  .collection('searching')
+                  .doc(doc.id)
+                  .update({ match: '' });
+              } catch (error) {
+                console.log('doc match clear error on start');
+              }
+            });
+          })
+          .catch((error) => {
+            console.log('Error getting documents: ', error);
+          });
+        // console.log(res);
+      } catch (error) {
+        console.log(error);
+      }
+      setLockout(false);
+    }
+    purgeOld();
+  }, []);
   // const messagesRef = firestore.collection('searching');
   // const query = messagesRef.orderBy('createdAt').limit(25);
   // const [activeSearches] = useCollectionData(query, { idField: 'id' });
 
-  var observer = 'none';
+  var observer = null;
   //
   //
   //
@@ -72,7 +129,7 @@ export default function Home() {
 
   async function handleLogout() {
     setError('');
-
+    if (observer != null) observer();
     try {
       await logout();
       localStorage.removeItem('user_data');
@@ -88,7 +145,13 @@ export default function Home() {
 
   async function searching() {
     setMatch('Searching.');
-
+    var timeOut = setTimeout(() => {
+      if (id_of_match == 'none') {
+        setMatch('Not searching.');
+        if (observer != null) observer();
+        setLockout(false);
+      }
+    }, MS_BEFORE_ABANDON_SEARCH);
     if (localStorage.getItem('user_data') == null) {
       await fetchData();
       try {
@@ -106,6 +169,7 @@ export default function Home() {
 
     setLockout(true);
     var matchFound = false;
+    var matchInternal = '';
     try {
       //
       //
@@ -139,6 +203,7 @@ export default function Home() {
         // console.log(doc.id, '=>', doc.data());
         // *************************************************************
         if (
+          doc.data().match == '' &&
           doc.data().sex === searchingSex &&
           doc.data().search_sex === userInfo.sex
         ) {
@@ -152,10 +217,41 @@ export default function Home() {
             matchFound = true;
             setId(doc.id);
             setMatch('Found match! ' + doc.id);
+            clearTimeout(timeOut);
+            matchInternal = doc.id;
           } catch (error) {}
         }
       });
-    } catch (error) {}
+      if (matchFound) {
+        console.log('yes, but lets listen for changes');
+        console.log('idk how to implement this yet. the thing is ');
+        console.log('if the doc creator deletes the doc, i cant see changes');
+        // This works only to see if fields changed, not if doc deleted.
+
+        observer = firestore
+          .collection('searching')
+          .where(firebase.firestore.FieldPath.documentId(), '==', matchInternal)
+          .onSnapshot((snapshot) => {
+            // console.log(snapshot);
+            snapshot.docChanges().forEach((change) => {
+              if (change.type === 'modified') {
+                // So if the doc filler loses the match, then we need to reset.
+                console.log(`new match info ${change.doc.data().match}`);
+                if (change.doc.data().match == '') {
+                  matchFound = false;
+                  setId('none');
+                  setMatch('Not searching.');
+                  clearTimeout(timeOut);
+                  setLockout(false);
+                  observer();
+                }
+              }
+            });
+          });
+      }
+    } catch (error) {
+      console.log(error);
+    }
 
     if (!matchFound) {
       try {
@@ -201,7 +297,26 @@ export default function Home() {
               matchFound = true;
               setId(docSnapshot.data().match);
               setMatch('Found match! ' + docSnapshot.data().match);
-              observer();
+              clearTimeout(timeOut);
+              // observer();dont kill observer because we could lose the match.
+            } else if (
+              docSnapshot &&
+              docSnapshot.data() &&
+              docSnapshot.data().match == ''
+            ) {
+              matchFound = false;
+              setId('none');
+              setMatch('Searching.');
+              clearTimeout(timeOut);
+              timeOut = setTimeout(() => {
+                if (id_of_match == 'none') {
+                  setMatch('Not searching.');
+                  if (observer != null) observer();
+                  setLockout(false);
+                }
+              }, MS_BEFORE_ABANDON_SEARCH);
+
+              // observer();
             }
           });
       } catch (error) {
@@ -211,7 +326,7 @@ export default function Home() {
 
       if (matchFound) {
         setLockout(true);
-        observer();
+        // observer(); dont kill observer because we could lose the match.
       }
     }
   }
@@ -237,96 +352,28 @@ export default function Home() {
         <strong>Verified email:</strong>{' '}
         {currentUser.emailVerified ? 'verified' : 'not verified'}
       </Container>
-      <h1>{id_of_match}</h1>
+      <h1>Match: {id_of_match}</h1>
       <Button onClick={redirectToProfile}>Profile</Button>
       <div className="w-100 text-center mt-2">
         <Button variant="link" onClick={handleLogout}>
           Log Out
         </Button>
       </div>
+      <Link
+        to={{
+          pathname: id_of_match === 'none' ? '/' : '/Chat',
+          state: {
+            match_id: id_of_match,
+          },
+        }}>
+        {id_of_match === 'none' ? 'No match yet.' : 'Go to chat page with data'}
+      </Link>
+      <br></br>
+      <br></br>
       <Button disabled={lockout} onClick={searching}>
         Search for Match
       </Button>
       <div className="App">{/* <ChatRoom /> */}</div>
     </React.Fragment>
   );
-
-  //
-  //
-  //
-  //
-  //
-  //
-  //
-  //
-  //
-  //
-  //
-  //
-
-  // Stolen::
-  function ChatRoom() {
-    const dummy = useRef();
-    const messagesRef = firestore.collection('messages');
-    const query = messagesRef.orderBy('createdAt').limit(25);
-
-    const [messages] = useCollectionData(query, { idField: 'id' });
-
-    const [formValue, setFormValue] = useState('');
-
-    const sendMessage = async (e) => {
-      e.preventDefault();
-
-      const { uid, photoURL } = currentUser;
-
-      await messagesRef.add({
-        text: formValue,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        uid,
-        photoURL,
-      });
-
-      setFormValue('');
-      dummy.current.scrollIntoView({ behavior: 'smooth' });
-    };
-
-    return (
-      <>
-        <main>
-          {messages &&
-            messages.map((msg) => <ChatMessage key={msg.id} message={msg} />)}
-
-          <span ref={dummy}></span>
-        </main>
-
-        <form onSubmit={sendMessage}>
-          <input
-            value={formValue}
-            onChange={(e) => setFormValue(e.target.value)}
-            placeholder="send a message"
-          />
-
-          <button type="submit" disabled={!formValue}>
-            send
-          </button>
-        </form>
-      </>
-    );
-  }
-
-  function ChatMessage(props) {
-    const { text, uid, photoURL } = props.message;
-
-    const messageClass = uid === currentUser.uid ? 'sent' : 'received';
-
-    return (
-      <>
-        <div className={`message ${messageClass}`}>
-          <img src={photoURL} />
-          <p>{text}</p>
-        </div>
-      </>
-    );
-  }
-  // Stolen::
 }

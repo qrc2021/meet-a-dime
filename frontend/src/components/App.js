@@ -10,6 +10,7 @@ import Login from './Login';
 import Forgot from './Forgot';
 import Profile from './Profile';
 import Verify from './Verify';
+import Chat from './Chat';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Switch>
           <PrivateRoute exact path="/" component={Home} />
           <PrivateRoute exact path="/Profile" component={Profile} />
+          <PrivateRoute exact path="/Chat" component={Chat} />
           <Route exact path="/verify" component={Verify} />
           <Route path="/signup" component={SignUp} />
           <Route path="/login" component={Login} />
