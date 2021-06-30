@@ -13,6 +13,7 @@ var serviceAccount = require("./fireauth");
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
+
 // new comment
 
 // const url = process.env.MONGODB_URI
@@ -47,12 +48,12 @@ http.listen(process.env.PORT || 5000, function () {
 
 io.on("connection", (socket) => {
   console.log(`Chatroom id: ${socket.id}`);
-  socket.on("disconnect", () => {
-    console.log("Client disconnected");
-  });
-  socket.on("message", (string) => {
-    console.log(string);
-  });
+});
+io.on("disconnect", () => {
+  console.log("Client disconnected");
+});
+io.on("message", (string) => {
+  console.log(string);
 });
 
 app.set("port", process.env.PORT || 5000);
