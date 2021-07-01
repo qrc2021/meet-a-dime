@@ -110,4 +110,46 @@ exports.setApp = function (app, admin) {
     var ret = { error: err };
     res.status(200).json(ret);
   });
+
+  app.post("/api/setsocketid", async (req, res) => {
+    const obj = ({ matchID, userID, user_socket_id } = req.body);
+    var err = "";
+    var isHost = false;
+    try {
+      var snapshot = await admin
+        .firestore()
+        .collection("searching")
+        .doc(userID)
+        .get();
+      console.log(snapshot.exists);
+      //console.log(snapshot.data());
+      if (snapshot && snapshot.data() && snapshot.data().match == matchID) {
+        isHost = true;
+        var update = await admin
+          .firestore()
+          .collection("searching")
+          .doc(userID)
+          .update({ host_socket_id: user_socket_id });
+      } else {
+        var snapshot = await admin
+          .firestore()
+          .collection("searching")
+          .doc(matchID)
+          .get();
+        if (snapshot && snapshot.data() && snapshot.data().match == userID) {
+          var update = await admin
+            .firestore()
+            .collection("searching")
+            .doc(matchID)
+            .update({ join_socket_id: user_socket_id });
+        }
+      }
+    } catch (error) {
+      err = error;
+      console.log(error);
+    }
+
+    var ret = { error: err, ishost: isHost };
+    res.status(200).json(ret);
+  });
 };
