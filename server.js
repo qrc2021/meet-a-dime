@@ -47,13 +47,18 @@ http.listen(process.env.PORT || 5000, function () {
 });
 
 io.on("connection", (socket) => {
-  console.log(`Chatroom id: ${socket.id}`);
+  console.log(`Socket id: ${socket.id}`);
+  socket.emit("connection", null);
+  socket.on("message", (message, room) => {
+    if (room === "") {
+      socket.broadcast.emit("recieved-message", message);
+    } else {
+      socket.to(room).emit("recieved-message", message);
+    }
+  });
 });
 io.on("disconnect", () => {
   console.log("Client disconnected");
-});
-io.on("message", (string) => {
-  console.log(string);
 });
 
 app.set("port", process.env.PORT || 5000);
