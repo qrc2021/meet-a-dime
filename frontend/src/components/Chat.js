@@ -3,9 +3,13 @@ import { Button, Alert, Container, Form } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
 import { useHistory, useLocation } from 'react-router-dom';
 import { io } from 'socket.io-client';
-
+import axios from 'axios';
+import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
+
+var bp = require('../Path.js');
+const firestore = firebase.firestore();
 
 export default function Chat() {
   const messageRef = useRef();
@@ -13,6 +17,7 @@ export default function Chat() {
   //const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [socket, setSocket] = useState();
+  const [isHost, setHost] = useState('host');
   const { currentUser, logout } = useAuth();
   const location = useLocation();
   // Gets the passed in match id from the link in the home page
@@ -49,11 +54,33 @@ export default function Chat() {
     }
   }
 
+  async function fetchData(sid) {
+    try {
+      var config = {
+        method: 'post',
+        url: bp.buildPath('api/setsocketid'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: {
+          userID: currentUser.uid,
+          matchID: match_id,
+          user_socket_id: sid,
+        },
+      };
+
+      var response = await axios(config);
+      console.log(response.data);
+      setHost(response.data.ishost ? 'true' : 'false');
+    } catch (error) {}
+  }
+
   const id = currentUser.uid;
   // Clear all timeouts on page load, because there could be pending
   // refreshes from abandoning searches that persist through pages.
   useEffect(() => {
     clearAllTimeouts();
+
     console.log('cleared timeouts.');
     const socket = io('http://localhost:5000');
     setSocket(socket);
@@ -71,6 +98,7 @@ export default function Chat() {
       //   'message',
       //   `Email: "${currentUser.email}" \n With User ID: "${currentUser.uid}" connected to the server with socket id: "${socket.id}"`
       // );
+      fetchData(socket.id);
     });
   }, []);
 
@@ -128,6 +156,8 @@ export default function Chat() {
         <strong>User ID:</strong> {currentUser.uid}
         <br></br>
         <strong>MATCH:</strong> {match_id}
+        <br></br>
+        <strong>HOST:</strong> {isHost}
       </Container>
       <Container>
         <div id="message-container"></div>

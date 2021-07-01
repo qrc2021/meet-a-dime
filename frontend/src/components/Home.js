@@ -390,6 +390,8 @@ export default function Home() {
             search_age_end: '99',
             search_sex: searchingSex,
             seeker: currentUser.uid,
+            host_socket_id: '',
+            join_socket_id: '',
           });
         // Just posted the new doc to the 'searching' collection.
         console.log('DOC CREATED');
