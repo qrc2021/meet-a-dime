@@ -1,7 +1,7 @@
 import React from 'react';
 import SignUp from './SignUp';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Container } from 'react-bootstrap';
+// import { Container } from 'react-bootstrap';
 import { AuthProvider } from '../contexts/AuthContext';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import PrivateRoute from './PrivateRoute';

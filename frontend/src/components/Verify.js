@@ -1,13 +1,13 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { Form, Button, Card, Alert } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
-import { Link, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { Redirect } from 'react-router';
-import { auth } from '../firebase';
+// import { auth } from '../firebase';
 
 export default function Verify() {
-  const emailRef = useRef();
-  const { logout, verify, currentUser, reload } = useAuth();
+  // const emailRef = useRef();
+  const { logout, verify, currentUser } = useAuth();
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);

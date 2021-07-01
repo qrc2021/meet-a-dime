@@ -12,7 +12,7 @@ export default function SignUp() {
   const passwordRef = useRef();
   const responseRef = useRef();
   const passwordConfirmRef = useRef();
-  const { signup, currentUser, logout } = useAuth();
+  const { signup, logout } = useAuth();
   const [error, setError] = useState('');
   const [loading, setLoading] = useState('');
   const [optionsState, setOptionsState] = useState('0');
@@ -81,16 +81,16 @@ export default function SignUp() {
       return setError('Password should be more than six characters.');
     }
 
-    // if (dobRef.current.value == 0)
+    // if (dobRef.current.value === 0)
     // {
     //   return setError('Please enter a valid Date of Birth.');
     // }
 
-    if (optionsState == '0') {
+    if (optionsState === '0') {
       return setError('Please choose your sex.');
     }
 
-    if (orientationState == '0') {
+    if (orientationState === '0') {
       return setError('Please choose your sexual orientation.');
     }
 
@@ -98,15 +98,15 @@ export default function SignUp() {
       return setError('Please enter a valid phone number.');
     }
 
-    if (dateState == '') return setError('Please enter a valid date...');
+    if (dateState === '') return setError('Please enter a valid date...');
 
     if (!isLegal(dateState))
       return setError('You must be 18 years or older to sign up');
 
-    if (firstRef.current.value == '')
+    if (firstRef.current.value === '')
       return setError('Please input your first name');
 
-    if (lastRef.current.value == '')
+    if (lastRef.current.value === '')
       return setError('Please input your last name');
 
     var orient = {
@@ -126,14 +126,14 @@ export default function SignUp() {
         firstName: firstRef.current.value.trim(),
         lastName: lastRef.current.value.trim(),
         email: newUser.email,
-        sex: optionsState == '1' ? 'Male' : 'Female',
+        sex: optionsState === '1' ? 'Male' : 'Female',
         sexOrientation: orient[orientationState],
         birth: dateState,
         phone: phoneVal,
         exitMessage: responseRef.current.value.trim(),
         userID: newUser.uid,
-        photo: newUser.photoURL == null ? '' : newUser.photoURL,
-        displayName: newUser.displayName == null ? '' : newUser.displayName,
+        photo: newUser.photoURL === null ? '' : newUser.photoURL,
+        displayName: newUser.displayName === null ? '' : newUser.displayName,
         initializedProfile: 0,
         FailMatch: [],
         SuccessMatch: [],
