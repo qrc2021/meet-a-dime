@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Alert, Container } from 'react-bootstrap';
+import { Button, Alert, Container, Form } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
 import { useHistory, useLocation } from 'react-router-dom';
+import {io} from "socket.io-client";
 
 import 'firebase/auth';
 import 'firebase/firestore';
@@ -30,6 +31,11 @@ export default function Chat() {
   useEffect(() => {
     clearAllTimeouts();
     console.log('cleared timeouts.');
+    const socket = io('http://localhost:5000')
+    socket.on('connect', () => {
+      console.log(`Email: "${currentUser.email}" connected with id: ${socket.id}`)
+      
+    })
   }, []);
 
   async function handleLogout() {
@@ -62,6 +68,9 @@ export default function Chat() {
         <strong>User ID:</strong> {currentUser.uid}
         <br></br>
         <strong>MATCH:</strong> {match_id}
+      </Container>
+      <Container>
+    
       </Container>
       <Button onClick={redirectToHome}>Home</Button>
       <div className="w-100 text-center mt-2">

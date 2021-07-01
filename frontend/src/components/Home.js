@@ -28,8 +28,8 @@ export default function Home() {
   // Search timeout in milliseconds
   const MS_BEFORE_ABANDON_SEARCH = 30000;
   // Before match expires. they are separate just incase.
-  const MS_BEFORE_ABANDON_MATCH_DOCJOIN = 10000;
-  const MS_BEFORE_ABANDON_MATCH_DOCHOST = 10000;
+  const MS_BEFORE_ABANDON_MATCH_DOCJOIN = 100000000;
+  const MS_BEFORE_ABANDON_MATCH_DOCHOST = 100000000;
   // The observer will eventually be a function that listens for changes
   // to the database. to prevent resource leaks, we can call observer()
   // to stop listening ('unsubscribe' to changes)
@@ -290,7 +290,7 @@ export default function Home() {
           doc.data().search_sex === userInfo.sex
         ) {
           try {
-            // By doing '.update()', I set my ID into their doc.
+            // By doing '.update()', I set my ID into their doc
             firestore
               .collection('searching')
               .doc(doc.id)

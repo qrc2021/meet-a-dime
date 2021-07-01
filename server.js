@@ -47,7 +47,7 @@ http.listen(process.env.PORT || 5000, function () {
 });
 
 io.on("connection", (socket) => {
-  console.log(`Chatroom id: ${socket.id}`);
+  console.log(`Socket id: ${socket.id}`);
 });
 io.on("disconnect", () => {
   console.log("Client disconnected");
