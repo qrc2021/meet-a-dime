@@ -10,8 +10,9 @@ import 'firebase/firestore';
 export default function Chat() {
   const messageRef = useRef();
   const roomRef = useRef();
-  const [message, setMessage] = useState('');
+  //const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [socket, setSocket] = useState();
   const { currentUser, logout } = useAuth();
   const location = useLocation();
   // Gets the passed in match id from the link in the home page
@@ -35,20 +36,6 @@ export default function Chat() {
   // joinRoomButton.addEventListener('click', () => {
   //   const room = roomInput.value;
   // });
-  function handleSubmit(e) {
-    e.preventDefault();
-    const message = messageRef.current.value;
-    const room = roomRef.current.value;
-
-    if (message === '') return;
-    displayMessage(message);
-    messageRef.current.value = '';
-  }
-  function displayMessage(message) {
-    const div = document.createElement('div');
-    div.textContent = message;
-    document.getElementById('message-container').append(div);
-  }
 
   // Redirect users if they are not verified.
   if (!currentUser.emailVerified) {
@@ -69,18 +56,45 @@ export default function Chat() {
     clearAllTimeouts();
     console.log('cleared timeouts.');
     const socket = io('http://localhost:5000');
+    setSocket(socket);
     socket.auth = { id };
     socket.connect();
-    socket.on('connect', () => {
-      console.log(
-        `Email: "${currentUser.email}" connected with id: ${socket.id}`
-      );
+    socket.on('connection', () => {
+      // console.log(
+      //   `Email: "${currentUser.email}" \n With User ID: "${currentUser.uid}" connected with socket id: "${socket.id}"`
+      // );
       displayMessage(
-        `Email: "${currentUser.email}" connected with id: ${socket.id}`
+        `Email: "${currentUser.email}" \n With User ID: "${currentUser.uid}" connected with socket id: "${socket.id}"`
       );
-      console.log(`You matched with ${match_id}`);
+      // console.log(`You matched with ${match_id}`);
+      // socket.emit(
+      //   'message',
+      //   `Email: "${currentUser.email}" \n With User ID: "${currentUser.uid}" connected to the server with socket id: "${socket.id}"`
+      // );
     });
   }, []);
+
+  if (socket) {
+    socket.on('recieved-message', (message) => {
+      displayMessage(message);
+    });
+  }
+  function handleSubmit(e) {
+    e.preventDefault();
+    const message = messageRef.current.value;
+    const room = roomRef.current.value;
+
+    if (message === '') return;
+    displayMessage(message);
+    socket.emit('message', message, room);
+    messageRef.current.value = '';
+  }
+
+  function displayMessage(message) {
+    const div = document.createElement('div');
+    div.textContent = message;
+    document.getElementById('message-container').append(div);
+  }
 
   async function handleLogout() {
     try {
