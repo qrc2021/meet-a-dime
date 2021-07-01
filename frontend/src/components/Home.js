@@ -213,15 +213,21 @@ export default function Home() {
     // State for match is now searching.
     setMatch('Searching.');
 
-    // The search timeout begins. The search will expire assuming
-    // there was no match found (states are reset to default basically).
-    var timeOut = setTimeout(() => {
-      if (id_of_match === 'none') {
-        setMatch('Not searching.');
-        if (observer !== null) observer();
-        setLockout(false);
-      }
-    }, MS_BEFORE_ABANDON_SEARCH);
+    // I removed this because this appears not to ever get called.
+    // It looks like the only person to "wait" are doc creators.
+    // If a doc filler finds a match, its instant. But the doc host
+    // can be sitting around waiting. So this can happen in the
+    // snapshot section instead.
+    // // The search timeout begins. The search will expire assuming
+    // // there was no match found (states are reset to default basically).
+    // var timeOut = setTimeout(() => {
+    //   console.log('TIMEOUT ONE');
+    //   if (id_of_match === 'none') {
+    //     setMatch('Not searching.');
+    //     if (observer !== null) observer();
+    //     setLockout(false);
+    //   }
+    // }, MS_BEFORE_ABANDON_SEARCH);
 
     // Is there user preferences in the local storage?
     // If not, query the API and get the new data.
@@ -300,13 +306,15 @@ export default function Home() {
             setId(doc.id);
             setMatch('Found match! ' + doc.id);
             // Clear the searching timeout.
-            clearTimeout(timeOut);
+            // clearTimeout(timeOut);
+            clearAllTimeouts();
             matchInternal = doc.id;
             // Abandon match after certain time.
             setTimeout(() => {
               setError('⚠️ Match abandoning in 3 seconds!');
             }, MS_BEFORE_ABANDON_MATCH_DOCJOIN - 3000);
             setTimeout(() => {
+              if (observer !== null) observer();
               window.location.reload();
             }, MS_BEFORE_ABANDON_MATCH_DOCJOIN);
           } catch (error) {}
@@ -397,12 +405,14 @@ export default function Home() {
               matchFound = true;
               setId(docSnapshot.data().match);
               setMatch('Found match! ' + docSnapshot.data().match);
-              clearTimeout(timeOut);
+              // clearTimeout(timeOut);
+              clearAllTimeouts();
               // Abandon match after a certain time.
               setTimeout(() => {
                 setError('⚠️ Match abandoning in 3 seconds!');
               }, MS_BEFORE_ABANDON_MATCH_DOCHOST - 3000);
               setTimeout(() => {
+                if (observer !== null) observer();
                 window.location.reload();
               }, MS_BEFORE_ABANDON_MATCH_DOCHOST);
               // observer();dont kill observer because we could lose the match.
@@ -418,8 +428,41 @@ export default function Home() {
               // clearTimeout(timeOut);
               // Clear timeouts, to prevent the match abandon refresh.
               clearAllTimeouts();
-              timeOut = setTimeout(() => {
+              setTimeout(() => {
                 if (id_of_match === 'none') {
+                  console.log('TIMEOUT DOC HOST');
+                  setLockout(true);
+                  // Abandoning the search should involve me clearing the old doc
+                  // that I posted up.
+                  async function deleteOldRecordAfterAbandon() {
+                    try {
+                      await firestore
+                        .collection('searching')
+                        .doc(currentUser.uid)
+                        .update({ match: '' });
+                      console.log('cleared old match before delete');
+                    } catch (error) {
+                      console.log(
+                        'tried to clear match before delete, but failed'
+                      );
+                      console.log('most of the time this is ok');
+                      // this is okay because this most likely wont exist on each load.
+                    }
+
+                    // Delete the document (if exists) if I am a "document host".
+                    try {
+                      await firestore
+                        .collection('searching')
+                        .doc(currentUser.uid)
+                        .delete();
+                      console.log('deleted my doc');
+                    } catch (error) {
+                      console.log('error:');
+                      console.log(error);
+                    }
+                  }
+                  deleteOldRecordAfterAbandon();
+
                   setMatch('Not searching.');
                   if (observer !== null) observer();
                   setLockout(false);
