@@ -33,12 +33,14 @@ export default function Chat() {
   }, []);
 
   async function handleLogout() {
-    setError('');
-
     try {
+      // Push the state to login that we need to purge the old user searches.
       await logout();
       localStorage.removeItem('user_data');
-      history.push('/login');
+      history.push('/login', {
+        state: { fromHome: true, oldID: currentUser.uid },
+      });
+      window.location.reload();
     } catch {
       setError('Failed to log out');
     }

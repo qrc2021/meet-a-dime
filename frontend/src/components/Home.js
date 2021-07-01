@@ -146,12 +146,16 @@ export default function Home() {
   // When the user logs out, call the observer to unsubscribe to changes.
   // and logout.
   async function handleLogout() {
-    setError('');
     if (observer !== null) observer();
     try {
+      // Push the state to login that we need to purge the old user searches.
+
       await logout();
       localStorage.removeItem('user_data');
-      history.push('/login');
+      history.push('/login', {
+        state: { fromHome: true, oldID: currentUser.uid },
+      });
+      window.location.reload();
     } catch {
       setError('Failed to log out');
     }
@@ -345,7 +349,7 @@ export default function Home() {
                   matchFound = false;
                   setId('none');
                   setMatch('Not searching.');
-
+                  setError('');
                   // clearTimeout(timeOut);
                   // These two clear all timeouts.
                   clearAllTimeouts();
@@ -425,6 +429,7 @@ export default function Home() {
               matchFound = false;
               setId('none');
               setMatch('Searching.');
+              setError('');
               // clearTimeout(timeOut);
               // Clear timeouts, to prevent the match abandon refresh.
               clearAllTimeouts();
@@ -464,6 +469,7 @@ export default function Home() {
                   deleteOldRecordAfterAbandon();
 
                   setMatch('Not searching.');
+                  setError('');
                   if (observer !== null) observer();
                   setLockout(false);
                 }
