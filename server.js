@@ -48,6 +48,7 @@ http.listen(process.env.PORT || 5000, function () {
 
 io.on("connection", (socket) => {
   console.log(`Socket id: ${socket.id}`);
+  socket.emit("connection", null);
 });
 io.on("disconnect", () => {
   console.log("Client disconnected");
