@@ -3,7 +3,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const path = require("path");
 var api = require("./api.js");
-
+const { instrument } = require("@socket.io/admin-ui");
 require("dotenv").config();
 
 var admin = require("firebase-admin");
@@ -36,8 +36,17 @@ const app = express();
 var http = require("http").createServer(app);
 var io = require("socket.io")(http, {
   cors: {
-    origin: ["http://localhost:3000", "https://meetadime.herokuapp.com/"],
+    origin: [
+      "http://localhost:3000",
+      "https://meetadime.herokuapp.com/",
+      "https://admin.socket.io",
+    ],
+    credentials: true,
   },
+});
+
+instrument(io, {
+  auth: false,
 });
 
 http.listen(process.env.PORT || 5000, function () {
@@ -46,20 +55,24 @@ http.listen(process.env.PORT || 5000, function () {
   console.log("App listening to port: ", port);
 });
 
+// io.on("connection", (socket) => {
+//   console.log(`Socket id: ${socket.id}`);
+// });
+
 io.on("connection", (socket) => {
   console.log(`Socket id: ${socket.id}`);
-  socket.emit("connection", null);
+
   socket.on("message", (message, room) => {
     if (room === "") {
-      socket.broadcast.emit("recieved-message", message);
+      socket.emit("recieved-message", message);
     } else {
       socket.to(room).emit("recieved-message", message);
     }
   });
 });
-io.on("disconnect", () => {
-  console.log("Client disconnected");
-});
+// io.on("disconnect", () => {
+//   console.log("Client disconnected");
+// });
 
 app.set("port", process.env.PORT || 5000);
 
