@@ -152,4 +152,28 @@ exports.setApp = function (app, admin) {
     var ret = { error: err, ishost: isHost };
     res.status(200).json(ret);
   });
+
+  app.post("/api/retrievesockets", async (req, res) => {
+    const obj = ({ hostID, ishost } = req.body);
+    var err = "";
+    var sock = "";
+    try {
+      var snapshot = await admin
+        .firestore()
+        .collection("searching")
+        .doc(hostID)
+        .get();
+      if (snapshot && snapshot.data() && ishost) {
+        sock = snapshot.data().host_socket_id;
+      } else if (snapshot && snapshot.data() && !ishost) {
+        sock = snapshot.data().host_socket_id;
+      }
+    } catch (error) {
+      err = error;
+      console.log(error);
+    }
+
+    var ret = { error: err, socket_id: sock };
+    res.status(200).json(ret);
+  });
 };
