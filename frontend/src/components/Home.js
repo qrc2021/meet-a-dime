@@ -26,16 +26,21 @@ export default function Home() {
   const [match, setMatch] = useState('Not searching.');
   const [id_of_match, setId] = useState('none');
   // Search timeout in milliseconds
-  const MS_BEFORE_ABANDON_SEARCH = 30000;
+  const MS_BEFORE_ABANDON_SEARCH = 15000;
   // Before match expires. they are separate just incase.
-  const MS_BEFORE_ABANDON_MATCH_DOCJOIN = 100000000;
-  const MS_BEFORE_ABANDON_MATCH_DOCHOST = 100000000;
+  const MS_BEFORE_ABANDON_MATCH_DOCJOIN = 10000;
+  const MS_BEFORE_ABANDON_MATCH_DOCHOST = 10000;
   // The observer will eventually be a function that listens for changes
   // to the database. to prevent resource leaks, we can call observer()
   // to stop listening ('unsubscribe' to changes)
   var observer = null;
   // The history is for redirects.
   const history = useHistory();
+  var timeout1 = null;
+  var timeout2 = null;
+  var timeout3 = null;
+  var timeout4 = null;
+  var timeout5 = null;
 
   // useEffect occurs only once on page load.
   // This will clear any record of the user in the 'searching' collection
@@ -100,6 +105,15 @@ export default function Home() {
     }
     // call the function that was just defined here.
     purgeOld();
+    return () => {
+      clearTimeout(timeout1);
+      clearTimeout(timeout2);
+      clearTimeout(timeout3);
+      clearTimeout(timeout4);
+      clearTimeout(timeout5);
+      if (observer != null) observer();
+      else console.log("no observer, couldn't call");
+    };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Basic user info for their preferences. Will be referenced in search.
@@ -140,7 +154,10 @@ export default function Home() {
 
       // Set this into local storage for easy reference and persistence.
       localStorage.setItem('user_data', JSON.stringify(response.data));
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+      console.log('issue in fetch data');
+    }
   }
 
   // When the user logs out, call the observer to unsubscribe to changes.
@@ -167,10 +184,12 @@ export default function Home() {
   }
 
   function clearAllTimeouts() {
-    var id = window.setTimeout(function () {}, 0);
-    while (id--) {
-      window.clearTimeout(id);
-    }
+    clearTimeout(timeout1);
+    clearTimeout(timeout2);
+    clearTimeout(timeout3);
+    clearTimeout(timeout4);
+    clearTimeout(timeout5);
+    console.log('tried to clear timeouts in home. this probably didnt work.');
   }
 
   // .
@@ -240,6 +259,7 @@ export default function Home() {
       try {
       } catch (error) {
         setLockout(false);
+        console.log(error);
       }
     } else {
       // otherwise, its in user data so lets just get it.
@@ -314,14 +334,26 @@ export default function Home() {
             clearAllTimeouts();
             matchInternal = doc.id;
             // Abandon match after certain time.
-            setTimeout(() => {
-              setError('⚠️ Match abandoning in 3 seconds!');
+            timeout1 = setTimeout(() => {
+              if (window.location.pathname == '/') {
+                setError('⚠️ Match abandoning in 3 seconds!');
+                console.log('match abandoning message printed');
+              } else {
+                console.log('timeout 1 ran in home.js, but ignored.');
+              }
             }, MS_BEFORE_ABANDON_MATCH_DOCJOIN - 3000);
-            setTimeout(() => {
-              if (observer !== null) observer();
-              window.location.reload();
+            timeout2 = setTimeout(() => {
+              if (window.location.pathname == '/') {
+                if (observer !== null) observer();
+                window.location.reload();
+                console.log('page reloaded');
+              } else {
+                console.log('timeout 2 ran in home.js, but ignored.');
+              }
             }, MS_BEFORE_ABANDON_MATCH_DOCJOIN);
-          } catch (error) {}
+          } catch (error) {
+            console.log('324');
+          }
         }
       });
       // Still part of phase two. Listen for changes to the doc we
@@ -342,7 +374,7 @@ export default function Home() {
             snapshot.docChanges().forEach((change) => {
               if (change.type === 'modified') {
                 // So if the doc filler loses the match, then we need to reset.
-                console.log(`new match info ${change.doc.data().match}`);
+                // console.log(`new match info ${change.doc.data().match}`);
                 if (change.doc.data().match === '') {
                   // Uh oh. The doc match was just set empty. The doc owner
                   // must have refreshed their session.
@@ -414,12 +446,23 @@ export default function Home() {
               // clearTimeout(timeOut);
               clearAllTimeouts();
               // Abandon match after a certain time.
-              setTimeout(() => {
-                setError('⚠️ Match abandoning in 3 seconds!');
+              timeout3 = setTimeout(() => {
+                if (window.location.pathname == '/') {
+                  setError('⚠️ Match abandoning in 3 seconds!');
+                  console.log('match abandoning message printed');
+                } else {
+                  console.log('timeout 3 ran in home.js, but ignored.');
+                }
               }, MS_BEFORE_ABANDON_MATCH_DOCHOST - 3000);
-              setTimeout(() => {
-                if (observer !== null) observer();
-                window.location.reload();
+
+              timeout4 = setTimeout(() => {
+                if (window.location.pathname == '/') {
+                  if (observer !== null) observer();
+                  window.location.reload();
+                  console.log('page reloaded');
+                } else {
+                  console.log('timeout 4 ran in home.js, but ignored.');
+                }
               }, MS_BEFORE_ABANDON_MATCH_DOCHOST);
               // observer();dont kill observer because we could lose the match.
             } else if (
@@ -435,8 +478,8 @@ export default function Home() {
               // clearTimeout(timeOut);
               // Clear timeouts, to prevent the match abandon refresh.
               clearAllTimeouts();
-              setTimeout(() => {
-                if (id_of_match === 'none') {
+              timeout5 = setTimeout(() => {
+                if (window.location.pathname == '/' && id_of_match === 'none') {
                   console.log('TIMEOUT DOC HOST');
                   setLockout(true);
                   // Abandoning the search should involve me clearing the old doc
@@ -474,6 +517,8 @@ export default function Home() {
                   setError('');
                   if (observer !== null) observer();
                   setLockout(false);
+                } else {
+                  console.log('timeout 5 tried to run, but was ignored.');
                 }
               }, MS_BEFORE_ABANDON_SEARCH);
 
@@ -530,6 +575,7 @@ export default function Home() {
           state: {
             match_id: id_of_match,
             observer: observer,
+            timeout_5: timeout5,
           },
         }}>
         {id_of_match === 'none' ? 'No match yet.' : 'Go to chat page with data'}

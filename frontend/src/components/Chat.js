@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Button, Alert, Container, Form } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -17,11 +17,13 @@ export default function Chat() {
   //const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [socket, setSocket] = useState();
-  const [isHost, setHost] = useState('host');
+  const [isHost, setHost] = useState('none');
   const { currentUser, logout } = useAuth();
   const location = useLocation();
   // Gets the passed in match id from the link in the home page
-  const { match_id } = location.state;
+  // timeout_5 is passed in from the home link. it prevents removing the match document in the background.
+  const { match_id, timeout_5 } = location.state;
+
   const history = useHistory();
 
   const joinRoomButton = document.getElementById('room-button');
@@ -29,55 +31,51 @@ export default function Chat() {
   const roomInput = document.getElementById('room-input');
   const form = document.getElementById('form');
 
-  // form.addEventListener('submit', (e) => {
-  //   e.preventDefault();
-  //   const message = messageInput;
-  //   const room = roomInput;
-
-  //   if (message === '') return;
-  //   displayMessage(message);
-  // });
-
-  // joinRoomButton.addEventListener('click', () => {
-  //   const room = roomInput.value;
-  // });
-
   // Redirect users if they are not verified.
   if (!currentUser.emailVerified) {
     history.push('/verify');
   }
 
-  function clearAllTimeouts() {
-    var id = window.setTimeout(function () {}, 0);
-    while (id--) {
-      window.clearTimeout(id);
+  // The function definition for the inital posting of the user's socket id to the DB.
+  async function APIsendSocketID(sid) {
+    if (sid == '') return;
+    var config = {
+      method: 'post',
+      url: bp.buildPath('api/setsocketid'),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data: {
+        userID: currentUser.uid,
+        matchID: match_id,
+        user_socket_id: sid,
+      },
+    };
+
+    var response = await axios(config);
+    console.log(response.data);
+    setHost(response.data.ishost ? 'true' : 'false');
+    return response.data.ishost;
+  }
+
+  const id = currentUser.uid;
+
+  // This function retrieves the socket id of your match, using the API built for this purpose.
+  async function fetchOtherSocket(is_the_host) {
+    var id_to_send = '';
+
+    var is_host = '';
+    if (is_the_host == 'true') {
+      is_host = 'true';
+      id_to_send = currentUser.uid;
+    } else if (is_the_host == 'false') {
+      is_host = 'false';
+      id_to_send = match_id;
+    } else {
+      console.log('in fetchOtherSocket, recieved something else.');
+      return '';
     }
-  }
 
-  async function fetchData(sid) {
-    try {
-      var config = {
-        method: 'post',
-        url: bp.buildPath('api/setsocketid'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: {
-          userID: currentUser.uid,
-          matchID: match_id,
-          user_socket_id: sid,
-        },
-      };
-
-      var response = await axios(config);
-      console.log(response.data);
-      setHost(response.data.ishost ? 'true' : 'false');
-      return response.data.ishost;
-    } catch (error) {}
-  }
-
-  async function fetchSocket(hostStatus) {
-    console.log('fetching sockets...');
     try {
       var config = {
         method: 'post',
@@ -86,81 +84,136 @@ export default function Chat() {
           'Content-Type': 'application/json',
         },
         data: {
-          hostID: hostStatus ? currentUser.uid : match_id,
-          ishost: hostStatus,
+          hostID: id_to_send,
+          ishost: is_host,
         },
       };
+      console.log('sending:');
+      console.log(config);
 
       var response = await axios(config);
-      console.log(config.data);
-      console.log('Fetched: ' + response.data.socket_id);
+
+      console.log('response:');
+      console.log(response);
+
       return response.data.socket_id;
     } catch (error) {
+      console.log('SOME ERROR');
       console.log(error);
     }
   }
 
-  const id = currentUser.uid;
-  // Clear all timeouts on page load, because there could be pending
-  // refreshes from abandoning searches that persist through pages.
+  // This useEffect runs each time that the host status changes. When it changes, we query the DB
+  // and see if we get the other's socket id. if so, then perfect! if not, keep polling every second.
   useEffect(() => {
-    clearAllTimeouts();
+    // console.log('********** IS HOST CHANGED**************');
+    if (isHost == 'true') {
+      console.log('***** IS HOST IS NOW TRUE');
+      fetchOtherSocket('true')
+        .then((response) => {
+          console.log('in true, just got back with');
+          console.log(response);
+          if (response === '') {
+            console.log('i need to do more to find out (in true)');
+            var trueInterval = setInterval(() => {
+              console.log('some polling!');
+              fetchOtherSocket('true').then((response) => {
+                if (response !== '') {
+                  console.log(response);
+                  setRoom(response);
+                  clearInterval(trueInterval);
+                }
+              });
+            }, 1000);
+          } // match session id was not empty!
+          else {
+            setRoom(response);
+          }
+        })
+        .catch((err) => console.log(err));
+    } else if (isHost == 'false') {
+      console.log('********* IS HOST IS NOW FALSE');
+      fetchOtherSocket('false')
+        .then((response) => {
+          console.log('in false, just got back with');
+          console.log(response);
+          if (response === '') {
+            console.log('i need to do more to find out (in false)');
+            var falseInterval = setInterval(() => {
+              console.log('some polling!');
+              fetchOtherSocket('false').then((response) => {
+                if (response !== '') {
+                  console.log(response);
+                  setRoom(response);
+                  clearInterval(falseInterval);
+                }
+              });
+            }, 1000);
+          } else {
+            // match session id was not empty!
+            setRoom(response);
+          }
+        })
+        .catch((err) => console.log(err));
+    } else if (isHost == 'none') {
+      console.log('THERE IS NO HOST!');
+    }
+  }, [isHost]);
 
-    console.log('cleared timeouts.');
-    const socket = io('http://localhost:5000');
-    setSocket(socket);
+  // this effect only runs once.
+  useEffect(() => {
+    clearTimeout(timeout_5);
+    // clearAllTimeouts();
+    // console.log('cleared timeouts.');
+    const socket = io(bp.buildPath(''));
     socket.auth = { id };
     socket.connect();
     socket.on('connect', () => {
-      // console.log(
-      //   `Email: "${currentUser.email}" \n With User ID: "${currentUser.uid}" connected with socket id: "${socket.id}"`
-      // );
       displayMessage(
         `Email: "${currentUser.email}" \n With User ID: "${currentUser.uid}" connected with socket id: "${socket.id}"`
       );
-      // console.log(`You matched with ${match_id}`);
-      // socket.emit(
-      //   'message',
-      //   `Email: "${currentUser.email}" \n With User ID: "${currentUser.uid}" connected to the server with socket id: "${socket.id}"`
-      // );
-      var status = fetchData(socket.id).then((a) => {
-        console.log(a);
-
-        var interval = setInterval(() => {
-          var id = fetchSocket(a).then((x) => {
-            console.log(x);
-            if (x !== '') {
-              clearInterval(interval);
-              console.log(id);
-              setRoom(x);
-            }
-          });
-        }, 1000);
-      });
+      // When connected, try to send in my socket id. I get back whether I am host or not, which I can then use later.
+      APIsendSocketID(socket.id).then(
+        (hostValue) => {
+          console.log('RESOLVED. is user host?');
+          console.log(hostValue);
+        },
+        (reason) => {
+          console.log('REASON');
+          console.log(reason);
+        }
+      );
+      setSocket(socket);
     });
+    // Wait for incoming private messages.
+    socket.on('private', (message, to, from) =>
+      displayMessage(message, 'received')
+    );
   }, []);
 
-  if (socket) {
-    socket.on('connect', () => {
-      socket.on('recieved-message', (message) => {
-        displayMessage(message);
-      });
-    });
-  }
   function handleSubmit(e) {
     e.preventDefault();
     const message = messageRef.current.value;
     const room_ = room;
 
     if (message === '') return;
-    displayMessage(message);
-    socket.emit('message', message, room_);
+    displayMessage(message, 'sent');
+    // ARGS ARE: message, to, from
+    // Emit a private message.
+    socket.emit('private', message, room_, socket.id);
     messageRef.current.value = '';
   }
 
-  function displayMessage(message) {
+  // Two modes added for some extra processing (like maybe classes or etc)
+  function displayMessage(message, mode) {
+    var suffix = '';
+    if (mode === 'received') {
+      suffix = ' (them)';
+    } else if (mode == 'sent') {
+      suffix = ' (you)';
+    }
     const div = document.createElement('div');
-    div.textContent = message;
+    div.textContent = message + suffix;
     document.getElementById('message-container').append(div);
   }
 
@@ -180,6 +233,7 @@ export default function Chat() {
 
   function redirectToHome() {
     history.push('/');
+    window.location.reload();
   }
 
   return (
@@ -207,15 +261,19 @@ export default function Chat() {
             type="text"
             id="message_input"
             ref={messageRef}></Form.Control>
-          <Button type="submit" id="send-button">
+          <Button
+            disabled={room == '' ? true : false}
+            type="submit"
+            id="send-button">
             Send
           </Button>
           <br></br>
-          <Form.Label htmlFor="room-input">Room</Form.Label>
+          {/* <Form.Label htmlFor="room-input">Room</Form.Label>
           <Form.Control type="text" value={room}></Form.Control>
           <Button type="button" id="room-button">
             Join
-          </Button>
+          </Button> */}
+          <h3>Their room: {room}</h3>
         </Form>
       </Container>
       <Button onClick={redirectToHome}>Home</Button>

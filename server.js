@@ -45,6 +45,7 @@ var io = require("socket.io")(http, {
   },
 });
 
+// Socket.io admin UI related stuff (as of yet, not working..)
 instrument(io, {
   auth: false,
 });
@@ -60,19 +61,14 @@ http.listen(process.env.PORT || 5000, function () {
 // });
 
 io.on("connection", (socket) => {
-  console.log(`Socket id: ${socket.id}`);
+  console.log(`User connected with socket id: ${socket.id}`);
 
-  socket.on("message", (message, room) => {
-    if (room === "") {
-      socket.emit("recieved-message", message);
-    } else {
-      socket.to(room).emit("recieved-message", message);
-    }
+  // On a private message, relay this to the correct room.
+  socket.on("private", (msg, to, from) => {
+    console.log(from, "tried to say ", msg, " to ", to);
+    socket.to(to).emit("private", msg, to, from);
   });
 });
-// io.on("disconnect", () => {
-//   console.log("Client disconnected");
-// });
 
 app.set("port", process.env.PORT || 5000);
 

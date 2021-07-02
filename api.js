@@ -154,6 +154,7 @@ exports.setApp = function (app, admin) {
   });
 
   app.post("/api/retrievesockets", async (req, res) => {
+    console.log("retrieved sockets");
     const obj = ({ hostID, ishost } = req.body);
     var err = "";
     var sock = "";
@@ -163,9 +164,9 @@ exports.setApp = function (app, admin) {
         .collection("searching")
         .doc(hostID)
         .get();
-      if (snapshot && snapshot.data() && ishost) {
-        sock = snapshot.data().host_socket_id;
-      } else if (snapshot && snapshot.data() && !ishost) {
+      if (snapshot && snapshot.data() && ishost == "true") {
+        sock = snapshot.data().join_socket_id;
+      } else if (snapshot && snapshot.data() && ishost == "false") {
         sock = snapshot.data().host_socket_id;
       }
     } catch (error) {
