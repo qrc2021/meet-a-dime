@@ -7,7 +7,7 @@ import axios from 'axios';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
-
+import moment from 'moment';
 var bp = require('../Path.js');
 const firestore = firebase.firestore();
 
@@ -17,8 +17,13 @@ export default function Chat() {
   //const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [socket, setSocket] = useState();
-  const [isHost, setHost] = useState('none');
+  // const [isHost, setHost] = useState('none');
   const { currentUser, logout } = useAuth();
+
+  const [match_age, setMatchAge] = useState('');
+  const [match_name, setMatchName] = useState('user');
+  const [match_sex, setMatchSex] = useState('');
+
   const location = useLocation();
   // Gets the passed in match id from the link in the home page
   // timeout_5 is passed in from the home link. it prevents removing the match document in the background.
@@ -36,157 +41,68 @@ export default function Chat() {
     history.push('/verify');
   }
 
-  // The function definition for the inital posting of the user's socket id to the DB.
-  async function APIsendSocketID(sid) {
-    if (sid == '') return;
-    var config = {
-      method: 'post',
-      url: bp.buildPath('api/setsocketid'),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      data: {
-        userID: currentUser.uid,
-        matchID: match_id,
-        user_socket_id: sid,
-      },
-    };
-
-    var response = await axios(config);
-    console.log(response.data);
-    setHost(response.data.ishost ? 'true' : 'false');
-    return response.data.ishost;
-  }
-
-  const id = currentUser.uid;
-
-  // This function retrieves the socket id of your match, using the API built for this purpose.
-  async function fetchOtherSocket(is_the_host) {
-    var id_to_send = '';
-
-    var is_host = '';
-    if (is_the_host == 'true') {
-      is_host = 'true';
-      id_to_send = currentUser.uid;
-    } else if (is_the_host == 'false') {
-      is_host = 'false';
-      id_to_send = match_id;
-    } else {
-      console.log('in fetchOtherSocket, recieved something else.');
-      return '';
-    }
-
+  // Fetch the matches' name, birth, sex when page loads.
+  async function fetchMatchInfo() {
     try {
       var config = {
         method: 'post',
-        url: bp.buildPath('api/retrievesockets'),
+        url: bp.buildPath('api/getbasicuser'),
         headers: {
           'Content-Type': 'application/json',
         },
-        data: {
-          hostID: id_to_send,
-          ishost: is_host,
-        },
+        data: { uid: match_id },
       };
-      console.log('sending:');
-      console.log(config);
-
       var response = await axios(config);
-
-      console.log('response:');
-      console.log(response);
-
-      return response.data.socket_id;
+      // console.log(response.data);
+      console.log('fetched data!');
+      setMatchAge(moment().diff(response.data.birth, 'years'));
+      setMatchName(response.data.firstName);
+      setMatchSex(response.data.sex);
     } catch (error) {
-      console.log('SOME ERROR');
       console.log(error);
     }
   }
 
-  // This useEffect runs each time that the host status changes. When it changes, we query the DB
-  // and see if we get the other's socket id. if so, then perfect! if not, keep polling every second.
-  useEffect(() => {
-    // console.log('********** IS HOST CHANGED**************');
-    if (isHost == 'true') {
-      console.log('***** IS HOST IS NOW TRUE');
-      fetchOtherSocket('true')
-        .then((response) => {
-          console.log('in true, just got back with');
-          console.log(response);
-          if (response === '') {
-            console.log('i need to do more to find out (in true)');
-            var trueInterval = setInterval(() => {
-              console.log('some polling!');
-              fetchOtherSocket('true').then((response) => {
-                if (response !== '') {
-                  console.log(response);
-                  setRoom(response);
-                  clearInterval(trueInterval);
-                }
-              });
-            }, 1000);
-          } // match session id was not empty!
-          else {
-            setRoom(response);
-          }
-        })
-        .catch((err) => console.log(err));
-    } else if (isHost == 'false') {
-      console.log('********* IS HOST IS NOW FALSE');
-      fetchOtherSocket('false')
-        .then((response) => {
-          console.log('in false, just got back with');
-          console.log(response);
-          if (response === '') {
-            console.log('i need to do more to find out (in false)');
-            var falseInterval = setInterval(() => {
-              console.log('some polling!');
-              fetchOtherSocket('false').then((response) => {
-                if (response !== '') {
-                  console.log(response);
-                  setRoom(response);
-                  clearInterval(falseInterval);
-                }
-              });
-            }, 1000);
-          } else {
-            // match session id was not empty!
-            setRoom(response);
-          }
-        })
-        .catch((err) => console.log(err));
-    } else if (isHost == 'none') {
-      console.log('THERE IS NO HOST!');
-    }
-  }, [isHost]);
+  const id = currentUser.uid;
 
   // this effect only runs once.
   useEffect(() => {
+    // This is a timeout that carried over from the last page. It deletes
+    // the doc in the background.
     clearTimeout(timeout_5);
-    // clearAllTimeouts();
-    // console.log('cleared timeouts.');
-    const socket = io(bp.buildPath(''));
+    // This gets the match data.
+    fetchMatchInfo();
+    const socket = io(bp.buildPath(''), { forceNew: true });
     socket.auth = { id };
     socket.connect();
     socket.on('connect', () => {
-      displayMessage(
+      console.log(
         `Email: "${currentUser.email}" \n With User ID: "${currentUser.uid}" connected with socket id: "${socket.id}"`
       );
-      // When connected, try to send in my socket id. I get back whether I am host or not, which I can then use later.
-      APIsendSocketID(socket.id).then(
-        (hostValue) => {
-          console.log('RESOLVED. is user host?');
-          console.log(hostValue);
-        },
-        (reason) => {
-          console.log('REASON');
-          console.log(reason);
-        }
-      );
-      setSocket(socket);
     });
+
+    // This is new!
+    // We get both ids, and sort them alphabetically.
+    // The concatenated string is the unique room id!
+    const ids = [currentUser.uid, match_id];
+    ids.sort();
+    const new_room = ids[0] + ids[1];
+    socket.emit(
+      'join-room',
+      currentUser.uid.toString(),
+      new_room.toString(),
+      function (message) {
+        if (message == 'joined') {
+          console.log('callback called, joining room now.');
+          setRoom(new_room);
+          displayMessage('Joined the room! Introduce yourself :)', 'system');
+        }
+      }
+    );
+
+    setSocket(socket);
     // Wait for incoming private messages.
-    socket.on('private', (message, to, from) =>
+    socket.on('message', (message, user) =>
       displayMessage(message, 'received')
     );
   }, []);
@@ -194,13 +110,12 @@ export default function Chat() {
   function handleSubmit(e) {
     e.preventDefault();
     const message = messageRef.current.value;
-    const room_ = room;
+    // const room_ = room;
 
     if (message === '') return;
     displayMessage(message, 'sent');
-    // ARGS ARE: message, to, from
-    // Emit a private message.
-    socket.emit('private', message, room_, socket.id);
+    // ARGS ARE: from, room, message
+    socket.emit('send-to-room', currentUser.uid, room, message);
     messageRef.current.value = '';
   }
 
@@ -211,6 +126,8 @@ export default function Chat() {
       suffix = ' (them)';
     } else if (mode == 'sent') {
       suffix = ' (you)';
+    } else if (mode == 'system') {
+      suffix = ' [[sys msg, remove suffix later]]';
     }
     const div = document.createElement('div');
     div.textContent = message + suffix;
@@ -251,29 +168,30 @@ export default function Chat() {
         <br></br>
         <strong>MATCH:</strong> {match_id}
         <br></br>
-        <strong>HOST:</strong> {isHost}
+        <strong>their age:</strong> {match_age}
+        <br></br>
+        <strong>their name:</strong> {match_name}
+        <br></br>
+        <strong>their sex:</strong> {match_sex}
+        <hr></hr>
       </Container>
       <Container>
         <div id="message-container"></div>
         <Form onSubmit={handleSubmit}>
+          <hr></hr>
           <Form.Label>Message</Form.Label>
           <Form.Control
             type="text"
             id="message_input"
             ref={messageRef}></Form.Control>
           <Button
-            disabled={room == '' ? true : false}
+            disabled={room === '' ? true : false}
             type="submit"
             id="send-button">
             Send
           </Button>
           <br></br>
-          {/* <Form.Label htmlFor="room-input">Room</Form.Label>
-          <Form.Control type="text" value={room}></Form.Control>
-          <Button type="button" id="room-button">
-            Join
-          </Button> */}
-          <h3>Their room: {room}</h3>
+          <h3>Our room id: {room}</h3>
         </Form>
       </Container>
       <Button onClick={redirectToHome}>Home</Button>

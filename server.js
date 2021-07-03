@@ -63,10 +63,21 @@ http.listen(process.env.PORT || 5000, function () {
 io.on("connection", (socket) => {
   console.log(`User connected with socket id: ${socket.id}`);
 
-  // On a private message, relay this to the correct room.
-  socket.on("private", (msg, to, from) => {
-    console.log(from, "tried to say ", msg, " to ", to);
-    socket.to(to).emit("private", msg, to, from);
+  // // On a private message, relay this to the correct room.
+  // socket.on("private", (msg, to, from) => {
+  //   console.log(from, "tried to say ", msg, " to ", to);
+  //   socket.to(to).emit("private", msg, to, from);
+  // });
+  // Join the room, then call the callback to alert that join occurred.
+  // This gets called on the client side.
+  socket.on("join-room", (user, room, callback) => {
+    console.log("> User", user, "joined room", room);
+    socket.join(room);
+    callback("joined");
+  });
+  // Send a message to a particular room.
+  socket.on("send-to-room", (user, room, message) => {
+    socket.to(room).emit("message", message, user);
   });
 });
 
