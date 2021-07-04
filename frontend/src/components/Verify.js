@@ -55,18 +55,21 @@ export default function Verify() {
       <Card>
         <Card.Body>
           <h2 className="text-center mb-4">
-            Verify your account before continuing
+            Verify Your E-mail
           </h2>
           {error && <Alert variant="danger">{error}</Alert>}
           {message && <Alert variant="success">{message}</Alert>}
           <Form onSubmit={handleSubmit}>
             <Button
               disabled={loading || pressed}
-              className="w-100 mt-2"
+              className="w-100 mt-2 mb-4"
               type="submit">
-              Send Verify Email
+              Send Email Verification
             </Button>
           </Form>
+          <h3 className="text-center mb-0">
+          Make sure to check your inbox <br></br>to verify your email.
+          </h3>
         </Card.Body>
       </Card>
       <div className="w-100 text-center mt-2">
