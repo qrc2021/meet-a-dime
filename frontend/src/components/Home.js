@@ -42,6 +42,16 @@ export default function Home() {
   var timeout4 = null;
   var timeout5 = null;
 
+  // Basic user info for their preferences. Will be referenced in search.
+  var userInfo = {
+    birth: '',
+    exitMessage: '',
+    firstName: '',
+    sex: '',
+    sexOrientation: '',
+    photo: '',
+  };
+
   // useEffect occurs only once on page load.
   // This will clear any record of the user in the 'searching' collection
   // so that it not only resets the searching state, but
@@ -52,6 +62,11 @@ export default function Home() {
   // The matching algorithm/mechanism is described after the useEffect, in
   // the search function.
   useEffect(() => {
+    async function getIntialUserPhoto() {
+      await fetchData();
+      document.getElementById('photo').src = userInfo.photo;
+    }
+
     async function purgeOld() {
       // Lock the search button until these tasks are complete.
       setLockout(true);
@@ -105,6 +120,7 @@ export default function Home() {
     }
     // call the function that was just defined here.
     purgeOld();
+    getIntialUserPhoto();
     return () => {
       clearTimeout(timeout1);
       clearTimeout(timeout2);
@@ -115,15 +131,6 @@ export default function Home() {
       else console.log("no observer, couldn't call");
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Basic user info for their preferences. Will be referenced in search.
-  var userInfo = {
-    birth: '',
-    exitMessage: '',
-    firstName: '',
-    sex: '',
-    sexOrientation: '',
-  };
 
   // Redirect users if they are not verified.
   if (!currentUser.emailVerified) {
@@ -151,6 +158,7 @@ export default function Home() {
       userInfo.firstName = response.data.firstName;
       userInfo.sex = response.data.sex;
       userInfo.sexOrientation = response.data.sexOrientation;
+      userInfo.photo = response.data.photo;
 
       // Set this into local storage for easy reference and persistence.
       localStorage.setItem('user_data', JSON.stringify(response.data));
@@ -172,6 +180,7 @@ export default function Home() {
       history.push('/login', {
         state: { fromHome: true, oldID: currentUser.uid },
       });
+      // Sort of a workaround incase user logs back in quickly.
       window.location.reload();
     } catch {
       setError('Failed to log out');
@@ -255,6 +264,7 @@ export default function Home() {
     // Is there user preferences in the local storage?
     // If not, query the API and get the new data.
     if (localStorage.getItem('user_data') === null) {
+      console.log('1');
       await fetchData();
       try {
       } catch (error) {
@@ -264,11 +274,13 @@ export default function Home() {
     } else {
       // otherwise, its in user data so lets just get it.
       var local = JSON.parse(localStorage.getItem('user_data'));
+      console.log('2');
       userInfo.birth = local.birth;
       userInfo.exitMessage = local.exitMessage;
       userInfo.firstName = local.firstName;
       userInfo.sex = local.sex;
       userInfo.sexOrientation = local.sexOrientation;
+      userInfo.photo = local.photo;
     }
 
     // Lock the search button for now, until tasks are done.
@@ -557,9 +569,13 @@ export default function Home() {
         <br></br>
         <strong>User ID:</strong> {currentUser.uid}
         <br></br>
-        <strong>Refresh token:</strong> {currentUser.refreshToken}
+        {/* <strong>Refresh token:</strong> {currentUser.refreshToken}
+        <br></br> */}
+        <strong>Photo:</strong>
         <br></br>
-        <strong>Verified email:</strong>{' '}
+        <img height="100px" width="100px" src="" id="photo"></img>
+        <br></br>
+        <strong>Verified email: </strong>
         {currentUser.emailVerified ? 'verified' : 'not verified'}
       </Container>
       <h1>Match: {id_of_match}</h1>

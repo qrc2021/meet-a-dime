@@ -6,10 +6,11 @@ import { Link } from 'react-router-dom';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
-
+import 'firebase/storage';
 
 export default function Profile() {
   const [error, setError] = useState('');
+  const [photoStatus, setPhotoStatus] = useState('');
   const firestore = firebase.firestore();
   const { currentUser, logout } = useAuth();
   const history = useHistory();
@@ -35,7 +36,37 @@ export default function Profile() {
     history.push('/');
   }
 
-  async function fetchUserData(){
+  function processPhoto() {
+    const selectedFile = document.getElementById('photoUploadGroup').files[0];
+    if (selectedFile === undefined) return setPhotoStatus('no file selected');
+
+    // Regex that gets the file extension
+    var re = /(?:\.([^.]+))?$/;
+    var ext = re.exec(selectedFile.name)[1];
+    setPhotoStatus('Uploading...');
+    var storageRef = firebase.storage().ref();
+    var profileRef = storageRef.child(currentUser.uid + '.' + ext);
+    profileRef.put(selectedFile).then((snapshot) => {
+      snapshot.ref.getDownloadURL().then((url) => {
+        firestore
+          .collection('users')
+          .doc(currentUser.uid)
+          .update({ photo: url })
+          .then(() => {
+            console.log('photo set to user in database!');
+            setPhotoStatus('Photo uploaded!');
+            document.getElementById('photo').src = url;
+          })
+          .catch((error) => {
+            console.log(error);
+            // setError('something went wrong');
+            setPhotoStatus('something went wrong.');
+          });
+      });
+    });
+  }
+
+  async function fetchUserData() {
     var snapshot = await firestore.collection('users').get();
     snapshot.forEach((doc) => {
       if (doc.data().userID === currentUser.uid) {
@@ -46,15 +77,35 @@ export default function Profile() {
         var userExitMessage = doc.data().exitMessage;
         var userSex = doc.data().sex;
         var userOrientation = doc.data().sexOrientation;
-        document.getElementById("birth").innerHTML = userBirth;
-        document.getElementById("first").innerHTML = userFirstName;
-        document.getElementById("last").innerHTML = userLastName;
-        document.getElementById("phone").innerHTML = userPhone;
-        document.getElementById("exit").innerHTML = userExitMessage;
-        document.getElementById("sex").innerHTML = userSex;
-        document.getElementById("orientation").innerHTML = userOrientation;
+        var photo = doc.data().photo;
+        document.getElementById('birth').innerHTML = userBirth;
+        document.getElementById('first').innerHTML = userFirstName;
+        document.getElementById('last').innerHTML = userLastName;
+        document.getElementById('phone').innerHTML = userPhone;
+        document.getElementById('exit').innerHTML = userExitMessage;
+        document.getElementById('sex').innerHTML = userSex;
+        document.getElementById('orientation').innerHTML = userOrientation;
+        document.getElementById('photo').src = photo;
+
+        // Set some items into local storage for easy reference later
+        //   its only 5 items right now just so it matches the other
+        //   references on the Home.js page, but we can add all for sure
+
+        // Ideally this should also get set when a user changes it
+        // on this page as well.
+        localStorage.setItem(
+          'user_data',
+          JSON.stringify({
+            birth: userBirth,
+            exitMessage: userExitMessage,
+            firstName: userFirstName,
+            sex: userSex,
+            sexOrientation: userOrientation,
+            photo: photo,
+          })
+        );
       }
-    })
+    });
   }
 
   fetchUserData();
@@ -64,23 +115,40 @@ export default function Profile() {
       <h2 className="text-center mb-4">Profile</h2>
       {error && <Alert variant="danger">{error}</Alert>}
       <Container>
-        <strong>First Name:</strong> <span id = "first"></span>
+        <strong>First Name:</strong> <span id="first"></span>
         <br></br>
-        <strong>Last Name:</strong> <span id = "last"></span>
+        <strong>Last Name:</strong> <span id="last"></span>
         <br></br>
-        <strong>Birthday:</strong> <span id = "birth"></span>
+        <strong>Birthday:</strong> <span id="birth"></span>
         <br></br>
         <strong>Email:</strong> {currentUser.email}
         <br></br>
-        <strong>Phone Number:</strong> <span id = "phone"></span>
+        <strong>Phone Number:</strong> <span id="phone"></span>
         <br></br>
-        <strong>Exit Message:</strong> <span id = "exit"></span>
+        <strong>Exit Message:</strong> <span id="exit"></span>
         <br></br>
-        <strong>Sex:</strong> <span id = "sex"></span>
+        <strong>Sex:</strong> <span id="sex"></span>
         <br></br>
-        <strong>Sexual Orientation:</strong> <span id = "orientation"></span>
+        <strong>Sexual Orientation:</strong> <span id="orientation"></span>
         <br></br>
         <strong>User ID:</strong> {currentUser.uid}
+        <br></br>
+        <strong>Photo:</strong>
+        <br></br>
+        <img height="100px" width="100px" src="" id="photo"></img>
+        {/* Temporary file input field, just needs style and
+        probably some custom input fields */}
+        <div className="my-3">
+          <input type="file" id="photoUploadGroup" />
+
+          <button
+            className="btn btn-primary"
+            id="photoUploadButton"
+            onClick={processPhoto}>
+            Upload Photo
+          </button>
+        </div>
+        {photoStatus}
       </Container>
       <Button onClick={redirectToHome}>Home</Button>
       <div className="w-100 text-center mt-2">

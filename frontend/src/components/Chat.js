@@ -23,6 +23,7 @@ export default function Chat() {
   const [match_age, setMatchAge] = useState('');
   const [match_name, setMatchName] = useState('user');
   const [match_sex, setMatchSex] = useState('');
+  const [match_photo, setMatchPhoto] = useState('');
 
   const location = useLocation();
   // Gets the passed in match id from the link in the home page
@@ -58,6 +59,7 @@ export default function Chat() {
       setMatchAge(moment().diff(response.data.birth, 'years'));
       setMatchName(response.data.firstName);
       setMatchSex(response.data.sex);
+      setMatchPhoto(response.data.photo);
     } catch (error) {
       console.log(error);
     }
@@ -173,6 +175,14 @@ export default function Chat() {
         <strong>their name:</strong> {match_name}
         <br></br>
         <strong>their sex:</strong> {match_sex}
+        <br></br>
+        <strong>their photo:</strong>
+        <br></br>
+        <img
+          height="100px"
+          width="100px"
+          src={match_photo}
+          id="matchPhoto"></img>
         <hr></hr>
       </Container>
       <Container>

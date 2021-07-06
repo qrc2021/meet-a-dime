@@ -5,6 +5,9 @@ import { Link, useHistory } from 'react-router-dom';
 import axios from 'axios';
 import moment from 'moment';
 
+const DEFAULT_COIN_IMAGE =
+  'https://firebasestorage.googleapis.com/v0/b/meet-a-dime.appspot.com/o/default_1.png?alt=media&token=23ab5b95-0214-42e3-9c54-d7811362aafc';
+
 export default function SignUp() {
   const firstRef = useRef();
   const lastRef = useRef();
@@ -132,7 +135,7 @@ export default function SignUp() {
         phone: phoneVal,
         exitMessage: responseRef.current.value.trim(),
         userID: newUser.uid,
-        photo: newUser.photoURL === null ? '' : newUser.photoURL,
+        photo: DEFAULT_COIN_IMAGE,
         displayName: newUser.displayName === null ? '' : newUser.displayName,
         initializedProfile: 0,
         FailMatch: [],

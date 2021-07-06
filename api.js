@@ -64,6 +64,7 @@ exports.setApp = function (app, admin) {
           firstName: data.firstName,
           sex: data.sex,
           sexOrientation: data.sexOrientation,
+          photo: data.photo,
         };
       }
     } catch (error) {
@@ -96,6 +97,7 @@ exports.setApp = function (app, admin) {
           birth: data.birth,
           firstName: data.firstName,
           sex: data.sex,
+          photo: data.photo,
         };
       }
     } catch (error) {
