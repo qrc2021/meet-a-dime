@@ -178,11 +178,15 @@ export default function Chat() {
         <br></br>
         <strong>their photo:</strong>
         <br></br>
-        <img
-          height="100px"
-          width="100px"
-          src={match_photo}
-          id="matchPhoto"></img>
+        {match_photo !== '' ? (
+          <img
+            height="100px"
+            width="100px"
+            src={match_photo}
+            id="matchPhoto"></img>
+        ) : (
+          <></>
+        )}
         <hr></hr>
       </Container>
       <Container>

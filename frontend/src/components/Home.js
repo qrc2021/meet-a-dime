@@ -17,6 +17,7 @@ export default function Home() {
   // when lockout is true, the search button is disabled. this is for
   // locking the button while states are changing or loading is occuring
   const [lockout, setLockout] = useState(false);
+  const [myPhoto, setMyPhoto] = useState('');
   // the firebase firestore instance, used to query, add, delete, edit from DB.
   const firestore = firebase.firestore();
   // The currentUser object represents the authenticated firebase user.
@@ -64,7 +65,8 @@ export default function Home() {
   useEffect(() => {
     async function getIntialUserPhoto() {
       await fetchData();
-      document.getElementById('photo').src = userInfo.photo;
+      // document.getElementById('photo').src = userInfo.photo;
+      setMyPhoto(userInfo.photo);
     }
 
     async function purgeOld() {
@@ -573,7 +575,11 @@ export default function Home() {
         <br></br> */}
         <strong>Photo:</strong>
         <br></br>
-        <img height="100px" width="100px" src="" id="photo"></img>
+        {myPhoto !== '' ? (
+          <img height="100px" width="100px" src={myPhoto} id="photo"></img>
+        ) : (
+          <></>
+        )}
         <br></br>
         <strong>Verified email: </strong>
         {currentUser.emailVerified ? 'verified' : 'not verified'}

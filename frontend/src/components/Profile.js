@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Alert, Container } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
 import { useHistory } from 'react-router-dom';
@@ -11,6 +11,7 @@ import 'firebase/storage';
 export default function Profile() {
   const [error, setError] = useState('');
   const [photoStatus, setPhotoStatus] = useState('');
+  const [myPhoto, setMyPhoto] = useState('');
   const firestore = firebase.firestore();
   const { currentUser, logout } = useAuth();
   const history = useHistory();
@@ -55,7 +56,7 @@ export default function Profile() {
           .then(() => {
             console.log('photo set to user in database!');
             setPhotoStatus('Photo uploaded!');
-            document.getElementById('photo').src = url;
+            setMyPhoto(url);
           })
           .catch((error) => {
             console.log(error);
@@ -67,6 +68,7 @@ export default function Profile() {
   }
 
   async function fetchUserData() {
+    console.log('ran');
     var snapshot = await firestore.collection('users').get();
     snapshot.forEach((doc) => {
       if (doc.data().userID === currentUser.uid) {
@@ -85,7 +87,7 @@ export default function Profile() {
         document.getElementById('exit').innerHTML = userExitMessage;
         document.getElementById('sex').innerHTML = userSex;
         document.getElementById('orientation').innerHTML = userOrientation;
-        document.getElementById('photo').src = photo;
+        setMyPhoto(photo);
 
         // Set some items into local storage for easy reference later
         //   its only 5 items right now just so it matches the other
@@ -108,7 +110,18 @@ export default function Profile() {
     });
   }
 
-  fetchUserData();
+  // useEffect ensures the function runs once at page load,
+  // and not each time a state changes
+  // (for example, just the fetchUserData(); by itself would
+  // rerun each time the photo was set, or any of our other
+  // states. now it will just run once, or whenever we call
+  // it again to update.
+  //
+  // so to update: set the stuff in database, then call fetchUserData()
+  // after that is complete, like in the .then() after the promise.
+  useEffect(() => {
+    fetchUserData();
+  }, []);
 
   return (
     <React.Fragment>
@@ -135,7 +148,12 @@ export default function Profile() {
         <br></br>
         <strong>Photo:</strong>
         <br></br>
-        <img height="100px" width="100px" src="" id="photo"></img>
+        {myPhoto !== '' ? (
+          <img height="100px" width="100px" src={myPhoto} id="photo"></img>
+        ) : (
+          <></>
+        )}
+        <br></br>
         {/* Temporary file input field, just needs style and
         probably some custom input fields */}
         <div className="my-3">
