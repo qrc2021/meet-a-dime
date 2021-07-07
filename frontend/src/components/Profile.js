@@ -39,6 +39,10 @@ export default function Profile() {
     history.push('/');
   }
 
+  function redirectToUpdateProfile() {
+    history.push('/update-profile');
+  }
+
   function processPhoto() {
     const selectedFile = document.getElementById('photoUploadGroup').files[0];
     if (selectedFile === undefined) return setPhotoStatus('no file selected');
@@ -169,7 +173,11 @@ export default function Profile() {
           </button>
         </div>
         {photoStatus}
+        <Link to="/update-profile" className="btn btn-primary">
+          Update Profile
+        </Link>
       </Container>
+      <br></br>
       <Button onClick={redirectToHome}>Home</Button>
       <div className="w-100 text-center mt-2">
         <Button variant="link" onClick={handleLogout}>
