@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
-// import { Button, Card, Alert } from 'react-bootstrap';
-import Container from '@material-ui/core/Container';
-import Button from '@material-ui/core/Button';
+
+import { Form, Button, Card, Navbar, CardDeck } from 'react-bootstrap';
 import { Alert, AlertTitle } from '@material-ui/lab';
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
+
 import { useAuth } from '../contexts/AuthContext';
 import { useHistory } from 'react-router-dom';
 import { Redirect } from 'react-router';
+import '../styles/Verify.css';
 // import { auth } from '../firebase';
 
 export default function Verify() {
@@ -51,39 +50,91 @@ export default function Verify() {
 
   return (
     <React.Fragment>
+    <body>
+    <Navbar bg="transparent">
+      <Navbar.Brand href="login">
+        <img
+          src="/DimeAssets/headerlogo.png"
+          width="300px"
+          height="100%"
+          className="d-inline-block align-top"
+          alt="React Bootstrap logo"
+        />
+      </Navbar.Brand>
+    </Navbar>
+
       {currentUser && currentUser.emailVerified ? (
         <Redirect to="/"></Redirect>
       ) : (
         <React.Fragment></React.Fragment>
       )}
 
-      <Container style={{ justifyContent: 'center', maxWidth: 700 }}>
-        <Card>
-          <CardContent>
-            <h2 className="text-center mb-4">Verify Your E-mail</h2>
-            {error && <Alert severity="error">{error}</Alert>}
-            {message && <Alert severity="success">{message}</Alert>}
-            <form onSubmit={handleSubmit}>
-              <Button
-                disabled={loading || pressed}
-                className="w-100 mt-2 mb-4"
-                variant="contained"
-                color="primary"
-                type="submit">
-                Send Email Verification
-              </Button>
-            </form>
-            <p className="text-center mb-0">
-              Make sure to check your inbox <br></br>to verify your email.
-            </p>
-          </CardContent>
-        </Card>
-      </Container>
-      <div className="w-100 text-center mt-2">
-        <Button variant="contained" color="primary" onClick={handleLogout}>
+      <Card
+      varient="top"
+      style={{
+        minWidth: '300px',
+        maxWidth: '550px',
+        marginRight: 'auto',
+        marginLeft: 'auto',
+        borderRadius: '30px',
+      }}>
+        <Card.Body>
+          <h2 className="text-center mb-4"
+          style={{
+            fontWeight: 'bold',
+            fontSize: '50px',
+            color: '#7E7E7E',
+          }}>
+            Verify Your E-mail
+          </h2>
+          <Card.Img className="text-center mb-4"
+          variant="top"
+          src="DimeAssets/envelope.png"
+          
+        />
+          {error && <Alert severity="error">{error}</Alert>}
+          {message && <Alert severity="success">{message}</Alert>}
+          <Form onSubmit={handleSubmit}>
+            <Button
+              disabled={loading || pressed}
+              className="w-100 mt-2 mb-3"
+              type="submit"
+              style={{
+                fontWeight: 'bold',
+                fontSize: '30px',
+                color: 'white',
+                backgroundColor: '#E64398',
+                borderRadius: '30px',
+                borderColor: '#E64398',
+              }}>
+              Send Email Verification
+            </Button>
+          </Form>
+          <h3 className="text-center mb-0"
+          style={{
+            fontWeight: '400',
+            fontSize: '30px',
+            color: '#7E7E7E',
+          }}>
+          Make sure to check your inbox to verify your email.
+          </h3>
+        </Card.Body>
+      </Card>
+      {/* <div className="w-100 text-center mt-2">
+        <Button onClick={handleLogout}
+          style={{
+            fontWeight: 'bold',
+            fontSize: '25px',
+            color: 'white',
+            backgroundColor: '#E64398',
+            borderRadius: '30px',
+            borderColor: '#E64398',
+          }}>
+
           Log In
         </Button>
-      </div>
+      </div> */}
+    </body>
     </React.Fragment>
   );
 }
