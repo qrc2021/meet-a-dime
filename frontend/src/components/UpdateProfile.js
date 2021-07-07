@@ -1,28 +1,35 @@
-import React, { useRef, useState } from 'react';
-import { Card, Form, Button } from 'react-bootstrap';
+import React, { useRef, useState, useEffect } from 'react';
+import { Card, Form, Button, Alert } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
-import { Alert, AlertTitle } from '@material-ui/lab';
 import { Link, useHistory } from 'react-router-dom';
 import axios from 'axios';
 import moment from 'moment';
+import firebase from 'firebase/app';
+import 'firebase/auth';
+import 'firebase/firestore';
+import 'firebase/storage';
 
 const DEFAULT_COIN_IMAGE =
   'https://firebasestorage.googleapis.com/v0/b/meet-a-dime.appspot.com/o/default_1.png?alt=media&token=23ab5b95-0214-42e3-9c54-d7811362aafc';
 
-export default function SignUp() {
+export default function UpdateProfile() {
   const firstRef = useRef();
   const lastRef = useRef();
   const emailRef = useRef();
   const passwordRef = useRef();
   const responseRef = useRef();
   const passwordConfirmRef = useRef();
-  const { signup, logout } = useAuth();
+  const firestore = firebase.firestore();
+  const { currentUser, signup, logout, updatePassword, updateEmail } = useAuth();
   const [error, setError] = useState('');
   const [loading, setLoading] = useState('');
   const [optionsState, setOptionsState] = useState('0');
   const [orientationState, setOrientationState] = useState('0');
+  const [userFirstName, setFirstName] = useState('');
+  const [userLastName, setLastName] = useState('');
+  const [userBirth, setBirthday] = useState('');
+  const [userExitMessage, setExitMessage] = useState('');
   const [phoneVal, setPhoneVal] = useState('');
-
   var adult = moment().subtract(18, 'years').calendar();
   console.log(adult);
   var form = moment(adult).format('YYYY-MM-DD');
@@ -81,7 +88,7 @@ export default function SignUp() {
       return setError('Passwords do not match.');
     }
 
-    if (passwordRef.current.value.length <= 6) {
+    if (passwordRef.current.value.length <= 6 && passwordRef.current.value.length != "") {
       return setError('Password should be more than six characters.');
     }
 
@@ -90,22 +97,12 @@ export default function SignUp() {
     //   return setError('Please enter a valid Date of Birth.');
     // }
 
-    if (optionsState === '0') {
-      return setError('Please choose your sex.');
-    }
-
-    if (orientationState === '0') {
-      return setError('Please choose your sexual orientation.');
-    }
-
     if (phoneVal.trim().length < 14) {
       return setError('Please enter a valid phone number.');
     }
 
-    if (dateState === '') return setError('Please enter a valid date...');
-
     if (!isLegal(dateState))
-      return setError('You must be 18 years or older to sign up');
+      return setError('You must be 18 years or older');
 
     if (firstRef.current.value === '')
       return setError('Please input your first name');
@@ -118,6 +115,53 @@ export default function SignUp() {
       2: 'Homosexual',
       3: 'Bisexual',
     };
+
+    const promises = [];
+    setLoading(true);
+    setError("");
+
+    var path = 'profile';
+    
+    if (emailRef.current.value !== currentUser.email) {
+        promises.push(updateEmail(emailRef.current.value));
+        path = 'login';
+    }
+
+    if (passwordRef.current.value) {
+        promises.push(updatePassword(passwordRef.current.value));
+        path = 'login';
+    }
+
+    promises.push(firestore.collection('users').doc(currentUser.uid).update({firstName: firstRef.current.value.trim()}));
+    promises.push(firestore.collection('users').doc(currentUser.uid).update({lastName: lastRef.current.value.trim()}));
+    promises.push(firestore.collection('users').doc(currentUser.uid).update({email: emailRef.current.value}));
+    promises.push(firestore.collection('users').doc(currentUser.uid).update({birth: dateState}));
+    promises.push(firestore.collection('users').doc(currentUser.uid).update({sex: optionsState === '1' ? 'Male' : 'Female'}));
+    promises.push(firestore.collection('users').doc(currentUser.uid).update({sexOrientation: orient[orientationState]}));
+    promises.push(firestore.collection('users').doc(currentUser.uid).update({phone: phoneVal}));
+    promises.push(firestore.collection('users').doc(currentUser.uid).update({exitMessage: responseRef.current.value.trim()}));
+
+    Promise.all(promises).then(() => {
+        history.push('/' + path);
+    }).catch(() => {
+        setError('Failed to update account');
+    }).finally(() => {
+        setLoading(false);
+    })
+
+    /*try {
+        await firestore.collection('users').doc(currentUser.uid).update({firstName: firstRef.current.value.trim()});
+        await firestore.collection('users').doc(currentUser.uid).update({lastName: lastRef.current.value.trim()});
+        await firestore.collection('users').doc(currentUser.uid).update({birth: dateState});
+        await firestore.collection('users').doc(currentUser.uid).update({sex: optionsState === '1' ? 'Male' : 'Female'});
+        await firestore.collection('users').doc(currentUser.uid).update({sexOrientation: orient[orientationState]});
+        await firestore.collection('users').doc(currentUser.uid).update({phone: phoneVal});
+        await firestore.collection('users').doc(currentUser.uid).update({exitMessage: responseRef.current.value.trim()});
+    } catch(error) {
+        setError('Failed to update account: ' + error);
+    }*/
+
+    /*
     try {
       setError('');
       setLoading(true);
@@ -170,40 +214,87 @@ export default function SignUp() {
       }
       setLoading(false);
     }
+    */
+  }
+
+  async function fetchUserData() {
+    console.log('ran');
+    var snapshot = await firestore.collection('users').get();
+    snapshot.forEach((doc) => {
+      if (doc.data().userID === currentUser.uid) {
+        setDateState(doc.data().birth);  
+        setFirstName(doc.data().firstName);
+        setLastName(doc.data().lastName);
+        setPhoneVal(doc.data().phone);
+        setExitMessage(doc.data().exitMessage);
+        setOptionsState(doc.data().sex == "Male" ? "1" : "2");
+        var userOrientation = doc.data().sexOrientation;
+        setOrientationState(userOrientation == "Heterosexual" ? "1" : (userOrientation == "Homosexual" ? "2" : "3"));
+        
+
+        // Set some items into local storage for easy reference later
+        //   its only 5 items right now just so it matches the other
+        //   references on the Home.js page, but we can add all for sure
+
+        // Ideally this should also get set when a user changes it
+        // on this page as well.
+        localStorage.setItem(
+          'user_data',
+          JSON.stringify({
+            birth: userBirth,
+            exitMessage: userExitMessage,
+            firstName: userFirstName,
+            sex: optionsState,
+            sexOrientation: orientationState,
+          })
+        );
+      }
+    });
+  }
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  function redirectToProfile() {
+      history.push('/profile');
   }
 
   return (
     <>
       <Card>
         <Card.Body>
-          <h2 className="text-center mb-3">Sign Up</h2>
-          {error && <Alert severity="error">{error}</Alert>}
+          <h2 className="text-center mb-3">Update Profile</h2>
+          {error && <Alert variant="danger">{error}</Alert>}
           <Form onSubmit={handleSubmit}>
             <Form.Group id="firstName">
               <Form.Label>First name:</Form.Label>
-              <Form.Control type="text" ref={firstRef} />
+              <Form.Control type="text" ref={firstRef} defaultValue={userFirstName}/>
             </Form.Group>
             <Form.Group id="lastName">
               <Form.Label>Last name:</Form.Label>
-              <Form.Control type="text" ref={lastRef} />
+              <Form.Control type="text" ref={lastRef} defaultValue={userLastName}/>
               <Form.Text className="text-muted">
                 Your last name will stay private
               </Form.Text>
             </Form.Group>
             <Form.Group id="email">
               <Form.Label>Email</Form.Label>
-              <Form.Control type="email" ref={emailRef} required />
+              <Form.Control type="email" ref={emailRef} required 
+              defaultValue={currentUser.email}/>
               <Form.Text className="text-muted">
                 We will never share your email with anyone.
               </Form.Text>
             </Form.Group>
             <Form.Group id="password">
-              <Form.Label>Password</Form.Label>
-              <Form.Control type="password" ref={passwordRef} required />
+              <Form.Label>New password</Form.Label>
+              <Form.Control type="password" ref={passwordRef} 
+              placeholder="Leave blank to keep the same."/>
             </Form.Group>
             <Form.Group id="password-confirm">
-              <Form.Label>Password confirmation</Form.Label>
-              <Form.Control type="password" ref={passwordConfirmRef} required />
+              <Form.Label>New password confirmation</Form.Label>
+              <Form.Control type="password" ref={passwordConfirmRef} 
+              placeholder="Leave blank to keep the same."/>
             </Form.Group>
             <Form.Group id="dob">
               <Form.Label>Date of Birth</Form.Label>
@@ -224,7 +315,6 @@ export default function SignUp() {
                 value={optionsState}
                 onChange={(e) => setOptionsState(e.target.value)}
                 required>
-                <option value="0">Choose your sex...</option>
                 <option value="1">Male</option>
                 <option value="2">Female</option>
               </Form.Control>
@@ -236,7 +326,6 @@ export default function SignUp() {
                 value={orientationState}
                 onChange={(e) => setOrientationState(e.target.value)}
                 required>
-                <option value="0">Choose your sexual orientation...</option>
                 <option value="1">Heterosexual</option>
                 <option value="2">Homosexual</option>
                 <option value="3">Bisexual</option>
@@ -244,7 +333,7 @@ export default function SignUp() {
             </Form.Row>
             <Form.Group id="customResponse">
               <Form.Label>Custom end of chat response:</Form.Label>
-              <Form.Control type="text" ref={responseRef} />
+              <Form.Control type="text" ref={responseRef} defaultValue={userExitMessage}/>
               <Form.Text className="text-muted">
                 Users will see this response at the end of a chat. This can be
                 changed later...
@@ -260,13 +349,16 @@ export default function SignUp() {
               />
             </Form.Group>
             <Button disabled={loading} className="w-100 mt-2" type="submit">
-              Sign Up
+              Save Changes
+            </Button>
+            <Button className="w-100 mt-2">
+                Delete Account
             </Button>
           </Form>
         </Card.Body>
       </Card>
       <div className="w-100 text-center mt-2">
-        Already have an account? <Link to="/login">Log In</Link>
+        <Link to="/profile">Cancel</Link>
       </div>
     </>
   );

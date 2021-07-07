@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Button, Alert, Container, Form, Modal } from 'react-bootstrap';
+import { Button, Container, Form, Modal } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
 import { useHistory, useLocation } from 'react-router-dom';
+import { Alert, AlertTitle } from '@material-ui/lab';
 import { io } from 'socket.io-client';
 import axios from 'axios';
 import firebase from 'firebase/app';
@@ -318,7 +319,7 @@ export default function Chat() {
         (going home will make the users lose the match). for now they can still
         research for eachother tho
       </h3>
-      {error && <Alert variant="danger">{error}</Alert>}
+      {error && <Alert severity="error">{error}</Alert>}
       <Container>
         <strong>Email:</strong> {currentUser.email}
         <br></br>

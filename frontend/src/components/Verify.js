@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import { Form, Button, Card, Alert, Navbar, CardDeck } from 'react-bootstrap';
+
+import { Form, Button, Card, Navbar, CardDeck } from 'react-bootstrap';
+import { Alert, AlertTitle } from '@material-ui/lab';
+
 import { useAuth } from '../contexts/AuthContext';
 import { useHistory } from 'react-router-dom';
 import { Redirect } from 'react-router';
@@ -89,8 +92,8 @@ export default function Verify() {
           src="DimeAssets/envelope.png"
           
         />
-          {error && <Alert variant="danger">{error}</Alert>}
-          {message && <Alert variant="success">{message}</Alert>}
+          {error && <Alert severity="error">{error}</Alert>}
+          {message && <Alert severity="success">{message}</Alert>}
           <Form onSubmit={handleSubmit}>
             <Button
               disabled={loading || pressed}
@@ -127,6 +130,7 @@ export default function Verify() {
             borderRadius: '30px',
             borderColor: '#E64398',
           }}>
+
           Log In
         </Button>
       </div> */}
