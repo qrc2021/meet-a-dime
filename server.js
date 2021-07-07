@@ -71,13 +71,22 @@ io.on("connection", (socket) => {
   // Join the room, then call the callback to alert that join occurred.
   // This gets called on the client side.
   socket.on("join-room", (user, room, callback) => {
-    console.log("> User", user, "joined room", room);
+    console.log(">>>>> User", user, "joined room", room);
     socket.join(room);
     callback("joined");
+  });
+
+  socket.on("leave-room", (user, room) => {
+    console.log("> User", user, "left room", room);
+    socket.leave(room);
+    socket.to(room).emit("abandoned", "Your match left the session.");
+    socket.disconnect(0);
   });
   // Send a message to a particular room.
   socket.on("send-to-room", (user, room, message) => {
     socket.to(room).emit("message", message, user);
+    console.log();
+    console.log(message);
   });
 });
 

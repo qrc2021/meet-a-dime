@@ -89,7 +89,7 @@ export default function Login() {
       setLoading(true);
       await login(emailRef.current.value, passwordRef.current.value);
       history.push('/verify');
-      window.location.reload();
+      // window.location.reload();
     } catch (error) {
       setError('Failed to login: ' + error.message);
     }

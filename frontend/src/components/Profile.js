@@ -9,6 +9,8 @@ import 'firebase/firestore';
 import 'firebase/storage';
 
 export default function Profile() {
+  // Prevent some prompt issues.
+
   const [error, setError] = useState('');
   const [photoStatus, setPhotoStatus] = useState('');
   const [myPhoto, setMyPhoto] = useState('');

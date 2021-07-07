@@ -11,6 +11,8 @@ import Forgot from './Forgot';
 import Profile from './Profile';
 import Verify from './Verify';
 import Chat from './Chat';
+import NoContent from './NoContent';
+import After from './After';
 
 function App() {
   return (
@@ -18,12 +20,14 @@ function App() {
       <AuthProvider>
         <Switch>
           <PrivateRoute exact path="/" component={Home} />
-          <PrivateRoute exact path="/Profile" component={Profile} />
-          <PrivateRoute exact path="/Chat" component={Chat} />
+          <PrivateRoute exact path="/profile" component={Profile} />
+          <PrivateRoute exact path="/chat" component={Chat} />
+          <PrivateRoute exact path="/after" component={After} />
           <Route exact path="/verify" component={Verify} />
           <Route path="/signup" component={SignUp} />
           <Route path="/login" component={Login} />
           <Route path="/forgot" component={Forgot} />
+          <Route component={NoContent} />
         </Switch>
       </AuthProvider>
     </Router>
