@@ -139,7 +139,21 @@ export default function Chat() {
     });
     socket.on('abandoned', (message) => {
       displayMessage('Your match left the chat. Switching..', 'system');
-      setTimeout(() => {
+      setTimeout(async () => {
+        await firestore
+          .collection('users')
+          .doc(currentUser.uid)
+          .update({
+            FailMatch: firebase.firestore.FieldValue.arrayUnion(match_id),
+          });
+        await firestore
+          .collection('users')
+          .doc(match_id)
+          .update({
+            FailMatch: firebase.firestore.FieldValue.arrayUnion(
+              currentUser.uid
+            ),
+          });
         socket.emit('leave-room', currentUser.uid, room);
         history.push('/after', {
           state: { match_id: match_id, type: 'match_abandoned' },
@@ -179,6 +193,19 @@ export default function Chat() {
     try {
       // Push the state to login that we need to purge the old user searches.
 
+      await firestore
+        .collection('users')
+        .doc(currentUser.uid)
+        .update({
+          FailMatch: firebase.firestore.FieldValue.arrayUnion(match_id),
+        });
+      await firestore
+        .collection('users')
+        .doc(match_id)
+        .update({
+          FailMatch: firebase.firestore.FieldValue.arrayUnion(currentUser.uid),
+        });
+
       socket.emit('leave-room', currentUser.uid, room);
       await logout();
       history.push('/login', {
@@ -198,11 +225,19 @@ export default function Chat() {
     // window.location.reload(); CHANGED_NOW
   }
 
-  function redirectToAfter() {
-    // socket.emit('leave-room', currentUser.uid, room);
-    // history.push('/after', {
-    //   state: { match_id: match_id, type: 'user_abandoned' },
-    // });
+  async function redirectToAfter() {
+    await firestore
+      .collection('users')
+      .doc(currentUser.uid)
+      .update({
+        FailMatch: firebase.firestore.FieldValue.arrayUnion(match_id),
+      });
+    await firestore
+      .collection('users')
+      .doc(match_id)
+      .update({
+        FailMatch: firebase.firestore.FieldValue.arrayUnion(currentUser.uid),
+      });
     socket.emit('leave-room', currentUser.uid, room);
     history.push('/after', {
       state: { match_id: match_id, type: 'user_abandoned' },
@@ -266,7 +301,7 @@ export default function Chat() {
           )}
         </Container>
         <Button
-          className="btn btn-danger"
+          className={!afterChat ? 'btn btn-danger' : 'btn btn-primary'}
           onClick={!afterChat ? redirectToAfter : redirectToHome}>
           {!afterChat ? 'Abandon Chat' : 'Go Home'}
         </Button>

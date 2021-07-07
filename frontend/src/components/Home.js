@@ -29,7 +29,7 @@ export default function Home() {
   const [match, setMatch] = useState('Not searching.');
   const [id_of_match, setId] = useState('none');
   // Search timeout in milliseconds
-  const MS_BEFORE_ABANDON_SEARCH = 4000;
+  const MS_BEFORE_ABANDON_SEARCH = 30000;
   // Before match expires. they are separate just incase.
   const MS_BEFORE_ABANDON_MATCH_DOCJOIN = 10000;
   const MS_BEFORE_ABANDON_MATCH_DOCHOST = 10000;
@@ -78,12 +78,12 @@ export default function Home() {
           data: { uid: currentUser.uid },
         };
         var response = await axios(config);
+        setMyPhoto(response.data.photo);
       } catch (error) {
         console.log(error);
         console.log('issue in fetch data');
       }
       // document.getElementById('photo').src = userInfo.photo;
-      setMyPhoto(response.data.photo);
     }
 
     async function purgeOld() {
@@ -315,23 +315,44 @@ export default function Home() {
       var searchingSex = '';
       if (userInfo.sexOrientation === 'Heterosexual') {
         if (userInfo.sex === 'Male') {
-          searchingSex = 'Female';
+          searchingSex = ['Female'];
         } else {
-          searchingSex = 'Male';
+          searchingSex = ['Male'];
         }
       } else if (userInfo.sexOrientation === 'Homosexual') {
         if (userInfo.sex === 'Female') {
-          searchingSex = 'Female';
+          searchingSex = ['Female'];
         } else {
-          searchingSex = 'Male';
+          searchingSex = ['Male'];
         }
-      } else {
-        searchingSex = 'Any'; // Not working right now.
+      } else if (userInfo.sexOrientation === 'Bisexual') {
+        searchingSex = ['Male', 'Female']; // Not working right now.
       }
       return searchingSex;
     }
     // STAGE TWO //
     // Try to find and 'fill' an existing document, to complete a match!
+
+    function fillMatch(doc_id) {
+      try {
+        // By doing '.update()', I set my ID into their doc
+        firestore
+          .collection('searching')
+          .doc(doc_id)
+          .update({ match: currentUser.uid });
+        // Match is found! Do the correct tasks.
+        matchFound = true;
+        setId(doc_id);
+        setMatch('Found match! ' + doc_id);
+        // Clear the searching timeout.
+        // clearTimeout(timeOut);
+        clearAllTimeouts();
+        matchInternal = doc_id;
+      } catch (error) {
+        console.log('324');
+      }
+    }
+
     try {
       // Find what sex we are seeking.
       var searchingSex = getSearchingSex();
@@ -345,48 +366,17 @@ export default function Home() {
         //   - no current match
         //   - are they what I am searching for
         //   - am I what they are searching for
+        console.log(doc.data().search_sex);
+        //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         if (
           doc.data().match === '' &&
-          doc.data().sex === searchingSex &&
-          doc.data().search_sex === userInfo.sex
+          searchingSex.includes(doc.data().sex) &&
+          doc.data().search_sex.includes(userInfo.sex)
         ) {
-          try {
-            // By doing '.update()', I set my ID into their doc
-            firestore
-              .collection('searching')
-              .doc(doc.id)
-              .update({ match: currentUser.uid });
-            // Match is found! Do the correct tasks.
-            matchFound = true;
-            setId(doc.id);
-            setMatch('Found match! ' + doc.id);
-            // Clear the searching timeout.
-            // clearTimeout(timeOut);
-            clearAllTimeouts();
-            matchInternal = doc.id;
-            // Abandon match after certain time.
-            // timeout1 = setTimeout(() => {
-            //   if (window.location.pathname == '/') {
-            //     setError('⚠️ Match abandoning in 3 seconds!');
-            //     console.log('match abandoning message printed');
-            //   } else {
-            //     console.log('timeout 1 ran in home.js, but ignored.');
-            //   }
-            // }, MS_BEFORE_ABANDON_MATCH_DOCJOIN - 3000);
-            // timeout2 = setTimeout(() => {
-            //   if (window.location.pathname == '/') {
-            //     if (observer !== null) observer();
-            //     window.location.reload();
-            //     console.log('page reloaded');
-            //   } else {
-            //     console.log('timeout 2 ran in home.js, but ignored.');
-            //   }
-            // }, MS_BEFORE_ABANDON_MATCH_DOCJOIN);
-          } catch (error) {
-            console.log('324');
-          }
+          fillMatch(doc.id);
         }
       });
+      //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       // Still part of phase two. Listen for changes to the doc we
       // just filled in. Its possible the doc owner drops out,
       // and we need to listen for this.
