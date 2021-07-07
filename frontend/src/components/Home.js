@@ -1,5 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Button, Alert, Container } from 'react-bootstrap';
+// import { Button, Alert, Container } from 'react-bootstrap';
+import { Alert, AlertTitle } from '@material-ui/lab';
+import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
+import PhotoCamera from '@material-ui/icons/PhotoCamera';
+import Container from '@material-ui/core/Container';
+import Button from '@material-ui/core/Button';
+import Box from '@material-ui/core/Box';
 import { useAuth } from '../contexts/AuthContext';
 import { useHistory } from 'react-router-dom';
 import { Link } from 'react-router-dom';
@@ -15,7 +21,7 @@ export default function Home() {
   const observer = useRef(null);
   // Prevent some prompt issues.
 
-  // error corresponds to a bootstrap alert that will display err messages.
+  // error corresponds to an alert that will display err messages.
   const [error, setError] = useState('');
   // when lockout is true, the search button is disabled. this is for
   // locking the button while states are changing or loading is occuring
@@ -526,13 +532,15 @@ export default function Home() {
   return (
     <React.Fragment>
       <h2 className="text-center mb-4">Welcome! WE GOOD :D </h2>
-      {error && <Alert variant="danger">{error}</Alert>}
+      {error && <Alert severity="error">{error}</Alert>}
       {match && match === 'Not searching.' && (
-        <Alert variant="warning">{match}</Alert>
+        <Alert severity="warning">{match}</Alert>
       )}
-      {match && match === 'Searching.' && <Alert variant="info">{match}</Alert>}
+      {match && match === 'Searching.' && (
+        <Alert severity="info">{match}</Alert>
+      )}
       {match && match !== 'Not searching.' && match !== 'Searching.' && (
-        <Alert variant="success">{match}</Alert>
+        <Alert severity="success">{match}</Alert>
       )}
       <Container>
         <strong>Email:</strong> {currentUser.email}
@@ -552,10 +560,12 @@ export default function Home() {
         <strong>Verified email: </strong>
         {currentUser.emailVerified ? 'verified' : 'not verified'}
       </Container>
-      <h1>Match: {id_of_match}</h1>
-      <Button onClick={redirectToProfile}>Profile</Button>
+
+      <Button variant="contained" color="primary" onClick={redirectToProfile}>
+        Profile
+      </Button>
       <div className="w-100 text-center mt-2">
-        <Button variant="link" onClick={handleLogout}>
+        <Button variant="contained" color="secondary" onClick={handleLogout}>
           Log Out
         </Button>
       </div>
@@ -571,7 +581,11 @@ export default function Home() {
       </Link>
       <br></br>
       <br></br>
-      <Button disabled={lockout} onClick={searching}>
+      <Button
+        variant="outlined"
+        color="primary"
+        disabled={lockout}
+        onClick={searching}>
         Search for Match
       </Button>
     </React.Fragment>
