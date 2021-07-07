@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
-import { Card, Form, Button, Alert } from 'react-bootstrap';
+import { Card, Form, Button } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
+import { Alert, AlertTitle } from '@material-ui/lab';
 import { Link, useHistory } from 'react-router-dom';
 import axios from 'axios';
 import moment from 'moment';
@@ -176,7 +177,7 @@ export default function SignUp() {
       <Card>
         <Card.Body>
           <h2 className="text-center mb-3">Sign Up</h2>
-          {error && <Alert variant="danger">{error}</Alert>}
+          {error && <Alert severity="error">{error}</Alert>}
           <Form onSubmit={handleSubmit}>
             <Form.Group id="firstName">
               <Form.Label>First name:</Form.Label>

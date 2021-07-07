@@ -1,7 +1,9 @@
 import React, { useRef, useState, useEffect } from 'react';
+import Link from '@material-ui/core/Link';
 //import { View, Text, ScrollView, TextInput } from 'react-native';
-import { Card, Form, Button, Alert, Image, CardDeck } from 'react-bootstrap';
-import { Link, useHistory } from 'react-router-dom';
+import { Card, Form, Button, Image, CardDeck } from 'react-bootstrap';
+import { useHistory } from 'react-router-dom';
+import { Alert, AlertTitle } from '@material-ui/lab';
 import { useAuth } from '../contexts/AuthContext';
 import firebase from 'firebase/app';
 import 'firebase/auth';
@@ -125,7 +127,7 @@ export default function Login() {
           }}>
           <Card.Body>
             <Card.Img variant="top" src="DimeAssets/headerlogo.png" />
-            {error && <Alert variant="danger">{error}</Alert>}
+            {error && <Alert severity="error">{error}</Alert>}
             <Form onSubmit={handleSubmit}>
               <Form.Group
                 id="email"
@@ -164,7 +166,15 @@ export default function Login() {
               </Button>
             </Form>
             <div className="w-100 text-center mt-2">
-              <Link to="/forgot">Forgot Password?</Link>
+              {/* <Link to="/forgot">Forgot Password?</Link> */}
+              <Link
+                href=""
+                onClick={(e) => {
+                  e.preventDefault();
+                  history.push('/forgot');
+                }}>
+                Forgot Password?
+              </Link>
             </div>
           </Card.Body>
           <Card.Footer

@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
-import { Form, Button, Card, Alert } from 'react-bootstrap';
+// import { Button, Card, Alert } from 'react-bootstrap';
+import Container from '@material-ui/core/Container';
+import Button from '@material-ui/core/Button';
+import { Alert, AlertTitle } from '@material-ui/lab';
+import Card from '@material-ui/core/Card';
+import CardContent from '@material-ui/core/CardContent';
 import { useAuth } from '../contexts/AuthContext';
 import { useHistory } from 'react-router-dom';
 import { Redirect } from 'react-router';
@@ -52,28 +57,30 @@ export default function Verify() {
         <React.Fragment></React.Fragment>
       )}
 
-      <Card>
-        <Card.Body>
-          <h2 className="text-center mb-4">
-            Verify Your E-mail
-          </h2>
-          {error && <Alert variant="danger">{error}</Alert>}
-          {message && <Alert variant="success">{message}</Alert>}
-          <Form onSubmit={handleSubmit}>
-            <Button
-              disabled={loading || pressed}
-              className="w-100 mt-2 mb-4"
-              type="submit">
-              Send Email Verification
-            </Button>
-          </Form>
-          <h3 className="text-center mb-0">
-          Make sure to check your inbox <br></br>to verify your email.
-          </h3>
-        </Card.Body>
-      </Card>
+      <Container style={{ justifyContent: 'center', maxWidth: 700 }}>
+        <Card>
+          <CardContent>
+            <h2 className="text-center mb-4">Verify Your E-mail</h2>
+            {error && <Alert severity="error">{error}</Alert>}
+            {message && <Alert severity="success">{message}</Alert>}
+            <form onSubmit={handleSubmit}>
+              <Button
+                disabled={loading || pressed}
+                className="w-100 mt-2 mb-4"
+                variant="contained"
+                color="primary"
+                type="submit">
+                Send Email Verification
+              </Button>
+            </form>
+            <p className="text-center mb-0">
+              Make sure to check your inbox <br></br>to verify your email.
+            </p>
+          </CardContent>
+        </Card>
+      </Container>
       <div className="w-100 text-center mt-2">
-        <Button variant="link" onClick={handleLogout}>
+        <Button variant="contained" color="primary" onClick={handleLogout}>
           Log In
         </Button>
       </div>
