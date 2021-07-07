@@ -98,16 +98,17 @@ export default function Login() {
   }
  
   return (
-    <>
-     
-      //todo: outline div up top
 
+      <>
+      //Hunter you fool import fonts
+      
 
       <CardDeck style={{
           display: 'flex',
           flexflow: 'row wrap',
           alignItems: 'center',
-          marginTop: '10%' // remove me to add in the div up top
+          marginTop: '10%',
+         backgroundColor: '#DCEAFF'
          }}>
      
       <Card.Img variant="top" src="DimeAssets/coin.png" style={{
@@ -123,18 +124,26 @@ export default function Login() {
           marginRight: 'auto'
       }}>     
            <Card.Body>
-          <h2 className="text-center mb-4">Log In</h2>
+                  <h2 className="text-center mb-4" style={{
+                      color: '#E64398',
+                      fontWeight: 'bold'
+                  }}>Meet-A-Dime</h2>
           {error && <Alert variant="danger">{error}</Alert>}
           <Form onSubmit={handleSubmit}>
-            <Form.Group id="email">
-              <Form.Label>Email</Form.Label>
-              <Form.Control type="email" ref={emailRef} required />
+                      <Form.Group id="email" style={{
+                      marginBottom: '15px'}}>
+              <Form.Control placeholder="Email" type="email" ref={emailRef} required />
             </Form.Group>
-            <Form.Group id="password">
-              <Form.Label>Password</Form.Label>
-              <Form.Control type="password" ref={passwordRef} required />
+                      <Form.Group id="password" style={{
+                          marginBottom: '15px'
+                      }}>
+              <Form.Control placeholder="Password" type="password" ref={passwordRef} required />
             </Form.Group>
-            <Button disabled={loading} className="w-100 mt-2" type="submit">
+            <Button disabled={loading} className="w-100 mt-2" type="submit" style={{
+                          borderRadius: '15px',
+                          backgroundColor: '#E64398',
+                          fontWeight: 'bold'
+                      }}>
               Log In
             </Button>
           </Form>
@@ -142,8 +151,17 @@ export default function Login() {
             <Link to="/forgot">Forgot Password?</Link>
           </div>
            </Card.Body>
-           <Card.Footer style={{marginLeft: 'auto', marginRight: 'auto'}}>
-                  Need an account? <Link to="/signup">Sign Up</Link>
+           <Card.Footer style={{
+                  color: '#B39BC8'
+              }}>
+
+                  <Button disabled={loading} className="w-100 mt-2" href="/signup" style={{
+                      borderRadius: '15px',
+                      backgroundColor: '#E64398',
+                      fontWeight: 'bold'
+                  }}>
+                      Sign up
+            </Button>
            </Card.Footer>
       </Card>   
       
@@ -154,6 +172,7 @@ export default function Login() {
           marginRight: 'auto'
       }} />
       </CardDeck>
-          </>
+     
+    </>
   );
 }
