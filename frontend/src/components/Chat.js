@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Button, Alert, Container, Form } from 'react-bootstrap';
+import { Button, Alert, Container, Form, Modal } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
 import { useHistory, useLocation } from 'react-router-dom';
 import { io } from 'socket.io-client';
@@ -13,12 +13,13 @@ const firestore = firebase.firestore();
 
 export default function Chat() {
   const messageRef = useRef();
-  const EXPIRE_IN_MINUTES = 5;
+  const EXPIRE_IN_MINUTES = 0.1;
   const [room, setRoom] = useState('');
   //const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [socket, setSocket] = useState();
   const [afterChat, setAfterChat] = useState(false);
+  const [modalShow, setModalShow] = useState(false);
   // const [isHost, setHost] = useState('none');
   const { currentUser, logout } = useAuth();
 
@@ -70,6 +71,51 @@ export default function Chat() {
     }
   }
 
+  function noMatch() {
+    setTimeout(async () => {
+      await firestore
+        .collection('users')
+        .doc(currentUser.uid)
+        .update({
+          FailMatch: firebase.firestore.FieldValue.arrayUnion(match_id),
+        });
+      await firestore
+        .collection('users')
+        .doc(match_id)
+        .update({
+          FailMatch: firebase.firestore.FieldValue.arrayUnion(currentUser.uid),
+        });
+      socket.emit('leave-room', currentUser.uid, room);
+      history.push('/after', {
+        state: { match_id: match_id, type: 'match_abandoned' },
+      });
+    }, 0);
+  }
+
+  function MatchModal(props) {
+    return (
+      <Modal
+        {...props}
+        size="lg"
+        aria-labelledby="contained-modal-title-vcenter"
+        centered>
+        <Modal.Header closeButton>
+          <Modal.Title id="contained-modal-title-vcenter">
+            Meet A Dime
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <h4>You did the time! Do you want the Dime?</h4>
+          <p>Please select...</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button onClick={props.onHide}>Match</Button>
+          <Button onClick={noMatch}>No Match</Button>
+        </Modal.Footer>
+      </Modal>
+    );
+  }
+
   const id = currentUser.uid;
 
   // this effect only runs once.
@@ -94,56 +140,6 @@ export default function Chat() {
       console.log('set to', exp);
     }
 
-    function matchModal(props) {
-      return (
-        <Modal
-    {...props}
-    size="lg"
-    aria-labelledby="contained-modal-title-vcenter"
-    centered
-  >
-    <Modal.Header closeButton>
-      <Modal.Title id="contained-modal-title-vcenter">
-        Meet A Dime
-      </Modal.Title>
-    </Modal.Header>
-    <Modal.Body>
-      <h4>You did the time! Do you want the Dime?</h4>
-      <p>
-        Please select...
-      </p>
-    </Modal.Body>
-    <Modal.Footer>
-      <Button onClick={props.onHide}>Match</Button>
-      <Button onClick="noMatch()">No Match</Button>
-    </Modal.Footer>
-  </Modal>
-      );
-    }
-
-    function noMatch() {
-      setTimeout(async () => {
-        await firestore
-          .collection('users')
-          .doc(currentUser.uid)
-          .update({
-            FailMatch: firebase.firestore.FieldValue.arrayUnion(match_id),
-          });
-        await firestore
-          .collection('users')
-          .doc(match_id)
-          .update({
-            FailMatch: firebase.firestore.FieldValue.arrayUnion(
-              currentUser.uid
-            ),
-          });
-        socket.emit('leave-room', currentUser.uid, room);
-        history.push('/after', {
-          state: { match_id: match_id, type: 'match_abandoned' },
-        });
-      }, 0);
-    }
-
     var checkLoop = setInterval(() => {
       if (window.location.pathname !== '/chat') clearInterval(checkLoop);
       var current = Date.now();
@@ -151,10 +147,13 @@ export default function Chat() {
       if (current >= localStorage.getItem('chatExpiry')) {
         //console.log('ITS OVER');
         //Modal match or non-match
-        <matchModal
-        show={modalShow}
-        onHide={() => setModalShow(false)}
-      />
+        //   <matchModal
+        //   show={modalShow}
+        //   onHide={() => setModalShow(false)}
+        // />
+
+        setModalShow(true);
+
         clearInterval(checkLoop);
         setAfterChat(true);
       }
@@ -167,6 +166,7 @@ export default function Chat() {
       //Modal match or non-match
 
       clearInterval(checkLoop);
+      setModalShow(true);
       setAfterChat(true);
     }
 
@@ -195,7 +195,7 @@ export default function Chat() {
       if (user !== currentUser.uid) displayMessage(message, 'received');
       console.log(user);
     });
-    socket.on('abandoned', (message) => { 
+    socket.on('abandoned', (message) => {
       //match left & setting the pair as no match
       displayMessage('Your match left the chat. Switching..', 'system');
       setTimeout(async () => {
@@ -235,17 +235,19 @@ export default function Chat() {
 
   // Two modes added for some extra processing (like maybe classes or etc)
   function displayMessage(message, mode) {
-    var suffix = '';
-    if (mode === 'received') {
-      suffix = ' (them)';
-    } else if (mode == 'sent') {
-      suffix = ' (you)';
-    } else if (mode == 'system') {
-      suffix = ' [[sys msg, remove suffix later]]';
+    if (window.location.pathname == '/chat') {
+      var suffix = '';
+      if (mode === 'received') {
+        suffix = ' (them)';
+      } else if (mode == 'sent') {
+        suffix = ' (you)';
+      } else if (mode == 'system') {
+        suffix = ' [[sys msg, remove suffix later]]';
+      }
+      const div = document.createElement('div');
+      div.textContent = message + suffix;
+      document.getElementById('message-container').append(div);
     }
-    const div = document.createElement('div');
-    div.textContent = message + suffix;
-    document.getElementById('message-container').append(div);
   }
 
   async function handleLogout() {
@@ -280,12 +282,14 @@ export default function Chat() {
 
   function redirectToHome() {
     // socket.emit('leave-room', currentUser.uid, room);
+    socket.emit('leave-room', currentUser.uid, room);
     history.push('/');
     // window.location.reload(); CHANGED_NOW
   }
 
   async function redirectToAfter() {
     // user left & setting pair to no match
+    socket.emit('leave-room', currentUser.uid, room);
     await firestore
       .collection('users')
       .doc(currentUser.uid)
@@ -298,7 +302,7 @@ export default function Chat() {
       .update({
         FailMatch: firebase.firestore.FieldValue.arrayUnion(currentUser.uid),
       });
-    socket.emit('leave-room', currentUser.uid, room);
+
     history.push('/after', {
       state: { match_id: match_id, type: 'user_abandoned' },
     });
@@ -371,6 +375,7 @@ export default function Chat() {
           Log Out
         </Button>
       </div>
+      <MatchModal show={modalShow} onHide={() => setModalShow(false)} />
     </React.Fragment>
   );
 }
