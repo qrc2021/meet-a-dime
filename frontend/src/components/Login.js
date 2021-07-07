@@ -1,10 +1,12 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Card, Form, Button, Alert } from 'react-bootstrap';
+//import { View, Text, ScrollView, TextInput } from 'react-native';
+import { Card, Form, Button, Alert, Image, CardDeck} from 'react-bootstrap';
 import { Link, useHistory } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
+
 export default function Login() {
   const emailRef = useRef();
   const passwordRef = useRef();
@@ -94,11 +96,33 @@ export default function Login() {
 
     setLoading(false);
   }
-
+ 
   return (
     <>
-      <Card>
-        <Card.Body>
+     
+      //todo: outline div up top
+
+
+      <CardDeck style={{
+          display: 'flex',
+          flexflow: 'row wrap',
+          alignItems: 'center',
+          marginTop: '10%' // remove me to add in the div up top
+         }}>
+     
+      <Card.Img variant="top" src="DimeAssets/coin.png" style={{
+          width: '200px',
+          height: '200px',   
+          marginLeft: 'auto'
+      }} />
+
+          
+      <Card varient="top" style={{
+          minWidth: '300px',
+          marginLeft: 'auto',
+          marginRight: 'auto'
+      }}>     
+           <Card.Body>
           <h2 className="text-center mb-4">Log In</h2>
           {error && <Alert variant="danger">{error}</Alert>}
           <Form onSubmit={handleSubmit}>
@@ -117,11 +141,19 @@ export default function Login() {
           <div className="w-100 text-center mt-2">
             <Link to="/forgot">Forgot Password?</Link>
           </div>
-        </Card.Body>
-      </Card>
-      <div className="w-100 text-center mt-2">
-        Need an account? <Link to="/signup">Sign Up</Link>
-      </div>
-    </>
+           </Card.Body>
+           <Card.Footer style={{marginLeft: 'auto', marginRight: 'auto'}}>
+                  Need an account? <Link to="/signup">Sign Up</Link>
+           </Card.Footer>
+      </Card>   
+      
+                 
+      <Card.Img variant="top" src="DimeAssets/coin2.png" style={{
+          width: '200px',
+          height: '200px',
+          marginRight: 'auto'
+      }} />
+      </CardDeck>
+          </>
   );
 }
