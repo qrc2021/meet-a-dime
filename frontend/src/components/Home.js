@@ -29,7 +29,7 @@ export default function Home() {
   const [match, setMatch] = useState('Not searching.');
   const [id_of_match, setId] = useState('none');
   // Search timeout in milliseconds
-  const MS_BEFORE_ABANDON_SEARCH = 15000;
+  const MS_BEFORE_ABANDON_SEARCH = 4000;
   // Before match expires. they are separate just incase.
   const MS_BEFORE_ABANDON_MATCH_DOCJOIN = 10000;
   const MS_BEFORE_ABANDON_MATCH_DOCHOST = 10000;

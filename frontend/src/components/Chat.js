@@ -13,7 +13,7 @@ const firestore = firebase.firestore();
 
 export default function Chat() {
   const messageRef = useRef();
-  const EXPIRE_IN_MINUTES = 0.2;
+  const EXPIRE_IN_MINUTES = 5;
   const [room, setRoom] = useState('');
   //const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -133,62 +133,20 @@ export default function Chat() {
 
     setSocket(socket);
     // Wait for incoming private messages.
-    socket.on('message', (message, user) =>
-      displayMessage(message, 'received')
-    );
+    socket.on('message', (message, user) => {
+      if (user !== currentUser.uid) displayMessage(message, 'received');
+      console.log(user);
+    });
     socket.on('abandoned', (message) => {
       displayMessage('Your match left the chat. Switching..', 'system');
       setTimeout(() => {
-        socket.emit('leave-room', currentUser.uid, room, function (message) {
-          if (message == 'left') {
-            history.push('/after', {
-              state: { match_id: match_id, type: 'match_abandoned' },
-            });
-          }
+        socket.emit('leave-room', currentUser.uid, room);
+        history.push('/after', {
+          state: { match_id: match_id, type: 'match_abandoned' },
         });
       }, 0);
     });
   }, []);
-
-  // // This counts refreshes too.. no good.
-
-  // // // // When users close the tab.
-  // window.onbeforeunload = (event) => {
-  //   socket.emit('leave-room', currentUser.uid, room);
-  //   event.preventDefault();
-  //   event.returnValue = '';
-  //   return 'tried to leave';
-  // };
-
-  // window.addEventListener('unload', function (e) {
-  //   // Cancel the event
-  //   e.preventDefault(); // If you prevent default behavior in Mozilla Firefox prompt will always be shown
-  //   // Chrome requires returnValue to be set
-  //   e.returnValue = '';
-  //   socket.emit('leave-room', currentUser.uid, room);
-  // });
-
-  // window.onunload = (event) => {
-
-  //   event.preventDefault();
-  //   event.returnValue = '';
-
-  //   return 'left';
-  // };
-
-  // // // when user presses back
-  // // window.onpopstate = () => {
-  // //   if (socket !== undefined && socket !== null)
-  // //     socket.emit('leave-room', currentUser.uid, room);
-  // // };
-
-  // window.addEventListener('beforeunload', function (e) {
-  //   // Cancel the event
-  //   e.preventDefault(); // If you prevent default behavior in Mozilla Firefox prompt will always be shown
-  //   // Chrome requires returnValue to be set
-  //   e.returnValue = '';
-
-  // });
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -221,19 +179,11 @@ export default function Chat() {
     try {
       // Push the state to login that we need to purge the old user searches.
 
-      socket.emit(
-        'leave-room',
-        currentUser.uid,
-        room,
-        async function (message) {
-          if (message == 'left') {
-            await logout();
-            history.push('/login', {
-              state: { fromHome: true, oldID: currentUser.uid },
-            });
-          }
-        }
-      );
+      socket.emit('leave-room', currentUser.uid, room);
+      await logout();
+      history.push('/login', {
+        state: { fromHome: true, oldID: currentUser.uid },
+      });
       localStorage.removeItem('user_data');
 
       // window.location.reload();
@@ -253,12 +203,9 @@ export default function Chat() {
     // history.push('/after', {
     //   state: { match_id: match_id, type: 'user_abandoned' },
     // });
-    socket.emit('leave-room', currentUser.uid, room, function (message) {
-      if (message == 'left') {
-        history.push('/after', {
-          state: { match_id: match_id, type: 'user_abandoned' },
-        });
-      }
+    socket.emit('leave-room', currentUser.uid, room);
+    history.push('/after', {
+      state: { match_id: match_id, type: 'user_abandoned' },
     });
   }
 
