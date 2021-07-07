@@ -94,20 +94,78 @@ export default function Chat() {
       console.log('set to', exp);
     }
 
+    function matchModal(props) {
+      return (
+        <Modal
+    {...props}
+    size="lg"
+    aria-labelledby="contained-modal-title-vcenter"
+    centered
+  >
+    <Modal.Header closeButton>
+      <Modal.Title id="contained-modal-title-vcenter">
+        Meet A Dime
+      </Modal.Title>
+    </Modal.Header>
+    <Modal.Body>
+      <h4>You did the time! Do you want the Dime?</h4>
+      <p>
+        Please select...
+      </p>
+    </Modal.Body>
+    <Modal.Footer>
+      <Button onClick={props.onHide}>Match</Button>
+      <Button onClick="noMatch()">No Match</Button>
+    </Modal.Footer>
+  </Modal>
+      );
+    }
+
+    function noMatch() {
+      setTimeout(async () => {
+        await firestore
+          .collection('users')
+          .doc(currentUser.uid)
+          .update({
+            FailMatch: firebase.firestore.FieldValue.arrayUnion(match_id),
+          });
+        await firestore
+          .collection('users')
+          .doc(match_id)
+          .update({
+            FailMatch: firebase.firestore.FieldValue.arrayUnion(
+              currentUser.uid
+            ),
+          });
+        socket.emit('leave-room', currentUser.uid, room);
+        history.push('/after', {
+          state: { match_id: match_id, type: 'match_abandoned' },
+        });
+      }, 0);
+    }
+
     var checkLoop = setInterval(() => {
       if (window.location.pathname !== '/chat') clearInterval(checkLoop);
       var current = Date.now();
       console.log('checking..');
       if (current >= localStorage.getItem('chatExpiry')) {
-        console.log('ITS OVER');
+        //console.log('ITS OVER');
+        //Modal match or non-match
+        <matchModal
+        show={modalShow}
+        onHide={() => setModalShow(false)}
+      />
         clearInterval(checkLoop);
         setAfterChat(true);
       }
     }, 2000);
+
     var current_time = Date.now();
     console.log('checking..');
     if (current_time >= localStorage.getItem('chatExpiry')) {
-      console.log('ITS OVER');
+      //console.log('ITS OVER');
+      //Modal match or non-match
+
       clearInterval(checkLoop);
       setAfterChat(true);
     }
@@ -137,7 +195,8 @@ export default function Chat() {
       if (user !== currentUser.uid) displayMessage(message, 'received');
       console.log(user);
     });
-    socket.on('abandoned', (message) => {
+    socket.on('abandoned', (message) => { 
+      //match left & setting the pair as no match
       displayMessage('Your match left the chat. Switching..', 'system');
       setTimeout(async () => {
         await firestore
@@ -226,6 +285,7 @@ export default function Chat() {
   }
 
   async function redirectToAfter() {
+    // user left & setting pair to no match
     await firestore
       .collection('users')
       .doc(currentUser.uid)
