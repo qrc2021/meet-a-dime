@@ -100,34 +100,33 @@ export default function Login() {
   return (
 
       <>
-      //Hunter you fool import fonts
+      
       
 
       <CardDeck style={{
           display: 'flex',
           flexflow: 'row wrap',
           alignItems: 'center',
-          marginTop: '10%',
          backgroundColor: '#DCEAFF'
-         }}>
-     
-      <Card.Img variant="top" src="DimeAssets/coin.png" style={{
-          width: '200px',
-          height: '200px',   
+         }}>    
+    
+    
+
+      <Card.Img variant="top" src="DimeAssets/homelogo.png" style={{
+          width: '900px',
+          height: '900px',
+          marginRight: 'auto',
           marginLeft: 'auto'
       }} />
 
-          
       <Card varient="top" style={{
           minWidth: '300px',
-          marginLeft: 'auto',
-          marginRight: 'auto'
+          marginRight: 'auto',
+          maxWidth: '400px'
+          
       }}>     
-           <Card.Body>
-                  <h2 className="text-center mb-4" style={{
-                      color: '#E64398',
-                      fontWeight: 'bold'
-                  }}>Meet-A-Dime</h2>
+              <Card.Body>
+                  <Card.Img variant="top" src="DimeAssets/headerlogo.png"/>
           {error && <Alert variant="danger">{error}</Alert>}
           <Form onSubmit={handleSubmit}>
                       <Form.Group id="email" style={{
@@ -157,20 +156,14 @@ export default function Login() {
 
                   <Button disabled={loading} className="w-100 mt-2" href="/signup" style={{
                       borderRadius: '15px',
-                      backgroundColor: '#E64398',
+                      backgroundColor: '#B39BC8',
                       fontWeight: 'bold'
                   }}>
                       Sign up
             </Button>
            </Card.Footer>
-      </Card>   
+      </Card>              
       
-                 
-      <Card.Img variant="top" src="DimeAssets/coin2.png" style={{
-          width: '200px',
-          height: '200px',
-          marginRight: 'auto'
-      }} />
       </CardDeck>
      
     </>
