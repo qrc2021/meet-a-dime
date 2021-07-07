@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 //import { View, Text, ScrollView, TextInput } from 'react-native';
-import { Card, Form, Button, Alert, Image, CardDeck} from 'react-bootstrap';
+import { Card, Form, Button, Alert, Image, CardDeck } from 'react-bootstrap';
 import { Link, useHistory } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import firebase from 'firebase/app';
@@ -93,79 +93,98 @@ export default function Login() {
     } catch (error) {
       setError('Failed to login: ' + error.message);
     }
-
-    setLoading(false);
+    if (window.location.pathname === '/login') setLoading(false);
   }
- 
+
   return (
-
-      <>
-      
-      
-
-      <CardDeck style={{
+    <>
+      <CardDeck
+        style={{
           display: 'flex',
           flexflow: 'row wrap',
           alignItems: 'center',
-         backgroundColor: '#DCEAFF'
-         }}>    
-    
-    
+          backgroundColor: '#DCEAFF',
+        }}>
+        <Card.Img
+          variant="top"
+          src="DimeAssets/homelogo.png"
+          style={{
+            width: '900px',
+            height: '900px',
+            marginRight: 'auto',
+            marginLeft: 'auto',
+          }}
+        />
 
-      <Card.Img variant="top" src="DimeAssets/homelogo.png" style={{
-          width: '900px',
-          height: '900px',
-          marginRight: 'auto',
-          marginLeft: 'auto'
-      }} />
-
-      <Card varient="top" style={{
-          minWidth: '300px',
-          marginRight: 'auto',
-          maxWidth: '400px'
-          
-      }}>     
-              <Card.Body>
-                  <Card.Img variant="top" src="DimeAssets/headerlogo.png"/>
-          {error && <Alert variant="danger">{error}</Alert>}
-          <Form onSubmit={handleSubmit}>
-                      <Form.Group id="email" style={{
-                      marginBottom: '15px'}}>
-              <Form.Control placeholder="Email" type="email" ref={emailRef} required />
-            </Form.Group>
-                      <Form.Group id="password" style={{
-                          marginBottom: '15px'
-                      }}>
-              <Form.Control placeholder="Password" type="password" ref={passwordRef} required />
-            </Form.Group>
-            <Button disabled={loading} className="w-100 mt-2" type="submit" style={{
-                          borderRadius: '15px',
-                          backgroundColor: '#E64398',
-                          fontWeight: 'bold'
-                      }}>
-              Log In
-            </Button>
-          </Form>
-          <div className="w-100 text-center mt-2">
-            <Link to="/forgot">Forgot Password?</Link>
-          </div>
-           </Card.Body>
-           <Card.Footer style={{
-                  color: '#B39BC8'
+        <Card
+          varient="top"
+          style={{
+            minWidth: '300px',
+            marginRight: 'auto',
+            maxWidth: '400px',
+          }}>
+          <Card.Body>
+            <Card.Img variant="top" src="DimeAssets/headerlogo.png" />
+            {error && <Alert variant="danger">{error}</Alert>}
+            <Form onSubmit={handleSubmit}>
+              <Form.Group
+                id="email"
+                style={{
+                  marginBottom: '15px',
+                }}>
+                <Form.Control
+                  placeholder="Email"
+                  type="email"
+                  ref={emailRef}
+                  required
+                />
+              </Form.Group>
+              <Form.Group
+                id="password"
+                style={{
+                  marginBottom: '15px',
+                }}>
+                <Form.Control
+                  placeholder="Password"
+                  type="password"
+                  ref={passwordRef}
+                  required
+                />
+              </Form.Group>
+              <Button
+                disabled={loading}
+                className="w-100 mt-2"
+                type="submit"
+                style={{
+                  borderRadius: '15px',
+                  backgroundColor: '#E64398',
+                  fontWeight: 'bold',
+                }}>
+                Log In
+              </Button>
+            </Form>
+            <div className="w-100 text-center mt-2">
+              <Link to="/forgot">Forgot Password?</Link>
+            </div>
+          </Card.Body>
+          <Card.Footer
+            style={{
+              color: '#B39BC8',
+            }}>
+            <Button
+              disabled={loading}
+              className="w-100 mt-2"
+              href="/signup"
+              style={{
+                borderRadius: '15px',
+                backgroundColor: '#B39BC8',
+                fontWeight: 'bold',
               }}>
-
-                  <Button disabled={loading} className="w-100 mt-2" href="/signup" style={{
-                      borderRadius: '15px',
-                      backgroundColor: '#B39BC8',
-                      fontWeight: 'bold'
-                  }}>
-                      Sign up
+              Sign up
             </Button>
-           </Card.Footer>
-      </Card>              
-      
+          </Card.Footer>
+        </Card>
       </CardDeck>
-     
     </>
   );
 }

@@ -141,7 +141,10 @@ export default function Chat() {
     }
 
     var checkLoop = setInterval(() => {
-      if (window.location.pathname !== '/chat') clearInterval(checkLoop);
+      if (window.location.pathname !== '/chat') {
+        clearInterval(checkLoop);
+        return;
+      }
       var current = Date.now();
       console.log('checking..');
       if (current >= localStorage.getItem('chatExpiry')) {

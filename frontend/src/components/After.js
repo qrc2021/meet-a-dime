@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Button, Alert, Container, Form } from 'react-bootstrap';
+// import { Button, Alert, Container, Form } from 'react-bootstrap';
+import { Alert, AlertTitle } from '@material-ui/lab';
+import Container from '@material-ui/core/Container';
+import Button from '@material-ui/core/Button';
 import { useAuth } from '../contexts/AuthContext';
 import { useHistory, useLocation } from 'react-router-dom';
 import { io } from 'socket.io-client';
@@ -103,12 +106,12 @@ export default function After() {
     <React.Fragment>
       <h2 className="text-center mb-4">After Chat</h2>
 
-      {error && <Alert variant="danger">{error}</Alert>}
+      {error && <Alert severity="error">{error}</Alert>}
       {pageType && pageType == 'match_abandoned' && (
-        <Alert variant="info">{'Your match left.'}</Alert>
+        <Alert severity="info">{'Your match left.'}</Alert>
       )}
       {pageType && pageType == 'user_abandoned' && (
-        <Alert variant="info">{"Sorry it didn't go well :("}</Alert>
+        <Alert severity="info">{"Sorry it didn't go well :("}</Alert>
       )}
       <Container>
         <strong>Email:</strong> {currentUser.email}
@@ -136,7 +139,9 @@ export default function After() {
         )}
         <hr></hr>
       </Container>
-      <Button onClick={redirectToHome}>Home</Button>
+      <Button variant="contained" color="primary" onClick={redirectToHome}>
+        Home
+      </Button>
     </React.Fragment>
   );
 }
