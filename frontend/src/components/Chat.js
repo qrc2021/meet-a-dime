@@ -13,10 +13,12 @@ const firestore = firebase.firestore();
 
 export default function Chat() {
   const messageRef = useRef();
+  const EXPIRE_IN_MINUTES = 0.2;
   const [room, setRoom] = useState('');
   //const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [socket, setSocket] = useState();
+  const [afterChat, setAfterChat] = useState(false);
   // const [isHost, setHost] = useState('none');
   const { currentUser, logout } = useAuth();
 
@@ -28,9 +30,12 @@ export default function Chat() {
   const location = useLocation();
   // Gets the passed in match id from the link in the home page
   // timeout_5 is passed in from the home link. it prevents removing the match document in the background.
-  const { match_id, timeout_5 } = location.state;
 
   const history = useHistory();
+
+  if (location.state === undefined) window.location.href = '/';
+
+  const { match_id, timeout_5 } = location.state;
 
   const joinRoomButton = document.getElementById('room-button');
   const messageInput = document.getElementById('message_input');
@@ -83,6 +88,30 @@ export default function Chat() {
       );
     });
 
+    if (localStorage.getItem('chatExpiry') === null) {
+      var exp = Date.now() + EXPIRE_IN_MINUTES * 60000;
+      localStorage.setItem('chatExpiry', exp);
+      console.log('set to', exp);
+    }
+
+    var checkLoop = setInterval(() => {
+      if (window.location.pathname !== '/chat') clearInterval(checkLoop);
+      var current = Date.now();
+      console.log('checking..');
+      if (current >= localStorage.getItem('chatExpiry')) {
+        console.log('ITS OVER');
+        clearInterval(checkLoop);
+        setAfterChat(true);
+      }
+    }, 2000);
+    var current_time = Date.now();
+    console.log('checking..');
+    if (current_time >= localStorage.getItem('chatExpiry')) {
+      console.log('ITS OVER');
+      clearInterval(checkLoop);
+      setAfterChat(true);
+    }
+
     // This is new!
     // We get both ids, and sort them alphabetically.
     // The concatenated string is the unique room id!
@@ -107,7 +136,59 @@ export default function Chat() {
     socket.on('message', (message, user) =>
       displayMessage(message, 'received')
     );
+    socket.on('abandoned', (message) => {
+      displayMessage('Your match left the chat. Switching..', 'system');
+      setTimeout(() => {
+        socket.emit('leave-room', currentUser.uid, room, function (message) {
+          if (message == 'left') {
+            history.push('/after', {
+              state: { match_id: match_id, type: 'match_abandoned' },
+            });
+          }
+        });
+      }, 0);
+    });
   }, []);
+
+  // // This counts refreshes too.. no good.
+
+  // // // // When users close the tab.
+  // window.onbeforeunload = (event) => {
+  //   socket.emit('leave-room', currentUser.uid, room);
+  //   event.preventDefault();
+  //   event.returnValue = '';
+  //   return 'tried to leave';
+  // };
+
+  // window.addEventListener('unload', function (e) {
+  //   // Cancel the event
+  //   e.preventDefault(); // If you prevent default behavior in Mozilla Firefox prompt will always be shown
+  //   // Chrome requires returnValue to be set
+  //   e.returnValue = '';
+  //   socket.emit('leave-room', currentUser.uid, room);
+  // });
+
+  // window.onunload = (event) => {
+
+  //   event.preventDefault();
+  //   event.returnValue = '';
+
+  //   return 'left';
+  // };
+
+  // // // when user presses back
+  // // window.onpopstate = () => {
+  // //   if (socket !== undefined && socket !== null)
+  // //     socket.emit('leave-room', currentUser.uid, room);
+  // // };
+
+  // window.addEventListener('beforeunload', function (e) {
+  //   // Cancel the event
+  //   e.preventDefault(); // If you prevent default behavior in Mozilla Firefox prompt will always be shown
+  //   // Chrome requires returnValue to be set
+  //   e.returnValue = '';
+
+  // });
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -139,20 +220,46 @@ export default function Chat() {
   async function handleLogout() {
     try {
       // Push the state to login that we need to purge the old user searches.
-      await logout();
+
+      socket.emit(
+        'leave-room',
+        currentUser.uid,
+        room,
+        async function (message) {
+          if (message == 'left') {
+            await logout();
+            history.push('/login', {
+              state: { fromHome: true, oldID: currentUser.uid },
+            });
+          }
+        }
+      );
       localStorage.removeItem('user_data');
-      history.push('/login', {
-        state: { fromHome: true, oldID: currentUser.uid },
-      });
-      window.location.reload();
+
+      // window.location.reload();
     } catch {
       setError('Failed to log out');
     }
   }
 
   function redirectToHome() {
+    // socket.emit('leave-room', currentUser.uid, room);
     history.push('/');
-    window.location.reload();
+    // window.location.reload(); CHANGED_NOW
+  }
+
+  function redirectToAfter() {
+    // socket.emit('leave-room', currentUser.uid, room);
+    // history.push('/after', {
+    //   state: { match_id: match_id, type: 'user_abandoned' },
+    // });
+    socket.emit('leave-room', currentUser.uid, room, function (message) {
+      if (message == 'left') {
+        history.push('/after', {
+          state: { match_id: match_id, type: 'user_abandoned' },
+        });
+      }
+    });
   }
 
   return (
@@ -189,26 +296,34 @@ export default function Chat() {
         )}
         <hr></hr>
       </Container>
-      <Container>
-        <div id="message-container"></div>
-        <Form onSubmit={handleSubmit}>
+      <React.Fragment>
+        <Container>
+          <div id="message-container"></div>
           <hr></hr>
-          <Form.Label>Message</Form.Label>
-          <Form.Control
-            type="text"
-            id="message_input"
-            ref={messageRef}></Form.Control>
-          <Button
-            disabled={room === '' ? true : false}
-            type="submit"
-            id="send-button">
-            Send
-          </Button>
-          <br></br>
-          <h3>Our room id: {room}</h3>
-        </Form>
-      </Container>
-      <Button onClick={redirectToHome}>Home</Button>
+          {!afterChat && (
+            <Form onSubmit={handleSubmit}>
+              <Form.Label>Message</Form.Label>
+              <Form.Control
+                type="text"
+                id="message_input"
+                ref={messageRef}></Form.Control>
+              <Button
+                disabled={room === '' || afterChat ? true : false}
+                type="submit"
+                id="send-button">
+                Send
+              </Button>
+              <br></br>
+              <h3>Our room id: {room}</h3>
+            </Form>
+          )}
+        </Container>
+        <Button
+          className="btn btn-danger"
+          onClick={!afterChat ? redirectToAfter : redirectToHome}>
+          {!afterChat ? 'Abandon Chat' : 'Go Home'}
+        </Button>
+      </React.Fragment>
       <div className="w-100 text-center mt-2">
         <Button variant="link" onClick={handleLogout}>
           Log Out

@@ -12,6 +12,8 @@ import moment from 'moment';
 var bp = require('../Path.js');
 
 export default function Home() {
+  // Prevent some prompt issues.
+
   // error corresponds to a bootstrap alert that will display err messages.
   const [error, setError] = useState('');
   // when lockout is true, the search button is disabled. this is for
@@ -37,10 +39,10 @@ export default function Home() {
   var observer = null;
   // The history is for redirects.
   const history = useHistory();
-  var timeout1 = null;
-  var timeout2 = null;
-  var timeout3 = null;
-  var timeout4 = null;
+  // var timeout1 = null;
+  // var timeout2 = null;
+  // var timeout3 = null;
+  // var timeout4 = null;
   var timeout5 = null;
 
   // Basic user info for their preferences. Will be referenced in search.
@@ -63,10 +65,25 @@ export default function Home() {
   // The matching algorithm/mechanism is described after the useEffect, in
   // the search function.
   useEffect(() => {
+    localStorage.removeItem('chatExpiry');
+
     async function getIntialUserPhoto() {
-      await fetchData();
+      try {
+        var config = {
+          method: 'post',
+          url: bp.buildPath('api/getbasicuser'),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          data: { uid: currentUser.uid },
+        };
+        var response = await axios(config);
+      } catch (error) {
+        console.log(error);
+        console.log('issue in fetch data');
+      }
       // document.getElementById('photo').src = userInfo.photo;
-      setMyPhoto(userInfo.photo);
+      setMyPhoto(response.data.photo);
     }
 
     async function purgeOld() {
@@ -124,10 +141,10 @@ export default function Home() {
     purgeOld();
     getIntialUserPhoto();
     return () => {
-      clearTimeout(timeout1);
-      clearTimeout(timeout2);
-      clearTimeout(timeout3);
-      clearTimeout(timeout4);
+      // clearTimeout(timeout1);
+      // clearTimeout(timeout2);
+      // clearTimeout(timeout3);
+      // clearTimeout(timeout4);
       clearTimeout(timeout5);
       if (observer != null) observer();
       else console.log("no observer, couldn't call");
@@ -183,7 +200,7 @@ export default function Home() {
         state: { fromHome: true, oldID: currentUser.uid },
       });
       // Sort of a workaround incase user logs back in quickly.
-      window.location.reload();
+      // window.location.reload();
     } catch {
       setError('Failed to log out');
     }
@@ -191,14 +208,14 @@ export default function Home() {
 
   // Used for the profile button in the JSX.
   function redirectToProfile() {
-    history.push('/Profile');
+    history.push('/profile');
   }
 
   function clearAllTimeouts() {
-    clearTimeout(timeout1);
-    clearTimeout(timeout2);
-    clearTimeout(timeout3);
-    clearTimeout(timeout4);
+    // clearTimeout(timeout1);
+    // clearTimeout(timeout2);
+    // clearTimeout(timeout3);
+    // clearTimeout(timeout4);
     clearTimeout(timeout5);
     console.log('tried to clear timeouts in home. this probably didnt work.');
   }
@@ -348,23 +365,23 @@ export default function Home() {
             clearAllTimeouts();
             matchInternal = doc.id;
             // Abandon match after certain time.
-            timeout1 = setTimeout(() => {
-              if (window.location.pathname == '/') {
-                setError('⚠️ Match abandoning in 3 seconds!');
-                console.log('match abandoning message printed');
-              } else {
-                console.log('timeout 1 ran in home.js, but ignored.');
-              }
-            }, MS_BEFORE_ABANDON_MATCH_DOCJOIN - 3000);
-            timeout2 = setTimeout(() => {
-              if (window.location.pathname == '/') {
-                if (observer !== null) observer();
-                window.location.reload();
-                console.log('page reloaded');
-              } else {
-                console.log('timeout 2 ran in home.js, but ignored.');
-              }
-            }, MS_BEFORE_ABANDON_MATCH_DOCJOIN);
+            // timeout1 = setTimeout(() => {
+            //   if (window.location.pathname == '/') {
+            //     setError('⚠️ Match abandoning in 3 seconds!');
+            //     console.log('match abandoning message printed');
+            //   } else {
+            //     console.log('timeout 1 ran in home.js, but ignored.');
+            //   }
+            // }, MS_BEFORE_ABANDON_MATCH_DOCJOIN - 3000);
+            // timeout2 = setTimeout(() => {
+            //   if (window.location.pathname == '/') {
+            //     if (observer !== null) observer();
+            //     window.location.reload();
+            //     console.log('page reloaded');
+            //   } else {
+            //     console.log('timeout 2 ran in home.js, but ignored.');
+            //   }
+            // }, MS_BEFORE_ABANDON_MATCH_DOCJOIN);
           } catch (error) {
             console.log('324');
           }
@@ -460,24 +477,24 @@ export default function Home() {
               // clearTimeout(timeOut);
               clearAllTimeouts();
               // Abandon match after a certain time.
-              timeout3 = setTimeout(() => {
-                if (window.location.pathname == '/') {
-                  setError('⚠️ Match abandoning in 3 seconds!');
-                  console.log('match abandoning message printed');
-                } else {
-                  console.log('timeout 3 ran in home.js, but ignored.');
-                }
-              }, MS_BEFORE_ABANDON_MATCH_DOCHOST - 3000);
+              // timeout3 = setTimeout(() => {
+              //   if (window.location.pathname == '/') {
+              //     setError('⚠️ Match abandoning in 3 seconds!');
+              //     console.log('match abandoning message printed');
+              //   } else {
+              //     console.log('timeout 3 ran in home.js, but ignored.');
+              //   }
+              // }, MS_BEFORE_ABANDON_MATCH_DOCHOST - 3000);
 
-              timeout4 = setTimeout(() => {
-                if (window.location.pathname == '/') {
-                  if (observer !== null) observer();
-                  window.location.reload();
-                  console.log('page reloaded');
-                } else {
-                  console.log('timeout 4 ran in home.js, but ignored.');
-                }
-              }, MS_BEFORE_ABANDON_MATCH_DOCHOST);
+              // timeout4 = setTimeout(() => {
+              //   if (window.location.pathname == '/') {
+              //     if (observer !== null) observer();
+              //     window.location.reload();
+              //     console.log('page reloaded');
+              //   } else {
+              //     console.log('timeout 4 ran in home.js, but ignored.');
+              //   }
+              // }, MS_BEFORE_ABANDON_MATCH_DOCHOST);
               // observer();dont kill observer because we could lose the match.
             } else if (
               docSnapshot &&
@@ -593,7 +610,7 @@ export default function Home() {
       </div>
       <Link
         to={{
-          pathname: id_of_match === 'none' ? '/' : '/Chat',
+          pathname: id_of_match === 'none' ? '/' : '/chat',
           state: {
             match_id: id_of_match,
             observer: observer,

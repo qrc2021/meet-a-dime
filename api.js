@@ -78,7 +78,7 @@ exports.setApp = function (app, admin) {
 
   app.post("/api/getbasicuser", async (req, res) => {
     var obj = ({ uid: uid } = req.body);
-    console.log("fetched user details for " + uid);
+    console.log("fetched basic user details for " + uid);
     var err = "";
     var response = "";
     var responseObj = {};

@@ -75,6 +75,13 @@ io.on("connection", (socket) => {
     socket.join(room);
     callback("joined");
   });
+
+  socket.on("leave-room", (user, room, callback) => {
+    console.log("> User", user, "left room", room);
+    socket.leave(room);
+    socket.to(room).emit("abandoned", "Your match left the session.");
+    callback("left");
+  });
   // Send a message to a particular room.
   socket.on("send-to-room", (user, room, message) => {
     socket.to(room).emit("message", message, user);
