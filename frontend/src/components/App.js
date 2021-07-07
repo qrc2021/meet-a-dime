@@ -13,6 +13,7 @@ import Verify from './Verify';
 import Chat from './Chat';
 import NoContent from './NoContent';
 import After from './After';
+import UpdateProfile from "./UpdateProfile";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Switch>
           <PrivateRoute exact path="/" component={Home} />
           <PrivateRoute exact path="/profile" component={Profile} />
+          <PrivateRoute path="/update-profile" component={UpdateProfile} />
           <PrivateRoute exact path="/chat" component={Chat} />
           <PrivateRoute exact path="/after" component={After} />
           <Route exact path="/verify" component={Verify} />
