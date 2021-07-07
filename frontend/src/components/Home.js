@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button, Alert, Container } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
 import { useHistory } from 'react-router-dom';
@@ -12,6 +12,7 @@ import moment from 'moment';
 var bp = require('../Path.js');
 
 export default function Home() {
+  const observer = useRef(null);
   // Prevent some prompt issues.
 
   // error corresponds to a bootstrap alert that will display err messages.
@@ -29,14 +30,14 @@ export default function Home() {
   const [match, setMatch] = useState('Not searching.');
   const [id_of_match, setId] = useState('none');
   // Search timeout in milliseconds
-  const MS_BEFORE_ABANDON_SEARCH = 30000;
+  const MS_BEFORE_ABANDON_SEARCH = 10000;
   // Before match expires. they are separate just incase.
   const MS_BEFORE_ABANDON_MATCH_DOCJOIN = 10000;
   const MS_BEFORE_ABANDON_MATCH_DOCHOST = 10000;
   // The observer will eventually be a function that listens for changes
   // to the database. to prevent resource leaks, we can call observer()
   // to stop listening ('unsubscribe' to changes)
-  var observer = null;
+  // var observer = null;
   // The history is for redirects.
   const history = useHistory();
   // var timeout1 = null;
@@ -141,13 +142,13 @@ export default function Home() {
     purgeOld();
     getIntialUserPhoto();
     return () => {
-      // clearTimeout(timeout1);
-      // clearTimeout(timeout2);
-      // clearTimeout(timeout3);
-      // clearTimeout(timeout4);
       clearTimeout(timeout5);
-      if (observer != null) observer();
-      else console.log("no observer, couldn't call");
+      console.log('LEAVING!');
+      if (observer.current !== null) {
+        observer.current();
+      } else {
+        console.log('could not clear observer');
+      }
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -190,7 +191,6 @@ export default function Home() {
   // When the user logs out, call the observer to unsubscribe to changes.
   // and logout.
   async function handleLogout() {
-    if (observer !== null) observer();
     try {
       // Push the state to login that we need to purge the old user searches.
 
@@ -212,10 +212,6 @@ export default function Home() {
   }
 
   function clearAllTimeouts() {
-    // clearTimeout(timeout1);
-    // clearTimeout(timeout2);
-    // clearTimeout(timeout3);
-    // clearTimeout(timeout4);
     clearTimeout(timeout5);
     console.log('tried to clear timeouts in home. this probably didnt work.');
   }
@@ -263,22 +259,6 @@ export default function Home() {
   async function searching() {
     // State for match is now searching.
     setMatch('Searching.');
-
-    // I removed this because this appears not to ever get called.
-    // It looks like the only person to "wait" are doc creators.
-    // If a doc filler finds a match, its instant. But the doc host
-    // can be sitting around waiting. So this can happen in the
-    // snapshot section instead.
-    // // The search timeout begins. The search will expire assuming
-    // // there was no match found (states are reset to default basically).
-    // var timeOut = setTimeout(() => {
-    //   console.log('TIMEOUT ONE');
-    //   if (id_of_match === 'none') {
-    //     setMatch('Not searching.');
-    //     if (observer !== null) observer();
-    //     setLockout(false);
-    //   }
-    // }, MS_BEFORE_ABANDON_SEARCH);
 
     // Is there user preferences in the local storage?
     // If not, query the API and get the new data.
@@ -387,7 +367,7 @@ export default function Home() {
         console.log('yes, but lets listen for changes');
         // This works only to see if fields changed, not if doc deleted.
         // The workaround is: before deleting, set the match to "" first.
-        observer = firestore
+        observer.current = firestore
           .collection('searching')
           .where(firebase.firestore.FieldPath.documentId(), '==', matchInternal)
           .onSnapshot((snapshot) => {
@@ -408,7 +388,7 @@ export default function Home() {
                   clearAllTimeouts();
 
                   setLockout(false);
-                  observer();
+                  ////observer();
                 }
               }
             });
@@ -451,7 +431,7 @@ export default function Home() {
         // Hang on to the observer now. This is the listener on my new
         // document. I am waiting for the match field to be filled,
         // but it can also get un-filled. Account for both.
-        observer = firestore
+        observer.current = firestore
           .collection('searching')
           .doc(currentUser.uid)
           .onSnapshot((docSnapshot) => {
@@ -466,26 +446,6 @@ export default function Home() {
               setMatch('Found match! ' + docSnapshot.data().match);
               // clearTimeout(timeOut);
               clearAllTimeouts();
-              // Abandon match after a certain time.
-              // timeout3 = setTimeout(() => {
-              //   if (window.location.pathname == '/') {
-              //     setError('⚠️ Match abandoning in 3 seconds!');
-              //     console.log('match abandoning message printed');
-              //   } else {
-              //     console.log('timeout 3 ran in home.js, but ignored.');
-              //   }
-              // }, MS_BEFORE_ABANDON_MATCH_DOCHOST - 3000);
-
-              // timeout4 = setTimeout(() => {
-              //   if (window.location.pathname == '/') {
-              //     if (observer !== null) observer();
-              //     window.location.reload();
-              //     console.log('page reloaded');
-              //   } else {
-              //     console.log('timeout 4 ran in home.js, but ignored.');
-              //   }
-              // }, MS_BEFORE_ABANDON_MATCH_DOCHOST);
-              // observer();dont kill observer because we could lose the match.
             } else if (
               docSnapshot &&
               docSnapshot.data() &&
@@ -536,14 +496,16 @@ export default function Home() {
 
                   setMatch('Not searching.');
                   setError('');
-                  if (observer !== null) observer();
+                  if (observer.current !== null) {
+                    observer.current();
+                  } else {
+                    console.log('could not clear observer in dochost');
+                  }
                   setLockout(false);
                 } else {
                   console.log('timeout 5 tried to run, but was ignored.');
                 }
               }, MS_BEFORE_ABANDON_SEARCH);
-
-              // observer();
             }
           });
       } catch (error) {
@@ -555,7 +517,6 @@ export default function Home() {
         // Here is where we would also tell the user to move to the chat.
         // They have MS_BEFORE_ABANDON_MATCH seconds to do so.
         setLockout(true);
-        // observer(); dont kill observer because we could lose the match.
       }
     }
   }
@@ -603,7 +564,6 @@ export default function Home() {
           pathname: id_of_match === 'none' ? '/' : '/chat',
           state: {
             match_id: id_of_match,
-            observer: observer,
             timeout_5: timeout5,
           },
         }}>
