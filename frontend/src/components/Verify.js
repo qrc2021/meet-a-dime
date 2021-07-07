@@ -50,18 +50,17 @@ export default function Verify() {
 
   return (
     <React.Fragment>
-    <body>
-    <Navbar bg="transparent">
-      <Navbar.Brand href="login">
-        <img
-          src="/DimeAssets/headerlogo.png"
-          width="300px"
-          height="100%"
-          className="d-inline-block align-top"
-          alt="React Bootstrap logo"
-        />
-      </Navbar.Brand>
-    </Navbar>
+      <Navbar bg="transparent">
+        <Navbar.Brand href="login">
+          <img
+            src="/DimeAssets/headerlogo.png"
+            width="300px"
+            height="100%"
+            className="d-inline-block align-top"
+            alt="React Bootstrap logo"
+          />
+        </Navbar.Brand>
+      </Navbar>
 
       {currentUser && currentUser.emailVerified ? (
         <Redirect to="/"></Redirect>
@@ -70,28 +69,29 @@ export default function Verify() {
       )}
 
       <Card
-      varient="top"
-      style={{
-        minWidth: '300px',
-        maxWidth: '550px',
-        marginRight: 'auto',
-        marginLeft: 'auto',
-        borderRadius: '30px',
-      }}>
+        varient="top"
+        style={{
+          minWidth: '300px',
+          maxWidth: '550px',
+          marginRight: 'auto',
+          marginLeft: 'auto',
+          borderRadius: '30px',
+        }}>
         <Card.Body>
-          <h2 className="text-center mb-4"
-          style={{
-            fontWeight: 'bold',
-            fontSize: '50px',
-            color: '#7E7E7E',
-          }}>
+          <h2
+            className="text-center mb-4"
+            style={{
+              fontWeight: 'bold',
+              fontSize: '50px',
+              color: '#7E7E7E',
+            }}>
             Verify Your E-mail
           </h2>
-          <Card.Img className="text-center mb-4"
-          variant="top"
-          src="DimeAssets/envelope.png"
-          
-        />
+          <Card.Img
+            className="text-center mb-4"
+            variant="top"
+            src="DimeAssets/envelope.png"
+          />
           {error && <Alert severity="error">{error}</Alert>}
           {message && <Alert severity="success">{message}</Alert>}
           <Form onSubmit={handleSubmit}>
@@ -110,13 +110,14 @@ export default function Verify() {
               Send Email Verification
             </Button>
           </Form>
-          <h3 className="text-center mb-0"
-          style={{
-            fontWeight: '400',
-            fontSize: '30px',
-            color: '#7E7E7E',
-          }}>
-          Make sure to check your inbox to verify your email.
+          <h3
+            className="text-center mb-0"
+            style={{
+              fontWeight: '400',
+              fontSize: '30px',
+              color: '#7E7E7E',
+            }}>
+            Make sure to check your inbox to verify your email.
           </h3>
         </Card.Body>
       </Card>
@@ -134,7 +135,6 @@ export default function Verify() {
           Log In
         </Button>
       </div> */}
-    </body>
     </React.Fragment>
   );
 }

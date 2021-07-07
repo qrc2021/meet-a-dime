@@ -33,7 +33,7 @@ export function AuthProvider({ children }) {
     return currentUser.reload();
   }
 
-  function deleteUser(){
+  function deleteUser() {
     return currentUser.delete();
   }
 
