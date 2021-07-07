@@ -15,6 +15,7 @@ export default function Login() {
   const { login } = useAuth();
   const history = useHistory();
   const [error, setError] = useState('');
+  const [isChecked, setChecked] = useState(false);
   const [loading, setLoading] = useState('');
 
   // This is to clear the old searching data when a user logouts.
@@ -89,9 +90,11 @@ export default function Login() {
     try {
       setError('');
       setLoading(true);
-      await firebase
-        .auth()
-        .setPersistence(firebase.auth.Auth.Persistence.SESSION);
+      if (!isChecked) {
+        await firebase
+          .auth()
+          .setPersistence(firebase.auth.Auth.Persistence.SESSION);
+      }
       await login(emailRef.current.value, passwordRef.current.value);
       history.push('/verify');
       // window.location.reload();
@@ -154,6 +157,16 @@ export default function Login() {
                   type="password"
                   ref={passwordRef}
                   required
+                />
+              </Form.Group>
+              <Form.Group controlId="formBasicCheckbox">
+                <Form.Check
+                  checked={isChecked}
+                  onClick={() => {
+                    setChecked(!isChecked);
+                  }}
+                  type="checkbox"
+                  label="Keep me logged in"
                 />
               </Form.Group>
               <Button
