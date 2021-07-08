@@ -130,9 +130,10 @@ export default function Login() {
             minWidth: '300px',
             marginRight: 'auto',
             maxWidth: '400px',
+            borderRadius: '30px',
           }}>
           <Card.Body>
-            <Card.Img variant="top" src="DimeAssets/headerlogo.png" />
+            <Card.Img variant="top" className="mb-3" src="DimeAssets/headerlogo.png" />
             {error && <Alert severity="error">{error}</Alert>}
             <Form onSubmit={handleSubmit}>
               <Form.Group
@@ -193,6 +194,7 @@ export default function Login() {
           <Card.Footer
             style={{
               color: '#B39BC8',
+              borderRadius: '30px',
             }}>
             <Button
               disabled={loading}

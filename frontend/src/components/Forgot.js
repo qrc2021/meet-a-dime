@@ -1,9 +1,10 @@
 import React, { useRef, useState } from 'react';
 // import { Form, Button, Card, Alert } from 'react-bootstrap';
+import { Navbar, Button } from 'react-bootstrap';
 import Container from '@material-ui/core/Container';
 import InputLabel from '@material-ui/core/InputLabel';
 import Input from '@material-ui/core/Input';
-import Button from '@material-ui/core/Button';
+// import Button from '@material-ui/core/Button';
 import { Alert, AlertTitle } from '@material-ui/lab';
 import Card from '@material-ui/core/Card';
 import { useHistory } from 'react-router-dom';
@@ -43,35 +44,83 @@ export default function Forgot() {
 
   return (
     <>
+  
+      <Navbar bg="transparent">
+        <Navbar.Brand href="login">
+          <img
+            src="/DimeAssets/headerlogo.png"
+            width="300px"
+            height="100%"
+            className="d-inline-block align-top"
+            alt="React Bootstrap logo"
+          />
+        </Navbar.Brand>
+      </Navbar>
+
       <Container style={{ justifyContent: 'center', maxWidth: 700 }}>
-        <Card>
+        <Card
+          varient="top"
+          style={{
+            minWidth: '250px',
+            maxWidth: '420px',
+            marginRight: 'auto',
+            marginLeft: 'auto',
+            borderRadius: '30px',
+          }}>
           <CardContent>
-            <h2 className="text-center mb-4">Password Reset</h2>
+            <h2 
+              className="text-center mb-2"
+              style={{
+                fontWeight: 'bold',
+                fontSize: '50px',
+                color: '#7E7E7E',
+              }}>
+              Password Reset</h2>
+            <h3
+              className="text-center mb-3"
+              style={{
+                fontWeight: '400',
+                fontSize: '20px',
+                color: '#7E7E7E',
+              }}>
+              Please enter your email below:
+            </h3>
             {error && <Alert severity="error">{error}</Alert>}
             {message && <Alert severity="success">{message}</Alert>}
             <form onSubmit={handleSubmit}>
-              <FormControl id="email">
+              <FormControl id="email"
+                className="mb-2"
+                style={{
+                  width: '100%'
+                }}>
                 <InputLabel>Email</InputLabel>
                 <Input type="email" inputRef={emailRef} required />
               </FormControl>
               <Button
                 variant="contained"
-                color="primary"
+                // color="primary"
                 disabled={loading}
-                className="w-100 mt-2"
-                type="submit">
+                className="btn-primary w-100 mt-2"
+                type="submit"
+                style={{
+                  fontSize: '20px',
+                }}>
                 Reset Password
               </Button>
             </form>
             <div className="w-100 text-center mt-3">
-              <Link
+              <Button
+                className="btn-secondary"
                 href=""
                 onClick={(e) => {
                   e.preventDefault();
                   history.push('/login');
+                }}
+                style={{
+                  fontSize: '19px',
                 }}>
                 Login
-              </Link>
+              </Button>
             </div>
           </CardContent>
         </Card>
