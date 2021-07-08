@@ -93,6 +93,32 @@ export default function Chat() {
     }, 0);
   }
 
+function Match() {
+  /*
+  Lord Lui Notes:
+  it would definetly have to be with sockets 
+  (emit an event to the other user) or with a 
+  firebase database listener to wait for changes 
+  to the searching doc (like two fields would need to 
+  be added to the doc, one for each of the users whether 
+  they say yes. if it gets edited you can capture that)
+
+  the searching doc gets created when the user searches, and stays up 
+  during the chat until they go back to home
+
+  so it should be accessible on the chat page to edit and update and read
+
+  for each pair: one person is the title of the document, 
+  and the other has their ID in the 'match' field
+
+  def recommend making two accounts to test with, and one has to be 
+  logged in on incognito mode or a different browser
+
+  (just cause otherwise they share the same data when testing)
+
+  */
+}
+
   function MatchModal(props) {
     return (
       <Modal
