@@ -50,17 +50,20 @@ export default function Verify() {
 
   return (
     <React.Fragment>
-      <Navbar bg="transparent">
-        <Navbar.Brand href="login">
-          <img
-            src="/DimeAssets/headerlogo.png"
-            width="300px"
-            height="100%"
-            className="d-inline-block align-top"
-            alt="React Bootstrap logo"
-          />
-        </Navbar.Brand>
-      </Navbar>
+
+
+    <Navbar bg="transparent">
+      <Navbar.Brand href="login">
+        <img
+          src="/DimeAssets/headerlogo.png"
+          width="300px"
+          height="100%"
+          className="d-inline-block align-top"
+          alt="React Bootstrap logo"
+        />
+      </Navbar.Brand>
+    </Navbar>
+
 
       {currentUser && currentUser.emailVerified ? (
         <Redirect to="/"></Redirect>
@@ -97,16 +100,9 @@ export default function Verify() {
           <Form onSubmit={handleSubmit}>
             <Button
               disabled={loading || pressed}
-              className="w-100 mt-2 mb-3"
-              type="submit"
-              style={{
-                fontWeight: 'bold',
-                fontSize: '30px',
-                color: 'white',
-                backgroundColor: '#E64398',
-                borderRadius: '30px',
-                borderColor: '#E64398',
-              }}>
+              variant="top"
+              className="btn-primary w-100 mt-2 mb-3"
+              type="submit">
               Send Email Verification
             </Button>
           </Form>
