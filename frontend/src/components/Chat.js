@@ -93,6 +93,32 @@ export default function Chat() {
     }, 0);
   }
 
+function Match() {
+  /*
+  Lord Lui Notes:
+  it would definetly have to be with sockets 
+  (emit an event to the other user) or with a 
+  firebase database listener to wait for changes 
+  to the searching doc (like two fields would need to 
+  be added to the doc, one for each of the users whether 
+  they say yes. if it gets edited you can capture that)
+
+  the searching doc gets created when the user searches, and stays up 
+  during the chat until they go back to home
+
+  so it should be accessible on the chat page to edit and update and read
+
+  for each pair: one person is the title of the document, 
+  and the other has their ID in the 'match' field
+
+  def recommend making two accounts to test with, and one has to be 
+  logged in on incognito mode or a different browser
+
+  (just cause otherwise they share the same data when testing)
+
+  */
+}
+
   function MatchModal(props) {
     return (
       <Modal
@@ -107,11 +133,11 @@ export default function Chat() {
         </Modal.Header>
         <Modal.Body>
           <h4>You did the time! Do you want the Dime?</h4>
-          <p>Please select...</p>
+          <p>Please select Tails to Match or Heads to Pass.</p>
         </Modal.Body>
         <Modal.Footer>
-          <Button onClick={props.onHide}>Match</Button>
-          <Button onClick={noMatch}>No Match</Button>
+          <Button style="height:2000px;width:2000px;" src="DimeAssets/hearteyes.pgn" onClick={props.onHide}>Tails</Button>
+          <Button style="height:2000px;width:2000px;" src="DimeAssets/sleepycoin.pgn" onClick={noMatch}>Heads</Button>
         </Modal.Footer>
       </Modal>
     );
