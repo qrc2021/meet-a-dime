@@ -128,7 +128,7 @@ export default function Chat() {
         size="lg"
         aria-labelledby="contained-modal-title-vcenter"
         centered>
-        <Modal.Header closeButton>
+        <Modal.Header>
           <Modal.Title id="contained-modal-title-vcenter">
             Meet A Dime
           </Modal.Title>
@@ -428,7 +428,11 @@ export default function Chat() {
           Log Out
         </Button>
       </div>
-      <MatchModal show={modalShow} onHide={() => setModalShow(false)} />
+      <MatchModal
+        backdrop="static"
+        show={modalShow}
+        onHide={() => setModalShow(false)}
+      />
     </React.Fragment>
   );
 }
