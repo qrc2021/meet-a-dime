@@ -157,15 +157,8 @@ export default function Login() {
               </Form.Group>
               <Button
                 disabled={loading}
-                className="w-100 mt-2 mb-1"
-                type="submit"
-                style={{
-                  borderRadius: '30px',
-                  backgroundColor: '#E64398',
-                  fontWeight: 'bold',
-                  fontSize: '30px',
-                  borderColor: '#E64398',
-                }}>
+                className="btn-primary w-100 mt-2 mb-1"
+                type="submit">
                 Log In
               </Button>
             </Form>
@@ -189,15 +182,8 @@ export default function Login() {
             }}>
             <Button
               disabled={loading}
-              className="w-100 mt-2"
-              href="/signup"
-              style={{
-                borderRadius: '30px',
-                backgroundColor: '#B39BC8',
-                fontWeight: 'bold',
-                fontSize: '30px',
-                borderColor: '#B39BC8',
-              }}>
+              className="btn-secondary w-100 mt-2"
+              href="/signup">
               Sign up
             </Button>
           </Card.Footer>

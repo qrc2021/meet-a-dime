@@ -1,3 +1,39 @@
 body {
     background-color: #DCEAFF;
-    }
+}
+
+.btn-primary {
+    font-weight: bold;
+    font-size: 30px;
+    color: white;
+    background-color: #E64398 !important;
+    border-radius: 30px;
+    border-color: #E64398 !important;
+}
+
+.btn-primary:hover {
+font-weight: bold;
+font-size: 30px;
+color: white;
+background-color: #ca3984 !important;
+border-radius: 30px;
+border-color: #ca3984 !important;
+}
+
+.btn-secondary {
+    font-weight: bold;
+    font-size: 30px;
+    color: white;
+    background-color: #B39BC8 !important;
+    border-radius: 30px;
+    border-color: #B39BC8 !important;
+}
+
+.btn-secondary:hover {
+font-weight: bold;
+font-size: 30px;
+color: white;
+background-color: #9f88b3 !important;
+border-radius: 30px;
+border-color: #9f88b3 !important;
+}

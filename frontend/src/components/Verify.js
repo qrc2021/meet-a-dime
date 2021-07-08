@@ -50,7 +50,7 @@ export default function Verify() {
 
   return (
     <React.Fragment>
-    <body>
+
     <Navbar bg="transparent">
       <Navbar.Brand href="login">
         <img
@@ -97,16 +97,9 @@ export default function Verify() {
           <Form onSubmit={handleSubmit}>
             <Button
               disabled={loading || pressed}
-              className="w-100 mt-2 mb-3"
-              type="submit"
-              style={{
-                fontWeight: 'bold',
-                fontSize: '30px',
-                color: 'white',
-                backgroundColor: '#E64398',
-                borderRadius: '30px',
-                borderColor: '#E64398',
-              }}>
+              variant="top"
+              className="btn-primary w-100 mt-2 mb-3"
+              type="submit">
               Send Email Verification
             </Button>
           </Form>
@@ -134,7 +127,6 @@ export default function Verify() {
           Log In
         </Button>
       </div> */}
-    </body>
     </React.Fragment>
   );
 }
