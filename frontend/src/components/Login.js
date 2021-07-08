@@ -133,7 +133,11 @@ export default function Login() {
             borderRadius: '30px',
           }}>
           <Card.Body>
-            <Card.Img variant="top" className="mb-3" src="DimeAssets/headerlogo.png" />
+            <Card.Img
+              variant="top"
+              className="mb-3"
+              src="DimeAssets/headerlogo.png"
+            />
             {error && <Alert severity="error">{error}</Alert>}
             <Form onSubmit={handleSubmit}>
               <Form.Group
@@ -162,7 +166,7 @@ export default function Login() {
               </Form.Group>
               <Form.Group controlId="formBasicCheckbox">
                 <Form.Check
-                  checked={isChecked}
+                  defaultChecked={isChecked}
                   onClick={() => {
                     setChecked(!isChecked);
                   }}
@@ -172,10 +176,8 @@ export default function Login() {
               </Form.Group>
               <Button
                 disabled={loading}
-
                 className="btn-primary w-100 mt-2 mb-1"
                 type="submit">
-
                 Log In
               </Button>
             </Form>
@@ -198,10 +200,8 @@ export default function Login() {
             }}>
             <Button
               disabled={loading}
-
               className="btn-secondary w-100 mt-2"
               href="/signup">
-
               Sign up
             </Button>
           </Card.Footer>
