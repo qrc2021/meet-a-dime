@@ -123,6 +123,18 @@ exports.setApp = function (app, admin) {
       initializedProfile,
       FailMatch,
       SuccessMatch,
+      question1Answer,
+      question2Answer,
+      question3Answer,
+      question4Answer,
+      question5Answer,
+      question6Answer,
+      question7Answer,
+      question8Answer,
+      question9Answer,
+      question10Answer,
+      question11Answer,
+      question12Answer,
     } = req.body);
 
     var err = "";

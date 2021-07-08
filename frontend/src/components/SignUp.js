@@ -22,6 +22,18 @@ export default function SignUp() {
   const [optionsState, setOptionsState] = useState('0');
   const [orientationState, setOrientationState] = useState('0');
   const [phoneVal, setPhoneVal] = useState('');
+  const answer1Ref = useRef();
+  const answer2Ref = useRef();
+  const answer3Ref = useRef();
+  const answer4Ref = useRef();
+  const answer5Ref = useRef();
+  const answer6Ref = useRef();
+  const answer7Ref = useRef();
+  const answer8Ref = useRef();
+  const answer9Ref = useRef();
+  const answer10Ref = useRef();
+  const answer11Ref = useRef();
+  const answer12Ref = useRef();
 
   var adult = moment().subtract(18, 'years').calendar();
   console.log(adult);
@@ -73,15 +85,27 @@ export default function SignUp() {
     setPhoneVal(formattedNumber);
   }
 
+  //counts the number of characters a user is typing for personal questions
+  //they get a live count that turns red if they are over the character limit
+  //NOTE - Add at a later date
+  var maxAnswerLength = 280;
+
   async function handleSubmit(e) {
     e.preventDefault();
     var bp = require('../Path.js');
 
+    //scroll to top of page toi see error messages
+    function scrollToTop() {
+      window.scrollTo(0, 0);
+    }
+
     if (passwordRef.current.value !== passwordConfirmRef.current.value) {
+      scrollToTop();
       return setError('Passwords do not match.');
     }
 
     if (passwordRef.current.value.length <= 6) {
+      scrollToTop();
       return setError('Password should be more than six characters.');
     }
 
@@ -91,27 +115,99 @@ export default function SignUp() {
     // }
 
     if (optionsState === '0') {
+      scrollToTop();
       return setError('Please choose your sex.');
     }
 
     if (orientationState === '0') {
+      scrollToTop();
       return setError('Please choose your sexual orientation.');
     }
 
     if (phoneVal.trim().length < 14) {
+      scrollToTop();
       return setError('Please enter a valid phone number.');
     }
 
-    if (dateState === '') return setError('Please enter a valid date...');
+    if (dateState === ''){
+      scrollToTop();
+      return setError('Please enter a valid date.');
+    }
 
-    if (!isLegal(dateState))
-      return setError('You must be 18 years or older to sign up');
+    if (!isLegal(dateState)) {
+      scrollToTop();
+      return setError('You must be 18 years or older to sign up.');
+    }
 
-    if (firstRef.current.value === '')
-      return setError('Please input your first name');
+    if (firstRef.current.value === '') {
+      scrollToTop();
+      return setError('Please input your first name.');
+    }
 
-    if (lastRef.current.value === '')
-      return setError('Please input your last name');
+    if (lastRef.current.value === '') {
+      scrollToTop();
+      return setError('Please input your last name.');
+    }
+
+    if (answer1Ref.current.value.length > maxAnswerLength) {
+      scrollToTop();
+      return setError('Question 1: Please keep your answer within 280 characters.');
+    }
+
+    if (answer2Ref.current.value.length > maxAnswerLength) {
+      scrollToTop();
+      return setError('Question 2: Please keep your answer within 280 characters.');
+    }
+
+    if (answer3Ref.current.value.length > maxAnswerLength) {
+      scrollToTop();
+      return setError('Question 3: Please keep your answer within 280 characters.');
+    }
+
+    if (answer4Ref.current.value.length > maxAnswerLength) {
+      scrollToTop();
+      return setError('Question 4: Please keep your answer within 280 characters.');
+    }
+
+    if (answer5Ref.current.value.length > maxAnswerLength) {
+      scrollToTop();
+      return setError('Question 5: Please keep your answer within 280 characters.');
+    }
+
+    if (answer6Ref.current.value.length > maxAnswerLength) {
+      scrollToTop();
+      return setError('Question 6: Please keep your answer within 280 characters.');
+    }
+
+    if (answer7Ref.current.value.length > maxAnswerLength) {
+      scrollToTop();
+      return setError('Question 7: Please keep your answer within 280 characters.');
+    }
+
+    if (answer8Ref.current.value.length > maxAnswerLength) {
+      scrollToTop();
+      return setError('Question 8: Please keep your answer within 280 characters.');
+    }
+
+    if (answer9Ref.current.value.length > maxAnswerLength) {
+      scrollToTop();
+      return setError('Question 9: Please keep your answer within 280 characters.');
+    }
+
+    if (answer10Ref.current.value.length > maxAnswerLength) {
+      scrollToTop();
+      return setError('Question 10: Please keep your answer within 280 characters.');
+    }
+
+    if (answer11Ref.current.value.length > maxAnswerLength) {
+      scrollToTop();
+      return setError('Question 11: Please keep your answer within 280 characters.');
+    }
+
+    if (answer12Ref.current.value.length > maxAnswerLength) {
+      scrollToTop();
+      return setError('Question 12: Please keep your answer within 280 characters.');
+    }
 
     var orient = {
       1: 'Heterosexual',
@@ -141,6 +237,18 @@ export default function SignUp() {
         initializedProfile: 0,
         FailMatch: [],
         SuccessMatch: [],
+        question1Answer: answer1Ref.current.value.trim(),
+        question2Answer: answer2Ref.current.value.trim(),
+        question3Answer: answer3Ref.current.value.trim(),
+        question4Answer: answer4Ref.current.value.trim(),
+        question5Answer: answer5Ref.current.value.trim(),
+        question6Answer: answer6Ref.current.value.trim(),
+        question7Answer: answer7Ref.current.value.trim(),
+        question8Answer: answer8Ref.current.value.trim(),
+        question9Answer: answer9Ref.current.value.trim(),
+        question10Answer: answer10Ref.current.value.trim(),
+        question11Answer: answer11Ref.current.value.trim(),
+        question12Answer: answer12Ref.current.value.trim(),
       };
 
       var config = {
@@ -271,6 +379,54 @@ export default function SignUp() {
                 required
               />
             </Form.Group>
+            <Form.Group id="question1Answer">
+              <Form.Label>Question 1: What do you like to do for fun or to relax?</Form.Label>
+              <Form.Control type="text" ref={answer1Ref} required/>
+            </Form.Group>
+            <Form.Group id="question2Answer">
+              <Form.Label>Question 2: What do you do for a living?</Form.Label>
+              <Form.Control type="text" ref={answer2Ref} required/>
+            </Form.Group>
+            <Form.Group id="question3Answer">
+              <Form.Label>Question 3: Would you say you are a romantic?</Form.Label>
+              <Form.Control type="text" ref={answer3Ref} required/>
+            </Form.Group>
+            <Form.Group id="question4Answer">
+              <Form.Label>Question 4: Are you an optimist or a pessimist?</Form.Label>
+              <Form.Control type="text" ref={answer4Ref} required/>
+            </Form.Group>
+            <Form.Group id="question5Answer">
+              <Form.Label>Question 5: What are you most passionate about?</Form.Label>
+              <Form.Control type="text" ref={answer5Ref} required/>
+            </Form.Group>
+            <Form.Group id="question6Answer">
+              <Form.Label>Question 6: Do you like horoscopes? If so, what's your sign?</Form.Label>
+              <Form.Control type="text" ref={answer6Ref} required/>
+            </Form.Group>
+            <Form.Group id="question7Answer">
+              <Form.Label>Question 7: What does an ideal date look like in your eyes?</Form.Label>
+              <Form.Control type="text" ref={answer7Ref} required/>
+            </Form.Group>
+            <Form.Group id="question8Answer">
+              <Form.Label>Question 8: What does your ideal future look like?</Form.Label>
+              <Form.Control type="text" ref={answer8Ref} required/>
+            </Form.Group>
+            <Form.Group id="question9Answer">
+              <Form.Label>Question 9: What is your favorite type of music?</Form.Label>
+              <Form.Control type="text" ref={answer9Ref} required/>
+            </Form.Group>
+            <Form.Group id="question10Answer">
+              <Form.Label>Question 10: Do you have any pets? If you do, tell me about them!</Form.Label>
+              <Form.Control type="text" ref={answer10Ref} required/>
+            </Form.Group>
+            <Form.Group id="question11Answer">
+              <Form.Label>Question 11: Do you have any sibilings? If so, how many?</Form.Label>
+              <Form.Control type="text" ref={answer11Ref} required/>
+            </Form.Group>
+            <Form.Group id="question12Answer">
+              <Form.Label>Question 12: What is your favorite game to play?</Form.Label>
+              <Form.Control type="text" ref={answer12Ref} required/>
+            </Form.Group>
             <Button disabled={loading} className="w-100 mt-2" type="submit">
               Sign Up
             </Button>
@@ -281,5 +437,6 @@ export default function SignUp() {
         Already have an account? <Link to="/login">Log In</Link>
       </div>
     </>
+
   );
 }
