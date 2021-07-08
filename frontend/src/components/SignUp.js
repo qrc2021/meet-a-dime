@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Card, Form, Button } from 'react-bootstrap';
+import { Card, Form, Button, Navbar } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
 import { Alert, AlertTitle } from '@material-ui/lab';
 import { Link, useHistory } from 'react-router-dom';
@@ -174,6 +174,18 @@ export default function SignUp() {
 
   return (
     <>
+      <Navbar bg="transparent">
+        <Navbar.Brand href="login">
+          <img
+            src="/DimeAssets/headerlogo.png"
+            width="300px"
+            height="100%"
+            className="d-inline-block align-top"
+            alt="React Bootstrap logo"
+          />
+        </Navbar.Brand>
+      </Navbar>
+      
       <Card>
         <Card.Body>
           <h2 className="text-center mb-3">Sign Up</h2>
