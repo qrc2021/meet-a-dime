@@ -113,6 +113,20 @@ export default function After() {
       {pageType && pageType == 'user_abandoned' && (
         <Alert severity="info">{"Sorry it didn't go well :("}</Alert>
       )}
+      {pageType && pageType == 'match_didnt_go_well' && (
+        <Alert severity="info">
+          {
+            'The other user said it didnt go well (I AM PLACEHOLDER TEXT CHANGE ME LATER)'
+          }
+        </Alert>
+      )}
+      {pageType && pageType == 'user_didnt_go_well' && (
+        <Alert severity="info">
+          {
+            "Sorry it didn't go well :( Keep looking! (I AM PLACEHOLDER TEXT CHANGE ME LATER)"
+          }
+        </Alert>
+      )}
       <Container>
         <strong>Email:</strong> {currentUser.email}
         <br></br>

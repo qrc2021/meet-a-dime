@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Button, Container, Form, Modal } from 'react-bootstrap';
+import { Button, Container, Form, Modal, Image } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Alert, AlertTitle } from '@material-ui/lab';
@@ -21,6 +21,7 @@ export default function Chat() {
   const [socket, setSocket] = useState();
   const [afterChat, setAfterChat] = useState(false);
   const [modalShow, setModalShow] = useState(false);
+  const refAfterChat = useRef(false);
   // const [isHost, setHost] = useState('none');
   const { currentUser, logout } = useAuth();
 
@@ -87,14 +88,15 @@ export default function Chat() {
           FailMatch: firebase.firestore.FieldValue.arrayUnion(currentUser.uid),
         });
       socket.emit('leave-room', currentUser.uid, room);
+      console.log('LEFT MY ROOM TOO');
       history.push('/after', {
-        state: { match_id: match_id, type: 'match_abandoned' },
+        state: { match_id: match_id, type: 'user_didnt_go_well' },
       });
     }, 0);
   }
 
-function Match() {
-  /*
+  function Match() {
+    /*
   Lord Lui Notes:
   it would definetly have to be with sockets 
   (emit an event to the other user) or with a 
@@ -117,7 +119,7 @@ function Match() {
   (just cause otherwise they share the same data when testing)
 
   */
-}
+  }
 
   function MatchModal(props) {
     return (
@@ -136,8 +138,18 @@ function Match() {
           <p>Please select Tails to Match or Heads to Pass.</p>
         </Modal.Body>
         <Modal.Footer>
-          <Button style="height:2000px;width:2000px;" src="DimeAssets/hearteyes.pgn" onClick={props.onHide}>Tails</Button>
-          <Button style="height:2000px;width:2000px;" src="DimeAssets/sleepycoin.pgn" onClick={noMatch}>Heads</Button>
+          <Image
+            style={{ height: '200px', width: '200px', cursor: 'pointer' }}
+            src="DimeAssets/hearteyes.png"
+            onClick={props.onHide}
+            alt="Tails"
+          />
+          <Image
+            style={{ height: '200px', width: '200px', cursor: 'pointer' }}
+            src="DimeAssets/sleepycoin.png"
+            onClick={noMatch}
+            alt="Heads"
+          />
         </Modal.Footer>
       </Modal>
     );
@@ -186,6 +198,7 @@ function Match() {
 
         clearInterval(checkLoop);
         setAfterChat(true);
+        refAfterChat.current = true;
       }
     }, 2000);
 
@@ -198,6 +211,7 @@ function Match() {
       clearInterval(checkLoop);
       setModalShow(true);
       setAfterChat(true);
+      refAfterChat.current = true;
     }
 
     // This is new!
@@ -243,10 +257,19 @@ function Match() {
               currentUser.uid
             ),
           });
+
+        console.log(refAfterChat.current);
+        if (!refAfterChat.current) {
+          history.push('/after', {
+            state: { match_id: match_id, type: 'match_abandoned' },
+          });
+        } else {
+          history.push('/after', {
+            state: { match_id: match_id, type: 'match_didnt_go_well' },
+          });
+        }
         socket.emit('leave-room', currentUser.uid, room);
-        history.push('/after', {
-          state: { match_id: match_id, type: 'match_abandoned' },
-        });
+        console.log('LEFT MY ROOM');
       }, 0);
     });
   }, []);
