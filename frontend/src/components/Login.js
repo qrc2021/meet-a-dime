@@ -15,6 +15,7 @@ export default function Login() {
   const { login } = useAuth();
   const history = useHistory();
   const [error, setError] = useState('');
+  const [isChecked, setChecked] = useState(false);
   const [loading, setLoading] = useState('');
 
   // This is to clear the old searching data when a user logouts.
@@ -89,6 +90,11 @@ export default function Login() {
     try {
       setError('');
       setLoading(true);
+      if (!isChecked) {
+        await firebase
+          .auth()
+          .setPersistence(firebase.auth.Auth.Persistence.SESSION);
+      }
       await login(emailRef.current.value, passwordRef.current.value);
       history.push('/verify');
       // window.location.reload();
@@ -111,8 +117,8 @@ export default function Login() {
           variant="top"
           src="DimeAssets/homelogo.png"
           style={{
-            width: '800px',
-            height: '800px',
+            width: '900px',
+            height: '900px',
             marginRight: 'auto',
             marginLeft: 'auto',
           }}
@@ -123,8 +129,7 @@ export default function Login() {
           style={{
             minWidth: '300px',
             marginRight: 'auto',
-            maxWidth: '600px',
-            borderRadius: '30px',
+            maxWidth: '400px',
           }}>
           <Card.Body>
             <Card.Img variant="top" src="DimeAssets/headerlogo.png" />
@@ -134,7 +139,6 @@ export default function Login() {
                 id="email"
                 style={{
                   marginBottom: '15px',
-                  marginTop: '15px',
                 }}>
                 <Form.Control
                   placeholder="Email"
@@ -155,17 +159,28 @@ export default function Login() {
                   required
                 />
               </Form.Group>
+              <Form.Group controlId="formBasicCheckbox">
+                <Form.Check
+                  checked={isChecked}
+                  onClick={() => {
+                    setChecked(!isChecked);
+                  }}
+                  type="checkbox"
+                  label="Keep me logged in"
+                />
+              </Form.Group>
               <Button
                 disabled={loading}
+
                 className="btn-primary w-100 mt-2 mb-1"
                 type="submit">
+
                 Log In
               </Button>
             </Form>
             <div className="w-100 text-center mt-2">
               {/* <Link to="/forgot">Forgot Password?</Link> */}
               <Link
-                style={{fontSize: '19px',}}
                 href=""
                 onClick={(e) => {
                   e.preventDefault();
@@ -177,13 +192,14 @@ export default function Login() {
           </Card.Body>
           <Card.Footer
             style={{
-              color: 'white',
-              borderRadius: '30px',
+              color: '#B39BC8',
             }}>
             <Button
               disabled={loading}
+
               className="btn-secondary w-100 mt-2"
               href="/signup">
+
               Sign up
             </Button>
           </Card.Footer>
