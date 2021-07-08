@@ -107,11 +107,11 @@ export default function Chat() {
         </Modal.Header>
         <Modal.Body>
           <h4>You did the time! Do you want the Dime?</h4>
-          <p>Please select...</p>
+          <p>Please select Tails to Match or Heads to Pass.</p>
         </Modal.Body>
         <Modal.Footer>
-          <Button onClick={props.onHide}>Match</Button>
-          <Button onClick={noMatch}>No Match</Button>
+          <Button style="height:2000px;width:2000px;" src="DimeAssets/hearteyes.pgn" onClick={props.onHide}>Tails</Button>
+          <Button style="height:2000px;width:2000px;" src="DimeAssets/sleepycoin.pgn" onClick={noMatch}>Heads</Button>
         </Modal.Footer>
       </Modal>
     );
