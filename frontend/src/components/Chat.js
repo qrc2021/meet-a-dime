@@ -9,12 +9,14 @@ import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
 import moment from 'moment';
+import { TramRounded } from '@material-ui/icons';
 var bp = require('../Path.js');
 const firestore = firebase.firestore();
 
 export default function Chat() {
   const messageRef = useRef();
-  const EXPIRE_IN_MINUTES = 0.1;
+  const EXPIRE_IN_MINUTES = 0.1; // 10 minutes
+  const modalExpire = 0.5; // 30 second
   const [room, setRoom] = useState('');
   //const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -95,12 +97,14 @@ export default function Chat() {
     }, 0);
   }
 
-  function Match() {
-    /*
+  function pendingMatch() {
+  /*
   Lord Lui Notes:
   it would definetly have to be with sockets 
-  (emit an event to the other user) or with a 
-  firebase database listener to wait for changes 
+  (emit an event to the other user) 
+  
+  or 
+  with a firebase database listener to wait for changes 
   to the searching doc (like two fields would need to 
   be added to the doc, one for each of the users whether 
   they say yes. if it gets edited you can capture that)
@@ -116,10 +120,81 @@ export default function Chat() {
   def recommend making two accounts to test with, and one has to be 
   logged in on incognito mode or a different browser
 
-  (just cause otherwise they share the same data when testing)
+  (just cause otherwise they share the same data when testing)*/
 
-  */
+    if (localStorage.getItem('modalExpiry') === null) {
+      var exp = Date.now() + modalExpire * 60000;
+      localStorage.setItem('modalExpiry', exp);
+      console.log('set to', exp);
+    }
+    
+    setTimeout(async () => {
+      var docRef =  firestore.collection('searching').doc(currentUser.uid);
+      var doc = await docRef.get();
+      var seeker = doc.get("seeker");
+      var match = doc.get("match");
+
+      if (currentUser.uid == seeker)
+      {
+        await firestore
+        .collection('searching')
+        .doc(currentUser.uid)
+        .set({
+          seekerTail: true
+        });
+        console.log('Waiting on Dime');
+       }
+
+        if (currentUser.uid == match)
+        {
+          await firestore
+          .collection('searching')
+          .doc(currentUser.uid)  
+          .set({
+            matchTail: true
+          });
+          console.log('Waiting on Dime');
+        }
+      
+        const seekerTail = await firestore.collection('searching').doc(currentUser.uid).get("seekerTail");
+        const matchTail = await firestore.collection('searching').doc(currentUser.uid).get("matchTail");
+        console.log('checking..');
+        var current_time = Date.now();
+        if (current_time >= localStorage.getItem('modalExpiry')) {
+          if(seeker == true && match == true)
+          {
+            Match();
+          }
+          else noMatch();
+      }
+    }, 0); 
   }
+
+  // Add match to user's SuccessMatch Array and vice versa
+  function Match() {
+    setTimeout(async () => {
+      // Add match to user array
+      await firestore
+        .collection('users')
+        .doc(currentUser.uid)
+        .update({
+          SuccessMatch: firebase.firestore.FieldValue.arrayUnion(match_id),
+        });
+      // Add user to match array
+      await firestore
+        .collection('users')
+        .doc(match_id)
+        .update({
+          SuccessMatch: firebase.firestore.FieldValue.arrayUnion(currentUser.uid),
+        });
+      console.log(refAfterChat.current);
+      history.push('/after', {
+        state: { match_id: match_id, type: 'match_made' },
+      });
+      socket.emit('leave-room', currentUser.uid, room);
+      console.log('LEFT MY ROOM');
+    }, 0);
+}
 
   function MatchModal(props) {
     return (
@@ -130,7 +205,10 @@ export default function Chat() {
         centered>
         <Modal.Header>
           <Modal.Title id="contained-modal-title-vcenter">
-            Meet A Dime
+          <Image
+            style={{ height: '100px', width: '300px', cursor: 'pointer' }}
+            src="DimeAssets/headerlogo.png"
+          />
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -141,7 +219,7 @@ export default function Chat() {
           <Image
             style={{ height: '200px', width: '200px', cursor: 'pointer' }}
             src="DimeAssets/hearteyes.png"
-            onClick={props.onHide}
+            onClick={pendingMatch} 
             alt="Tails"
           />
           <Image
@@ -187,16 +265,8 @@ export default function Chat() {
       var current = Date.now();
       console.log('checking..');
       if (current >= localStorage.getItem('chatExpiry')) {
-        //console.log('ITS OVER');
-        //Modal match or non-match
-        //   <matchModal
-        //   show={modalShow}
-        //   onHide={() => setModalShow(false)}
-        // />
-
-        setModalShow(true);
-
         clearInterval(checkLoop);
+        setModalShow(true);
         setAfterChat(true);
         refAfterChat.current = true;
       }
@@ -206,8 +276,7 @@ export default function Chat() {
     console.log('checking..');
     if (current_time >= localStorage.getItem('chatExpiry')) {
       //console.log('ITS OVER');
-      //Modal match or non-match
-
+      //Modal match vs non-match
       clearInterval(checkLoop);
       setModalShow(true);
       setAfterChat(true);
