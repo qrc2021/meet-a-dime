@@ -108,10 +108,18 @@ export default function After() {
 
       {error && <Alert severity="error">{error}</Alert>}
       {pageType && pageType == 'match_abandoned' && (
-        <Alert severity="info">{'Your match left.'}</Alert>
+        <Alert severity="info">
+          {
+          'Your match left.'
+          }
+        </Alert>
       )}
       {pageType && pageType == 'user_abandoned' && (
-        <Alert severity="info">{"Sorry it didn't go well :("}</Alert>
+        <Alert severity="info">
+          {
+          "Sorry it didn't go well. Keep flipping the coin!"
+          }
+        </Alert>
       )}
       {pageType && pageType == 'match_didnt_go_well' && (
         <Alert severity="info">
@@ -124,6 +132,13 @@ export default function After() {
         <Alert severity="info">
           {
             "Sorry it didn't go well :( Keep looking! (I AM PLACEHOLDER TEXT CHANGE ME LATER)"
+          }
+        </Alert>
+      )}
+      {pageType && pageType == 'match_made' && (
+        <Alert severity="info"
+        >{
+          "You\'ve matched with a Dime!"
           }
         </Alert>
       )}
