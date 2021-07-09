@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-// import { Button, Alert, Container } from 'react-bootstrap';
+import { Navbar } from 'react-bootstrap';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import { useAuth } from '../contexts/AuthContext';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
@@ -10,7 +10,6 @@ import AttachmentIcon from '@material-ui/icons/Attachment';
 import 'firebase/auth';
 import 'firebase/firestore';
 import 'firebase/storage';
-import { makeStyles } from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import AlarmIcon from '@material-ui/icons/Alarm';
@@ -20,8 +19,118 @@ import PhotoCamera from '@material-ui/icons/PhotoCamera';
 import Container from '@material-ui/core/Container';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
+import clsx from 'clsx';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
+import Drawer from '@material-ui/core/Drawer';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import List from '@material-ui/core/List';
+import Typography from '@material-ui/core/Typography';
+import Divider from '@material-ui/core/Divider';
+import MenuIcon from '@material-ui/icons/Menu';
+import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
+import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import HomeIcon from '@material-ui/icons/Home';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+
+// Drawer 
+const drawerWidth = 300;
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    display: 'flex',
+  },
+  appBar: {
+    transition: theme.transitions.create(['margin', 'width'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+  },
+  appBarShift: {
+    width: `calc(100% - ${drawerWidth}px)`,
+    transition: theme.transitions.create(['margin', 'width'], {
+      easing: theme.transitions.easing.easeOut,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+    marginRight: drawerWidth,
+  },
+  title: {
+    flexGrow: 1,
+
+  },
+  hide: {
+    display: 'none',
+  },
+  drawer: {
+    width: drawerWidth,
+    flexShrink: 0,
+  },
+  drawerPaper: {
+    width: drawerWidth,
+    background: "#FFDCF2",
+  },
+  drawerHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    padding: theme.spacing(0, 1),
+    // necessary for content to be below app bar
+    ...theme.mixins.toolbar,
+    justifyContent: 'flex-start',
+  },
+  listItemText:{
+    fontSize:'25px',
+    fontWeight: 'bold',
+    color: '#E64398',
+  },
+  content: {
+    flexGrow: 1,
+    padding: theme.spacing(3),
+    transition: theme.transitions.create('margin', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+    marginRight: -drawerWidth,
+  },
+  contentShift: {
+    transition: theme.transitions.create('margin', {
+      easing: theme.transitions.easing.easeOut,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+    marginRight: 0,
+  },
+}));
 
 export default function Profile() {
+
+  // Drawer
+  const classes = useStyles();
+  const itemsList = [
+    {
+      text: "Home",
+      icon: <HomeIcon style={{ color: "#e64398" }} />,
+      onClick: redirectToHome
+    },
+    {
+      text: "Logout",
+      icon: <ExitToAppIcon style={{ color: "#e64398" }} />,
+      onClick: handleLogout
+    }
+  ];
+
+  const theme = useTheme();
+  const [open, setOpen] = React.useState(false);
+
+  const handleDrawerOpen = () => {
+    setOpen(true);
+  };
+
+  const handleDrawerClose = () => {
+    setOpen(false);
+  };
+
   // Prevent some prompt issues.
 
   const [error, setError] = useState('');
@@ -184,7 +293,46 @@ export default function Profile() {
 
   return (
     <React.Fragment>
-      <h2 className="text-center mb-4">Profile</h2>
+      <AppBar
+        style={{ background: '#ffffff' }}
+        position="fixed"
+        className={clsx(classes.appBar, {
+          [classes.appBarShift]: open,
+        })}
+      >
+        <Toolbar>
+        <Typography variant="h6" noWrap className={classes.title}>
+          <Navbar bg="transparent">
+            <Navbar.Brand>
+              <img
+                src="/DimeAssets/headerlogo.png"
+                width="250px"
+                height="100%"
+                className="d-inline-block align-top"
+                alt="React Bootstrap logo"
+              />
+            </Navbar.Brand>
+          </Navbar> 
+        </Typography>
+
+          <IconButton
+            color="default"
+            aria-label="open drawer"
+            edge="end"
+            onClick={handleDrawerOpen}
+            className={clsx(open && classes.hide)}
+          >
+            <MenuIcon />
+          </IconButton>
+        </Toolbar>
+      </AppBar>
+      
+      <main
+        className={clsx(classes.content, {
+          [classes.contentShift]: open,
+        })}>
+        <div className={classes.drawerHeader} />
+        <h2 className="text-center mb-4">Profile</h2>
 
       {error && (
         <Alert severity="error">
@@ -274,12 +422,45 @@ export default function Profile() {
           Update Profile
         </Link>
       </Container>
-      <Button variant="contained" color="primary" onClick={redirectToHome}>
+      <Button variant="contained" color="primary" >
         Home
       </Button>
       <Button variant="contained" color="secondary" onClick={handleLogout}>
         Log Out
       </Button>
+      </main>
+
+      <Drawer
+        className={classes.drawer}
+        variant="persistent"
+        anchor="right"
+        open={open}
+        classes={{
+          paper: classes.drawerPaper,
+        }}
+      >
+        <div className={classes.drawerHeader}
+        >
+          <IconButton onClick={handleDrawerClose}>
+            {theme.direction === 'rtl' ? <ChevronLeftIcon /> : <ChevronRightIcon style={{ color: "#e64398", fontSize:'30px', }}/>}
+          </IconButton>
+        </div>
+        <Divider style={{ background: '#e64398' }}/>
+        <List>
+          {
+            itemsList.map((item, index) => {
+              const {text, icon, onClick} = item;
+              return (
+                <ListItem button key = {text} onClick={onClick}>
+                  {icon && <ListItemIcon>{icon}</ListItemIcon>}
+                  <ListItemText classes={{primary:classes.listItemText}} primary={text}/>
+                </ListItem>
+              );
+            })
+          }
+        </List>
+      </Drawer>
+      
     </React.Fragment>
   );
 }

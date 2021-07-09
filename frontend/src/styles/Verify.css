@@ -59,3 +59,24 @@ border-color: #ca3984 !important;
     border-radius: 30px;
     border-color: #ca3984 !important;
 }
+
+.text-welcome {
+    font-weight: bold;
+    font-size: 40px;
+    color: #9f88b3;
+}
+
+.text-matches {
+    color: #E64398;
+    font-size: 32px;
+    font-weight: 600;
+    text-align: left;
+}
+
+.text-search {
+    height: 45px;
+    font-size: 20px;
+    border-radius: 25px;
+    text-align: left;
+    max-width: "100%";
+}
