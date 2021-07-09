@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 // import { Button, Alert, Container } from 'react-bootstrap';
+import { Navbar, Button } from 'react-bootstrap';
 import { Alert, AlertTitle } from '@material-ui/lab';
 import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
 import PhotoCamera from '@material-ui/icons/PhotoCamera';
 import Container from '@material-ui/core/Container';
-import Button from '@material-ui/core/Button';
+// import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
 import { useAuth } from '../contexts/AuthContext';
 import { useHistory } from 'react-router-dom';
@@ -15,9 +16,121 @@ import 'firebase/auth';
 import 'firebase/firestore';
 import moment from 'moment';
 
+import clsx from 'clsx';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
+import Drawer from '@material-ui/core/Drawer';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import List from '@material-ui/core/List';
+import Typography from '@material-ui/core/Typography';
+import Divider from '@material-ui/core/Divider';
+import IconButton from '@material-ui/core/IconButton';
+import MenuIcon from '@material-ui/icons/Menu';
+import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
+import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import InboxIcon from '@material-ui/icons/MoveToInbox';
+import MailIcon from '@material-ui/icons/Mail';
+import CreateIcon from '@material-ui/icons/Create';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+
 var bp = require('../Path.js');
 
+const drawerWidth = 300;
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    display: 'flex',
+  },
+  appBar: {
+    transition: theme.transitions.create(['margin', 'width'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+  },
+  appBarShift: {
+    width: `calc(100% - ${drawerWidth}px)`,
+    transition: theme.transitions.create(['margin', 'width'], {
+      easing: theme.transitions.easing.easeOut,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+    marginRight: drawerWidth,
+  },
+  title: {
+    flexGrow: 1,
+
+  },
+  hide: {
+    display: 'none',
+  },
+  drawer: {
+    width: drawerWidth,
+    flexShrink: 0,
+  },
+  drawerPaper: {
+    width: drawerWidth,
+    background: "#FFDCF2",
+  },
+  drawerHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    padding: theme.spacing(0, 1),
+    // necessary for content to be below app bar
+    ...theme.mixins.toolbar,
+    justifyContent: 'flex-start',
+  },
+  listItemText:{
+    fontSize:'25px',
+    fontWeight: 'bold',
+    color: '#E64398',
+  },
+  content: {
+    flexGrow: 1,
+    padding: theme.spacing(3),
+    transition: theme.transitions.create('margin', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+    marginRight: -drawerWidth,
+  },
+  contentShift: {
+    transition: theme.transitions.create('margin', {
+      easing: theme.transitions.easing.easeOut,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+    marginRight: 0,
+  },
+}));
+
 export default function Home() {
+  // Drawer
+  const classes = useStyles();
+  const itemsList = [
+    {
+      text: "Edit Profile",
+      icon: <CreateIcon style={{ color: "#e64398" }} />,
+      onClick: redirectToProfile
+    },
+    {
+      text: "Logout",
+      icon: <ExitToAppIcon style={{ color: "#e64398" }} />,
+      onClick: handleLogout
+    }
+  ];
+
+  const theme = useTheme();
+  const [open, setOpen] = React.useState(false);
+
+  const handleDrawerOpen = () => {
+    setOpen(true);
+  };
+
+  const handleDrawerClose = () => {
+    setOpen(false);
+  };
+
   const observer = useRef(null);
   // Prevent some prompt issues.
 
@@ -73,7 +186,7 @@ export default function Home() {
   // the search function.
   useEffect(() => {
     localStorage.removeItem('chatExpiry');
-
+    document.body.style.backgroundColor = "white";
     async function getIntialUserPhoto() {
       try {
         var config = {
@@ -527,67 +640,149 @@ export default function Home() {
     }
   }
 
+  
   // The actual JSX components. The top is the errors/match states,
   // conditionally rendered.
   return (
     <React.Fragment>
-      <h2 className="text-center mb-4">Welcome! WE GOOD :D </h2>
-      {error && <Alert severity="error">{error}</Alert>}
-      {match && match === 'Not searching.' && (
-        <Alert severity="warning">{match}</Alert>
-      )}
-      {match && match === 'Searching.' && (
-        <Alert severity="info">{match}</Alert>
-      )}
-      {match && match !== 'Not searching.' && match !== 'Searching.' && (
-        <Alert severity="success">{match}</Alert>
-      )}
-      <Container>
-        <strong>Email:</strong> {currentUser.email}
-        <br></br>
-        <strong>User ID:</strong> {currentUser.uid}
-        <br></br>
-        {/* <strong>Refresh token:</strong> {currentUser.refreshToken}
-        <br></br> */}
-        <strong>Photo:</strong>
-        <br></br>
-        {myPhoto !== '' ? (
-          <img height="100px" width="100px" src={myPhoto} id="photo"></img>
-        ) : (
-          <></>
-        )}
-        <br></br>
-        <strong>Verified email: </strong>
-        {currentUser.emailVerified ? 'verified' : 'not verified'}
-      </Container>
+      {/* <Navbar bg="transparent">
+      <Navbar.Brand href="login">
+        <img
+          src="/DimeAssets/headerlogo.png"
+          width="300px"
+          height="100%"
+          className="d-inline-block align-top"
+          alt="React Bootstrap logo"
+        />
+      </Navbar.Brand>
+    </Navbar> */}
 
-      <Button variant="contained" color="primary" onClick={redirectToProfile}>
-        Profile
-      </Button>
-      <div className="w-100 text-center mt-2">
-        <Button variant="contained" color="secondary" onClick={handleLogout}>
-          Log Out
+      <AppBar
+        style={{ background: '#ffffff' }}
+        position="fixed"
+        className={clsx(classes.appBar, {
+          [classes.appBarShift]: open,
+        })}
+      >
+        <Toolbar>
+        <Typography variant="h6" noWrap className={classes.title}>
+          <Navbar bg="transparent">
+            <Navbar.Brand>
+              <img
+                src="/DimeAssets/headerlogo.png"
+                width="250px"
+                height="100%"
+                className="d-inline-block align-top"
+                alt="React Bootstrap logo"
+              />
+            </Navbar.Brand>
+          </Navbar> 
+        </Typography>
+                
+          <Button
+            className="btn-chat mx-3"
+            disabled={lockout}
+            onClick={searching}>
+            New Chat
+          </Button>
+
+          <IconButton
+            color="gray"
+            aria-label="open drawer"
+            edge="end"
+            onClick={handleDrawerOpen}
+            className={clsx(open && classes.hide)}
+          >
+            <MenuIcon />
+          </IconButton>
+        </Toolbar>
+      </AppBar>
+      
+      <main
+        className={clsx(classes.content, {
+          [classes.contentShift]: open,
+        })}>
+        <div className={classes.drawerHeader} />
+        <h2 className="text-center mt-4 mb-4">Welcome back, {currentUser.firstName}! </h2>
+        {error && <Alert severity="error">{error}</Alert>}
+        {match && match === 'Not searching.' && (
+        <Alert severity="warning">{match}</Alert>
+        )}
+        {match && match === 'Searching.' && (
+          <Alert severity="info">{match}</Alert>
+        )}
+        {match && match !== 'Not searching.' && match !== 'Searching.' && (
+          <Alert severity="success">{match}</Alert>
+        )}
+        <Container>
+          <strong>Email:</strong> {currentUser.email}
+          <br></br>
+          <strong>User ID:</strong> {currentUser.uid}
+          <br></br>
+          {/* <strong>Refresh token:</strong> {currentUser.refreshToken}
+          <br></br> */}
+          <strong>Photo:</strong>
+          <br></br>
+          {myPhoto !== '' ? (
+            <img height="100px" width="100px" src={myPhoto} id="photo"></img>
+          ) : (
+            <></>
+          )}
+          <br></br>
+          <strong>Verified email: </strong>
+          {currentUser.emailVerified ? 'verified' : 'not verified'}
+        </Container>
+        <Link
+          to={{
+            pathname: id_of_match === 'none' ? '/' : '/chat',
+            state: {
+              match_id: id_of_match,
+              timeout_5: timeout5,
+            },
+          }}>
+          {id_of_match === 'none' ? 'No match yet.' : 'Go to chat page with data'}
+        </Link>
+        <br></br>
+        <br></br>
+        <Button
+          variant="outlined"
+          color="primary"
+          disabled={lockout}
+          onClick={searching}>
+          Search for Match
         </Button>
-      </div>
-      <Link
-        to={{
-          pathname: id_of_match === 'none' ? '/' : '/chat',
-          state: {
-            match_id: id_of_match,
-            timeout_5: timeout5,
-          },
-        }}>
-        {id_of_match === 'none' ? 'No match yet.' : 'Go to chat page with data'}
-      </Link>
-      <br></br>
-      <br></br>
-      <Button
-        variant="outlined"
-        color="primary"
-        disabled={lockout}
-        onClick={searching}>
-        Search for Match
-      </Button>
+      </main>
+
+      <Drawer
+        className={classes.drawer}
+        variant="persistent"
+        anchor="right"
+        open={open}
+        classes={{
+          paper: classes.drawerPaper,
+        }}
+      >
+        <div className={classes.drawerHeader}
+        >
+          <IconButton onClick={handleDrawerClose}>
+            {theme.direction === 'rtl' ? <ChevronLeftIcon /> : <ChevronRightIcon style={{ color: "#e64398", fontSize:'30px', }}/>}
+          </IconButton>
+        </div>
+        <Divider />
+        <List>
+          {
+            itemsList.map((item, index) => {
+              const {text, icon, onClick} = item;
+              return (
+                <ListItem button key = {text} onClick={onClick}>
+                  {icon && <ListItemIcon>{icon}</ListItemIcon>}
+                  <ListItemText classes={{primary:classes.listItemText}} primary={text}/>
+                </ListItem>
+              );
+            })
+          }
+        </List>
+      </Drawer>
     </React.Fragment>
   );
 }

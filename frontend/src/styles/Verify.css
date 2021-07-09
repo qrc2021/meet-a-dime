@@ -2,6 +2,10 @@ body {
     background-color: #DCEAFF;
 }
 
+.homebg {
+    background-color: #FFFFFF;
+}
+
 .btn-primary {
     font-weight: bold;
     font-size: 30px;
@@ -30,10 +34,28 @@ border-color: #ca3984 !important;
 }
 
 .btn-secondary:hover {
-font-weight: bold;
-font-size: 30px;
-color: white;
-background-color: #9f88b3 !important;
-border-radius: 30px;
-border-color: #9f88b3 !important;
+    font-weight: bold;
+    font-size: 30px;
+    color: white;
+    background-color: #9f88b3 !important;
+    border-radius: 30px;
+    border-color: #9f88b3 !important;
+}
+
+.btn-chat {
+    font-weight: bold;
+    font-size: 23px;
+    color: white;
+    background-color: #E64398 !important;
+    border-radius: 30px;
+    border-color: #E64398 !important;
+}
+
+.btn-chat:hover {
+    font-weight: bold;
+    font-size: 23px;
+    color: white;
+    background-color: #ca3984 !important;
+    border-radius: 30px;
+    border-color: #ca3984 !important;
 }
