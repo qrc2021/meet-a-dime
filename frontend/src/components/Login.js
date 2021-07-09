@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import Link from '@material-ui/core/Link';
 //import { View, Text, ScrollView, TextInput } from 'react-native';
 import { Card, Form, Button, Image, CardDeck } from 'react-bootstrap';
+import Container from '@material-ui/core/Container';
 import { useHistory } from 'react-router-dom';
 import { Alert, AlertTitle } from '@material-ui/lab';
 import { useAuth } from '../contexts/AuthContext';
@@ -106,6 +107,7 @@ export default function Login() {
 
   return (
     <>
+    <Container style={{flex:'1'}}>
       <CardDeck
         style={{
           display: 'flex',
@@ -117,8 +119,7 @@ export default function Login() {
           variant="top"
           src="DimeAssets/homelogo.png"
           style={{
-            width: '900px',
-            height: '900px',
+            maxWidth: '600px',
             marginRight: 'auto',
             marginLeft: 'auto',
           }}
@@ -141,7 +142,7 @@ export default function Login() {
             {error && <Alert severity="error">{error}</Alert>}
             <Form onSubmit={handleSubmit}>
               <Form.Group
-                id="email"
+                id="name"
                 style={{
                   marginBottom: '15px',
                 }}>
@@ -207,6 +208,7 @@ export default function Login() {
           </Card.Footer>
         </Card>
       </CardDeck>
+      </Container>
     </>
   );
 }

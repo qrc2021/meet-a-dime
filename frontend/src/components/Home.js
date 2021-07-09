@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 // import { Button, Alert, Container } from 'react-bootstrap';
-import { Navbar, Button } from 'react-bootstrap';
+import { Navbar, Button, Form, Col, Row } from 'react-bootstrap';
 import { Alert, AlertTitle } from '@material-ui/lab';
 import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
 import PhotoCamera from '@material-ui/icons/PhotoCamera';
@@ -31,10 +31,9 @@ import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import InboxIcon from '@material-ui/icons/MoveToInbox';
-import MailIcon from '@material-ui/icons/Mail';
 import CreateIcon from '@material-ui/icons/Create';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import TextField from '@material-ui/core/TextField';
 
 var bp = require('../Path.js');
 
@@ -140,6 +139,7 @@ export default function Home() {
   // locking the button while states are changing or loading is occuring
   const [lockout, setLockout] = useState(false);
   const [myPhoto, setMyPhoto] = useState('');
+  const [name, setName] = useState('');
   // the firebase firestore instance, used to query, add, delete, edit from DB.
   const firestore = firebase.firestore();
   // The currentUser object represents the authenticated firebase user.
@@ -199,6 +199,7 @@ export default function Home() {
         };
         var response = await axios(config);
         setMyPhoto(response.data.photo);
+        setName(response.data.firstName);
       } catch (error) {
         console.log(error);
         console.log('issue in fetch data');
@@ -645,18 +646,6 @@ export default function Home() {
   // conditionally rendered.
   return (
     <React.Fragment>
-      {/* <Navbar bg="transparent">
-      <Navbar.Brand href="login">
-        <img
-          src="/DimeAssets/headerlogo.png"
-          width="300px"
-          height="100%"
-          className="d-inline-block align-top"
-          alt="React Bootstrap logo"
-        />
-      </Navbar.Brand>
-    </Navbar> */}
-
       <AppBar
         style={{ background: '#ffffff' }}
         position="fixed"
@@ -687,7 +676,7 @@ export default function Home() {
           </Button>
 
           <IconButton
-            color="gray"
+            color="default"
             aria-label="open drawer"
             edge="end"
             onClick={handleDrawerOpen}
@@ -703,7 +692,29 @@ export default function Home() {
           [classes.contentShift]: open,
         })}>
         <div className={classes.drawerHeader} />
-        <h2 className="text-center mt-4 mb-4">Welcome back, {currentUser.firstName}! </h2>
+        <h2 className=" text-welcome mt-4 mb-3">Welcome back, {name}! </h2>
+        <Divider 
+          style={{ 
+            background: '#7e7e7e',}} />
+        <br></br>
+          {/* Fixing search bar */}
+          <Row>
+          <Form.Group as={Row} controlId="formPlaintextPassword">
+            <Form.Label 
+              className="text-matches"
+              column sm="2">
+              My Matches
+            </Form.Label>
+            <Col 
+              className="pr-4"
+              sm="8">
+              <Form.Control
+                className="text-search mt-2" 
+                type="search" 
+                placeholder="Search for previous matches..." />
+            </Col>
+          </Form.Group>
+          </Row>
         {error && <Alert severity="error">{error}</Alert>}
         {match && match === 'Not searching.' && (
         <Alert severity="warning">{match}</Alert>
@@ -768,7 +779,7 @@ export default function Home() {
             {theme.direction === 'rtl' ? <ChevronLeftIcon /> : <ChevronRightIcon style={{ color: "#e64398", fontSize:'30px', }}/>}
           </IconButton>
         </div>
-        <Divider />
+        <Divider style={{ background: '#e64398' }}/>
         <List>
           {
             itemsList.map((item, index) => {
