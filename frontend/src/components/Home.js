@@ -34,6 +34,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import CreateIcon from '@material-ui/icons/Create';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import TextField from '@material-ui/core/TextField';
+import LinearProgress from '@material-ui/core/LinearProgress';
 
 var bp = require('../Path.js');
 
@@ -91,7 +92,7 @@ const useStyles = makeStyles((theme) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
-    marginRight: -drawerWidth,
+    // marginRight: -drawerWidth,
   },
   contentShift: {
     transition: theme.transitions.create('margin', {
@@ -130,7 +131,7 @@ export default function Home() {
   };
 
   const observer = useRef(null);
-  // Prevent some prompt issues.
+  const transferTimeoutRef = useRef();
 
   // error corresponds to an alert that will display err messages.
   const [error, setError] = useState('');
@@ -138,6 +139,7 @@ export default function Home() {
   // locking the button while states are changing or loading is occuring
   const [lockout, setLockout] = useState(false);
   const [myPhoto, setMyPhoto] = useState('');
+  const [progress, setProgress] = useState(-1);
   const [name, setName] = useState('');
   // the firebase firestore instance, used to query, add, delete, edit from DB.
   const firestore = firebase.firestore();
@@ -149,6 +151,7 @@ export default function Home() {
   const [id_of_match, setId] = useState('none');
   // Search timeout in milliseconds
   const MS_BEFORE_ABANDON_SEARCH = 10000;
+  const MS_TRANSFER_TO_CHAT = 3000;
   // Before match expires. they are separate just incase.
   const MS_BEFORE_ABANDON_MATCH_DOCJOIN = 10000;
   const MS_BEFORE_ABANDON_MATCH_DOCHOST = 10000;
@@ -262,6 +265,7 @@ export default function Home() {
     getIntialUserPhoto();
     return () => {
       clearTimeout(timeout5);
+      clearAllTimeouts();
       console.log('LEAVING!');
       if (observer.current !== null) {
         observer.current();
@@ -332,7 +336,6 @@ export default function Home() {
 
   function clearAllTimeouts() {
     clearTimeout(timeout5);
-    console.log('tried to clear timeouts in home. this probably didnt work.');
   }
 
   // .
@@ -441,6 +444,25 @@ export default function Home() {
           .update({ match: currentUser.uid });
         // Match is found! Do the correct tasks.
         matchFound = true;
+        // Transfer the user to the chat in 4 seconds.
+
+        var count = 0;
+        setProgress(count);
+        transferTimeoutRef.current = setInterval(() => {
+          count += (100 / MS_TRANSFER_TO_CHAT) * 100;
+          setProgress(count);
+          // console.log(doc_id);
+          if (count >= 100) {
+            clearInterval(transferTimeoutRef.current);
+            history.push('/chat', {
+              state: {
+                match_id: doc_id,
+                timeout_5: timeout5,
+              },
+            });
+          }
+        }, 100);
+
         setId(doc_id);
         setMatch('Found match! ' + doc_id);
         // Clear the searching timeout.
@@ -505,7 +527,9 @@ export default function Home() {
                   // clearTimeout(timeOut);
                   // These two clear all timeouts.
                   clearAllTimeouts();
-
+                  if (transferTimeoutRef.current !== undefined)
+                    clearInterval(transferTimeoutRef.current);
+                  setProgress(-1);
                   setLockout(false);
                   ////observer();
                 }
@@ -563,6 +587,25 @@ export default function Home() {
               docSnapshot.data().match !== ''
             ) {
               matchFound = true;
+              // Transfer the user to the chat in 4 seconds.
+
+              var count = 0;
+              setProgress(count);
+              transferTimeoutRef.current = setInterval(() => {
+                count += (100 / MS_TRANSFER_TO_CHAT) * 100;
+                setProgress(count);
+                // console.log(docSnapshot.data().match);
+                if (count >= 100) {
+                  clearInterval(transferTimeoutRef.current);
+                  history.push('/chat', {
+                    state: {
+                      match_id: docSnapshot.data().match,
+                      timeout_5: timeout5,
+                    },
+                  });
+                }
+              }, 100);
+
               setId(docSnapshot.data().match);
               setMatch('Found match! ' + docSnapshot.data().match);
               // clearTimeout(timeOut);
@@ -580,6 +623,9 @@ export default function Home() {
               // clearTimeout(timeOut);
               // Clear timeouts, to prevent the match abandon refresh.
               clearAllTimeouts();
+              if (transferTimeoutRef.current !== undefined)
+                clearInterval(transferTimeoutRef.current);
+              setProgress(-1);
               timeout5 = setTimeout(() => {
                 if (window.location.pathname == '/' && id_of_match === 'none') {
                   console.log('TIMEOUT DOC HOST');
@@ -692,28 +738,27 @@ export default function Home() {
         <div className={classes.drawerHeader} />
 
         <h2 className=" text-welcome mt-4 mb-3">Welcome back, {name}! </h2>
-        <Divider 
-          style={{ 
-            background: '#7e7e7e',}} />
+        <Divider
+          style={{
+            background: '#7e7e7e',
+          }}
+        />
         <br></br>
-          {/* Fixing search bar */}
-          <Row>
+        {/* Fixing search bar */}
+        <Row>
           <Form.Group as={Row} controlId="formPlaintextPassword">
-            <Form.Label 
-              className="text-matches"
-              column sm="2">
+            <Form.Label className="text-matches" column sm="2">
               My Matches
             </Form.Label>
-            <Col 
-              className="pr-4"
-              sm="8">
+            <Col className="pr-4" sm="8">
               <Form.Control
-                className="text-search mt-2" 
-                type="search" 
-                placeholder="Search for previous matches..." />
+                className="text-search mt-2"
+                type="search"
+                placeholder="Search for previous matches..."
+              />
             </Col>
           </Form.Group>
-          </Row>
+        </Row>
 
         {error && <Alert severity="error">{error}</Alert>}
         {match && match === 'Not searching.' && (
@@ -725,13 +770,12 @@ export default function Home() {
         {match && match !== 'Not searching.' && match !== 'Searching.' && (
           <Alert severity="success">{match}</Alert>
         )}
-        <Container>
+        {/* <Container>
           <strong>Email:</strong> {currentUser.email}
           <br></br>
           <strong>User ID:</strong> {currentUser.uid}
           <br></br>
-          {/* <strong>Refresh token:</strong> {currentUser.refreshToken}
-          <br></br> */}
+          
           <strong>Photo:</strong>
           <br></br>
           {myPhoto !== '' ? (
@@ -742,8 +786,8 @@ export default function Home() {
           <br></br>
           <strong>Verified email: </strong>
           {currentUser.emailVerified ? 'verified' : 'not verified'}
-        </Container>
-        <Link
+        </Container> */}
+        {/* <Link
           to={{
             pathname: id_of_match === 'none' ? '/' : '/chat',
             state: {
@@ -754,16 +798,16 @@ export default function Home() {
           {id_of_match === 'none'
             ? 'No match yet.'
             : 'Go to chat page with data'}
-        </Link>
+        </Link> */}
         <br></br>
         <br></br>
-        <Button
+        {/* <Button
           variant="outlined"
           color="primary"
           disabled={lockout}
           onClick={searching}>
           Search for Match
-        </Button>
+        </Button> */}
       </main>
 
       <Drawer
@@ -785,7 +829,7 @@ export default function Home() {
             )}
           </IconButton>
         </div>
-        <Divider style={{ background: '#e64398' }}/>
+        <Divider style={{ background: '#e64398' }} />
         <List>
           {itemsList.map((item, index) => {
             const { text, icon, onClick } = item;
@@ -801,6 +845,17 @@ export default function Home() {
           })}
         </List>
       </Drawer>
+      {progress !== -1 && (
+        <div
+          style={{
+            position: 'fixed',
+            left: '0',
+            bottom: '0',
+            width: '100%',
+          }}>
+          <LinearProgress variant="determinate" value={progress} />
+        </div>
+      )}
     </React.Fragment>
   );
 }

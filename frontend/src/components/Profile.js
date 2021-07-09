@@ -36,7 +36,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import HomeIcon from '@material-ui/icons/Home';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
-// Drawer 
+// Drawer
 const drawerWidth = 300;
 
 const useStyles = makeStyles((theme) => ({
@@ -59,7 +59,6 @@ const useStyles = makeStyles((theme) => ({
   },
   title: {
     flexGrow: 1,
-
   },
   hide: {
     display: 'none',
@@ -70,7 +69,7 @@ const useStyles = makeStyles((theme) => ({
   },
   drawerPaper: {
     width: drawerWidth,
-    background: "#FFDCF2",
+    background: '#FFDCF2',
   },
   drawerHeader: {
     display: 'flex',
@@ -80,8 +79,8 @@ const useStyles = makeStyles((theme) => ({
     ...theme.mixins.toolbar,
     justifyContent: 'flex-start',
   },
-  listItemText:{
-    fontSize:'25px',
+  listItemText: {
+    fontSize: '25px',
     fontWeight: 'bold',
     color: '#E64398',
   },
@@ -92,7 +91,7 @@ const useStyles = makeStyles((theme) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
-    marginRight: -drawerWidth,
+    // marginRight: -drawerWidth,
   },
   contentShift: {
     transition: theme.transitions.create('margin', {
@@ -104,20 +103,19 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function Profile() {
-
   // Drawer
   const classes = useStyles();
   const itemsList = [
     {
-      text: "Home",
-      icon: <HomeIcon style={{ color: "#e64398" }} />,
-      onClick: redirectToHome
+      text: 'Home',
+      icon: <HomeIcon style={{ color: '#e64398' }} />,
+      onClick: redirectToHome,
     },
     {
-      text: "Logout",
-      icon: <ExitToAppIcon style={{ color: "#e64398" }} />,
-      onClick: handleLogout
-    }
+      text: 'Logout',
+      icon: <ExitToAppIcon style={{ color: '#e64398' }} />,
+      onClick: handleLogout,
+    },
   ];
 
   const theme = useTheme();
@@ -298,35 +296,33 @@ export default function Profile() {
         position="fixed"
         className={clsx(classes.appBar, {
           [classes.appBarShift]: open,
-        })}
-      >
+        })}>
         <Toolbar>
-        <Typography variant="h6" noWrap className={classes.title}>
-          <Navbar bg="transparent">
-            <Navbar.Brand>
-              <img
-                src="/DimeAssets/headerlogo.png"
-                width="250px"
-                height="100%"
-                className="d-inline-block align-top"
-                alt="React Bootstrap logo"
-              />
-            </Navbar.Brand>
-          </Navbar> 
-        </Typography>
+          <Typography variant="h6" noWrap className={classes.title}>
+            <Navbar bg="transparent">
+              <Navbar.Brand>
+                <img
+                  src="/DimeAssets/headerlogo.png"
+                  width="250px"
+                  height="100%"
+                  className="d-inline-block align-top"
+                  alt="React Bootstrap logo"
+                />
+              </Navbar.Brand>
+            </Navbar>
+          </Typography>
 
           <IconButton
             color="default"
             aria-label="open drawer"
             edge="end"
             onClick={handleDrawerOpen}
-            className={clsx(open && classes.hide)}
-          >
+            className={clsx(open && classes.hide)}>
             <MenuIcon />
           </IconButton>
         </Toolbar>
       </AppBar>
-      
+
       <main
         className={clsx(classes.content, {
           [classes.contentShift]: open,
@@ -334,44 +330,44 @@ export default function Profile() {
         <div className={classes.drawerHeader} />
         <h2 className="text-center mb-4">Profile</h2>
 
-      {error && (
-        <Alert severity="error">
-          <AlertTitle>Error</AlertTitle>
-          {error}
-        </Alert>
-      )}
-
-      <Container>
-        <strong>First Name:</strong> <span id="first"></span>
-        <br></br>
-        <strong>Last Name:</strong> <span id="last"></span>
-        <br></br>
-        <strong>Birthday:</strong> <span id="birth"></span>
-        <br></br>
-        <strong>Email:</strong> {currentUser.email}
-        <br></br>
-        <strong>Phone Number:</strong> <span id="phone"></span>
-        <br></br>
-        <strong>Exit Message:</strong> <span id="exit"></span>
-        <br></br>
-        <strong>Sex:</strong> <span id="sex"></span>
-        <br></br>
-        <strong>Sexual Orientation:</strong> <span id="orientation"></span>
-        <br></br>
-        <strong>User ID:</strong> {currentUser.uid}
-        <br></br>
-        <strong>Photo:</strong>
-        <br></br>
-        {myPhoto !== '' ? (
-          <img height="100px" width="100px" src={myPhoto} id="photo"></img>
-        ) : (
-          <></>
+        {error && (
+          <Alert severity="error">
+            <AlertTitle>Error</AlertTitle>
+            {error}
+          </Alert>
         )}
-        <br></br>
-        {/* Temporary file input field, just needs style and
+
+        <Container>
+          <strong>First Name:</strong> <span id="first"></span>
+          <br></br>
+          <strong>Last Name:</strong> <span id="last"></span>
+          <br></br>
+          <strong>Birthday:</strong> <span id="birth"></span>
+          <br></br>
+          <strong>Email:</strong> {currentUser.email}
+          <br></br>
+          <strong>Phone Number:</strong> <span id="phone"></span>
+          <br></br>
+          <strong>Exit Message:</strong> <span id="exit"></span>
+          <br></br>
+          <strong>Sex:</strong> <span id="sex"></span>
+          <br></br>
+          <strong>Sexual Orientation:</strong> <span id="orientation"></span>
+          <br></br>
+          <strong>User ID:</strong> {currentUser.uid}
+          <br></br>
+          <strong>Photo:</strong>
+          <br></br>
+          {myPhoto !== '' ? (
+            <img height="100px" width="100px" src={myPhoto} id="photo"></img>
+          ) : (
+            <></>
+          )}
+          <br></br>
+          {/* Temporary file input field, just needs style and
         probably some custom input fields */}
-        <div className="my-3">
-          {/* <input type="file" id="photoUploadGroup" />
+          <div className="my-3">
+            {/* <input type="file" id="photoUploadGroup" />
 
           <button
             className="btn btn-primary"
@@ -379,55 +375,55 @@ export default function Profile() {
             onClick={processPhoto}>
             Upload Photo
           </button> */}
-          <input
-            onChange={() => {
-              if (
-                document.getElementById('photoUploadGroup') &&
-                document.getElementById('photoUploadGroup').files[0]
-              )
-                setSelectedFile(
-                  document.getElementById('photoUploadGroup').files[0].name
-                );
-            }}
-            accept="image/*"
-            id="photoUploadGroup"
-            hidden
-            type="file"
-          />
-          <label htmlFor="photoUploadGroup">
+            <input
+              onChange={() => {
+                if (
+                  document.getElementById('photoUploadGroup') &&
+                  document.getElementById('photoUploadGroup').files[0]
+                )
+                  setSelectedFile(
+                    document.getElementById('photoUploadGroup').files[0].name
+                  );
+              }}
+              accept="image/*"
+              id="photoUploadGroup"
+              hidden
+              type="file"
+            />
+            <label htmlFor="photoUploadGroup">
+              <Button
+                variant="contained"
+                color="primary"
+                component="span"
+                startIcon={<AttachmentIcon />}>
+                Select
+              </Button>
+            </label>
+            <Box my={1}>{selectedFile}</Box>
             <Button
               variant="contained"
-              color="primary"
-              component="span"
-              startIcon={<AttachmentIcon />}>
-              Select
+              color="default"
+              endIcon={<CloudUploadIcon />}
+              id="photoUploadButton"
+              onClick={processPhoto}
+              disabled={!selectedFile}>
+              Upload
             </Button>
-          </label>
-          <Box my={1}>{selectedFile}</Box>
-          <Button
-            variant="contained"
-            color="default"
-            endIcon={<CloudUploadIcon />}
-            id="photoUploadButton"
-            onClick={processPhoto}
-            disabled={!selectedFile}>
-            Upload
-          </Button>
-        </div>
-        {isUploading && (
-          <LinearProgress variant="determinate" value={progress} />
-        )}
-        {photoStatus}
-        <Link to="/update-profile" className="btn btn-primary">
-          Update Profile
-        </Link>
-      </Container>
-      <Button variant="contained" color="primary" >
-        Home
-      </Button>
-      <Button variant="contained" color="secondary" onClick={handleLogout}>
-        Log Out
-      </Button>
+          </div>
+          {isUploading && (
+            <LinearProgress variant="determinate" value={progress} />
+          )}
+          {photoStatus}
+          <Link to="/update-profile" className="btn btn-primary">
+            Update Profile
+          </Link>
+        </Container>
+        <Button variant="contained" color="primary">
+          Home
+        </Button>
+        <Button variant="contained" color="secondary" onClick={handleLogout}>
+          Log Out
+        </Button>
       </main>
 
       <Drawer
@@ -437,30 +433,34 @@ export default function Profile() {
         open={open}
         classes={{
           paper: classes.drawerPaper,
-        }}
-      >
-        <div className={classes.drawerHeader}
-        >
+        }}>
+        <div className={classes.drawerHeader}>
           <IconButton onClick={handleDrawerClose}>
-            {theme.direction === 'rtl' ? <ChevronLeftIcon /> : <ChevronRightIcon style={{ color: "#e64398", fontSize:'30px', }}/>}
+            {theme.direction === 'rtl' ? (
+              <ChevronLeftIcon />
+            ) : (
+              <ChevronRightIcon
+                style={{ color: '#e64398', fontSize: '30px' }}
+              />
+            )}
           </IconButton>
         </div>
-        <Divider style={{ background: '#e64398' }}/>
+        <Divider style={{ background: '#e64398' }} />
         <List>
-          {
-            itemsList.map((item, index) => {
-              const {text, icon, onClick} = item;
-              return (
-                <ListItem button key = {text} onClick={onClick}>
-                  {icon && <ListItemIcon>{icon}</ListItemIcon>}
-                  <ListItemText classes={{primary:classes.listItemText}} primary={text}/>
-                </ListItem>
-              );
-            })
-          }
+          {itemsList.map((item, index) => {
+            const { text, icon, onClick } = item;
+            return (
+              <ListItem button key={text} onClick={onClick}>
+                {icon && <ListItemIcon>{icon}</ListItemIcon>}
+                <ListItemText
+                  classes={{ primary: classes.listItemText }}
+                  primary={text}
+                />
+              </ListItem>
+            );
+          })}
         </List>
       </Drawer>
-      
     </React.Fragment>
   );
 }
