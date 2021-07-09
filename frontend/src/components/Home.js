@@ -352,7 +352,7 @@ export default function Home() {
         //   - no current match
         //   - are they what I am searching for
         //   - am I what they are searching for
-        console.log(doc.data().search_sex);
+        // console.log(doc.data().search_sex);
         //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         if (
           doc.data().match === '' &&
@@ -431,6 +431,8 @@ export default function Home() {
             seeker: currentUser.uid,
             host_socket_id: '',
             join_socket_id: '',
+            seekerTail: 'false',
+            matchTail: 'false',
           });
         // Just posted the new doc to the 'searching' collection.
         console.log('DOC CREATED');

@@ -82,6 +82,13 @@ io.on("connection", (socket) => {
     socket.to(room).emit("abandoned", "Your match left the session.");
     socket.disconnect(0);
   });
+
+  socket.on("leave-room-silently", (user, room) => {
+    console.log("> User", user, "left room silently.", room);
+    socket.leave(room);
+    socket.disconnect(0);
+  });
+
   // Send a message to a particular room.
   socket.on("send-to-room", (user, room, message) => {
     socket.to(room).emit("message", message, user);

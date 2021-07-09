@@ -15,8 +15,13 @@ const firestore = firebase.firestore();
 
 export default function Chat() {
   const messageRef = useRef();
+
+  const timeoutRef1 = useRef();
+  const timeoutRef2 = useRef();
+  const socketRef = useRef();
+
   const EXPIRE_IN_MINUTES = 0.1; // 10 minutes
-  const modalExpire = 0.5; // 30 second
+  const modalExpire = 10000; // 30 seconds in MS
   const [room, setRoom] = useState('');
   //const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -31,12 +36,13 @@ export default function Chat() {
   const [match_name, setMatchName] = useState('user');
   const [match_sex, setMatchSex] = useState('');
   const [match_photo, setMatchPhoto] = useState('');
-
+  // console.log(socket);
   const location = useLocation();
   // Gets the passed in match id from the link in the home page
   // timeout_5 is passed in from the home link. it prevents removing the match document in the background.
 
   const history = useHistory();
+  const observer = useRef(null);
 
   if (location.state === undefined) window.location.href = '/';
 
@@ -76,6 +82,8 @@ export default function Chat() {
   }
 
   function noMatch() {
+    if (timeoutRef1.current !== undefined) clearTimeout(timeoutRef1.current);
+    if (timeoutRef2.current !== undefined) clearTimeout(timeoutRef2.current);
     setTimeout(async () => {
       await firestore
         .collection('users')
@@ -91,14 +99,58 @@ export default function Chat() {
         });
       socket.emit('leave-room', currentUser.uid, room);
       console.log('LEFT MY ROOM TOO');
+
       history.push('/after', {
         state: { match_id: match_id, type: 'user_didnt_go_well' },
       });
     }, 0);
   }
 
-  function pendingMatch() {
-  /*
+  async function noMatchTimeout() {
+    var seeker = 'none';
+    var match = 'none';
+
+    var docRef = firestore.collection('searching').doc(currentUser.uid);
+    var doc = await docRef.get();
+    if (doc.exists) {
+      seeker = currentUser.uid;
+      match = match_id;
+    } else {
+      seeker = match_id;
+      match = currentUser.uid;
+    }
+
+    if (currentUser.uid == seeker) {
+      await firestore.collection('searching').doc(currentUser.uid).update({
+        seekerTail: 'timeout',
+      });
+      console.log('I am the seeker, I set my value TIMEOUT.');
+    }
+
+    if (currentUser.uid == match) {
+      await firestore.collection('searching').doc(match_id).update({
+        matchTail: 'timeout',
+      });
+      console.log('I am the match, I set my value TIMEOUT.');
+    }
+    socketRef.current.emit('leave-room-silently', currentUser.uid, room);
+
+    history.push('/after', {
+      state: { match_id: match_id, type: 'timeout' },
+    });
+
+    console.log('Left room silently');
+  }
+
+  async function pendingMatch() {
+    // This disconnects then sends to the /after page with a state.
+    function leavePageWith(stateString) {
+      socketRef.current.emit('leave-room-silently', currentUser.uid, room);
+      history.push('/after', {
+        state: { match_id: match_id, type: stateString },
+      });
+    }
+    /*
   Lord Lui Notes:
   it would definetly have to be with sockets 
   (emit an event to the other user) 
@@ -122,79 +174,132 @@ export default function Chat() {
 
   (just cause otherwise they share the same data when testing)*/
 
-    if (localStorage.getItem('modalExpiry') === null) {
-      var exp = Date.now() + modalExpire * 60000;
-      localStorage.setItem('modalExpiry', exp);
-      console.log('set to', exp);
-    }
-    
-    setTimeout(async () => {
-      var docRef =  firestore.collection('searching').doc(currentUser.uid);
-      var doc = await docRef.get();
-      var seeker = doc.get("seeker");
-      var match = doc.get("match");
+    // if (localStorage.getItem('modalExpiry') === null) {
+    //   var exp = Date.now() + modalExpire * 60000;
+    //   localStorage.setItem('modalExpiry', exp);
+    //   console.log('set to', exp);
+    // }
 
-      if (currentUser.uid == seeker)
-      {
-        await firestore
+    // If a user clicks a match dime, stop the timeouts.
+    if (timeoutRef1.current !== undefined) clearTimeout(timeoutRef1.current);
+    if (timeoutRef2.current !== undefined) clearTimeout(timeoutRef2.current);
+
+    // This extended timeout waits for an answer.
+    var extended_timeout = setTimeout(() => {
+      socketRef.current.emit('leave-room-silently', currentUser.uid, room);
+      observer.current();
+      history.push('/after', {
+        state: { match_id: match_id, type: 'extended_timeout' },
+      });
+    }, modalExpire);
+    // Identify who is who.
+    var seeker = 'none';
+    var match = 'none';
+
+    // There is only one doc. If I am the doc name, I am seeker. else, match
+    var docRef = firestore.collection('searching').doc(currentUser.uid);
+    var doc = await docRef.get();
+    if (doc.exists) {
+      seeker = currentUser.uid;
+      match = match_id;
+    } else {
+      seeker = match_id;
+      match = currentUser.uid;
+    }
+
+    // If im seeker, I need to set my value to true and wait for matchTail.
+    if (currentUser.uid == seeker) {
+      await firestore.collection('searching').doc(currentUser.uid).update({
+        seekerTail: 'true',
+      });
+      console.log('I am the seeker, I set my value true.');
+      // Now, check immediately just in case.
+      var res = await firestore
         .collection('searching')
         .doc(currentUser.uid)
-        .set({
-          seekerTail: true
-        });
-        console.log('Waiting on Dime');
-       }
-
-        if (currentUser.uid == match)
-        {
-          await firestore
+        .get();
+      if (res.data().matchTail == 'true') {
+        // OTHER PERSON SAID YES!!!!
+        console.log('match said yes!!');
+        clearTimeout(extended_timeout);
+        leavePageWith('match_made');
+      } else {
+        // Nothing yet, lets wait for a change to the matchTail.
+        observer.current = firestore
           .collection('searching')
-          .doc(currentUser.uid)  
-          .set({
-            matchTail: true
+          .doc(currentUser.uid)
+          .onSnapshot((docSnapshot) => {
+            if (
+              docSnapshot &&
+              docSnapshot.data() &&
+              docSnapshot.data().matchTail == 'true'
+            ) {
+              // THEY SAID YES !! (but after)
+              console.log('other person (the match) said yes after');
+              observer.current();
+              clearTimeout(extended_timeout);
+              leavePageWith('match_made');
+            }
+            if (
+              docSnapshot &&
+              docSnapshot.data() &&
+              docSnapshot.data().matchTail == 'timeout'
+            ) {
+              // The other person timed out..
+              console.log('other person (the match) timed out');
+              observer.current();
+              clearTimeout(extended_timeout);
+              leavePageWith('match_timedout');
+            }
           });
-          console.log('Waiting on Dime');
-        }
-      
-        const seekerTail = await firestore.collection('searching').doc(currentUser.uid).get("seekerTail");
-        const matchTail = await firestore.collection('searching').doc(currentUser.uid).get("matchTail");
-        console.log('checking..');
-        var current_time = Date.now();
-        if (current_time >= localStorage.getItem('modalExpiry')) {
-          if(seeker == true && match == true)
-          {
-            Match();
-          }
-          else noMatch();
       }
-    }, 0); 
-  }
+    }
 
-  // Add match to user's SuccessMatch Array and vice versa
-  function Match() {
-    setTimeout(async () => {
-      // Add match to user array
-      await firestore
-        .collection('users')
-        .doc(currentUser.uid)
-        .update({
-          SuccessMatch: firebase.firestore.FieldValue.arrayUnion(match_id),
-        });
-      // Add user to match array
-      await firestore
-        .collection('users')
-        .doc(match_id)
-        .update({
-          SuccessMatch: firebase.firestore.FieldValue.arrayUnion(currentUser.uid),
-        });
-      console.log(refAfterChat.current);
-      history.push('/after', {
-        state: { match_id: match_id, type: 'match_made' },
+    // If im match, I need to set my match to true and wait for seekerTail.
+    if (currentUser.uid == match) {
+      await firestore.collection('searching').doc(match_id).update({
+        matchTail: 'true',
       });
-      socket.emit('leave-room', currentUser.uid, room);
-      console.log('LEFT MY ROOM');
-    }, 0);
-}
+      console.log('I am the match, I set my value true.');
+      // Now, check immediately just in case.
+      var res = await firestore.collection('searching').doc(match_id).get();
+      if (res.data().seekerTail == 'true') {
+        // OTHER PERSON SAID YES!!!!
+        console.log('seeker said yes!!');
+        clearTimeout(extended_timeout);
+        leavePageWith('match_made');
+      } else {
+        // I need to passively listen for a document change.
+        observer.current = firestore
+          .collection('searching')
+          .doc(match_id)
+          .onSnapshot((docSnapshot) => {
+            if (
+              docSnapshot &&
+              docSnapshot.data() &&
+              docSnapshot.data().seekerTail == 'true'
+            ) {
+              // THEY SAID YES !! (but after)
+              console.log('other person (the seeker) said yes after');
+              observer.current();
+              clearTimeout(extended_timeout);
+              leavePageWith('match_made');
+            }
+            if (
+              docSnapshot &&
+              docSnapshot.data() &&
+              docSnapshot.data().seekerTail == 'timeout'
+            ) {
+              // The other person timed out..
+              console.log('other person (the seeker) timed out');
+              observer.current();
+              clearTimeout(extended_timeout);
+              leavePageWith('match_timedout');
+            }
+          });
+      }
+    }
+  }
 
   function MatchModal(props) {
     return (
@@ -205,10 +310,10 @@ export default function Chat() {
         centered>
         <Modal.Header>
           <Modal.Title id="contained-modal-title-vcenter">
-          <Image
-            style={{ height: '100px', width: '300px', cursor: 'pointer' }}
-            src="DimeAssets/headerlogo.png"
-          />
+            <Image
+              style={{ height: '100px', width: '300px', cursor: 'pointer' }}
+              src="DimeAssets/headerlogo.png"
+            />
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -219,7 +324,7 @@ export default function Chat() {
           <Image
             style={{ height: '200px', width: '200px', cursor: 'pointer' }}
             src="DimeAssets/hearteyes.png"
-            onClick={pendingMatch} 
+            onClick={pendingMatch}
             alt="Tails"
           />
           <Image
@@ -242,12 +347,12 @@ export default function Chat() {
     clearTimeout(timeout_5);
     // This gets the match data.
     fetchMatchInfo();
-    const socket = io(bp.buildPath(''), { forceNew: true });
-    socket.auth = { id };
-    socket.connect();
-    socket.on('connect', () => {
+    const sock = io(bp.buildPath(''), { forceNew: true });
+    sock.auth = { id };
+    sock.connect();
+    sock.on('connect', () => {
       console.log(
-        `Email: "${currentUser.email}" \n With User ID: "${currentUser.uid}" connected with socket id: "${socket.id}"`
+        `Email: "${currentUser.email}" \n With User ID: "${currentUser.uid}" connected with socket id: "${sock.id}"`
       );
     });
 
@@ -262,25 +367,35 @@ export default function Chat() {
         clearInterval(checkLoop);
         return;
       }
+
       var current = Date.now();
-      console.log('checking..');
       if (current >= localStorage.getItem('chatExpiry')) {
+        // The chat is over, logic for after chat goes here.
         clearInterval(checkLoop);
         setModalShow(true);
         setAfterChat(true);
         refAfterChat.current = true;
+        timeoutRef1.current = setTimeout(() => {
+          console.log('calling no match timeout');
+
+          noMatchTimeout();
+        }, modalExpire);
       }
     }, 2000);
 
     var current_time = Date.now();
-    console.log('checking..');
     if (current_time >= localStorage.getItem('chatExpiry')) {
-      //console.log('ITS OVER');
       //Modal match vs non-match
-      clearInterval(checkLoop);
+      // The chat is over, logic for after chat goes here.
+      console.log('i ran once');
+      clearInterval(checkLoop); // cancels the first loop.
       setModalShow(true);
       setAfterChat(true);
       refAfterChat.current = true;
+      timeoutRef2.current = setTimeout(() => {
+        console.log('calling no match timeout 2');
+        noMatchTimeout();
+      }, modalExpire);
     }
 
     // This is new!
@@ -289,7 +404,7 @@ export default function Chat() {
     const ids = [currentUser.uid, match_id];
     ids.sort();
     const new_room = ids[0] + ids[1];
-    socket.emit(
+    sock.emit(
       'join-room',
       currentUser.uid.toString(),
       new_room.toString(),
@@ -302,13 +417,14 @@ export default function Chat() {
       }
     );
 
-    setSocket(socket);
+    setSocket(sock);
+    socketRef.current = sock;
     // Wait for incoming private messages.
-    socket.on('message', (message, user) => {
+    sock.on('message', (message, user) => {
       if (user !== currentUser.uid) displayMessage(message, 'received');
       console.log(user);
     });
-    socket.on('abandoned', (message) => {
+    sock.on('abandoned', (message) => {
       //match left & setting the pair as no match
       displayMessage('Your match left the chat. Switching..', 'system');
       setTimeout(async () => {
@@ -337,7 +453,11 @@ export default function Chat() {
             state: { match_id: match_id, type: 'match_didnt_go_well' },
           });
         }
-        socket.emit('leave-room', currentUser.uid, room);
+        sock.emit('leave-room', currentUser.uid, room);
+        if (timeoutRef1.current !== undefined)
+          clearTimeout(timeoutRef1.current);
+        if (timeoutRef2.current !== undefined)
+          clearTimeout(timeoutRef2.current);
         console.log('LEFT MY ROOM');
       }, 0);
     });
@@ -390,6 +510,9 @@ export default function Chat() {
         });
 
       socket.emit('leave-room', currentUser.uid, room);
+      console.log('LEFT ROOM DUE TO LOGOUT');
+      if (timeoutRef1.current !== undefined) clearTimeout(timeoutRef1.current);
+      if (timeoutRef2.current !== undefined) clearTimeout(timeoutRef2.current);
       await logout();
       history.push('/login', {
         state: { fromHome: true, oldID: currentUser.uid },
@@ -405,6 +528,9 @@ export default function Chat() {
   function redirectToHome() {
     // socket.emit('leave-room', currentUser.uid, room);
     socket.emit('leave-room', currentUser.uid, room);
+    console.log('LEFT ROOM WENT HOME');
+    if (timeoutRef1.current !== undefined) clearTimeout(timeoutRef1.current);
+    if (timeoutRef2.current !== undefined) clearTimeout(timeoutRef2.current);
     history.push('/');
     // window.location.reload(); CHANGED_NOW
   }
@@ -412,6 +538,7 @@ export default function Chat() {
   async function redirectToAfter() {
     // user left & setting pair to no match
     socket.emit('leave-room', currentUser.uid, room);
+    console.log('LEFT ROOM: REDIRECT TO AFTER');
     await firestore
       .collection('users')
       .doc(currentUser.uid)
@@ -424,6 +551,8 @@ export default function Chat() {
       .update({
         FailMatch: firebase.firestore.FieldValue.arrayUnion(currentUser.uid),
       });
+    if (timeoutRef1.current !== undefined) clearTimeout(timeoutRef1.current);
+    if (timeoutRef2.current !== undefined) clearTimeout(timeoutRef2.current);
 
     history.push('/after', {
       state: { match_id: match_id, type: 'user_abandoned' },
