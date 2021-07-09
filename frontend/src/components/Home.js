@@ -60,7 +60,6 @@ const useStyles = makeStyles((theme) => ({
   },
   title: {
     flexGrow: 1,
-
   },
   hide: {
     display: 'none',
@@ -71,7 +70,7 @@ const useStyles = makeStyles((theme) => ({
   },
   drawerPaper: {
     width: drawerWidth,
-    background: "#FFDCF2",
+    background: '#FFDCF2',
   },
   drawerHeader: {
     display: 'flex',
@@ -81,8 +80,8 @@ const useStyles = makeStyles((theme) => ({
     ...theme.mixins.toolbar,
     justifyContent: 'flex-start',
   },
-  listItemText:{
-    fontSize:'25px',
+  listItemText: {
+    fontSize: '25px',
     fontWeight: 'bold',
     color: '#E64398',
   },
@@ -109,15 +108,15 @@ export default function Home() {
   const classes = useStyles();
   const itemsList = [
     {
-      text: "Edit Profile",
-      icon: <CreateIcon style={{ color: "#e64398" }} />,
-      onClick: redirectToProfile
+      text: 'Edit Profile',
+      icon: <CreateIcon style={{ color: '#e64398' }} />,
+      onClick: redirectToProfile,
     },
     {
-      text: "Logout",
-      icon: <ExitToAppIcon style={{ color: "#e64398" }} />,
-      onClick: handleLogout
-    }
+      text: 'Logout',
+      icon: <ExitToAppIcon style={{ color: '#e64398' }} />,
+      onClick: handleLogout,
+    },
   ];
 
   const theme = useTheme();
@@ -186,7 +185,7 @@ export default function Home() {
   // the search function.
   useEffect(() => {
     localStorage.removeItem('chatExpiry');
-    document.body.style.backgroundColor = "white";
+    document.body.style.backgroundColor = 'white';
     async function getIntialUserPhoto() {
       try {
         var config = {
@@ -642,7 +641,6 @@ export default function Home() {
     }
   }
 
-  
   // The actual JSX components. The top is the errors/match states,
   // conditionally rendered.
   return (
@@ -664,23 +662,22 @@ export default function Home() {
         position="fixed"
         className={clsx(classes.appBar, {
           [classes.appBarShift]: open,
-        })}
-      >
+        })}>
         <Toolbar>
-        <Typography variant="h6" noWrap className={classes.title}>
-          <Navbar bg="transparent">
-            <Navbar.Brand>
-              <img
-                src="/DimeAssets/headerlogo.png"
-                width="250px"
-                height="100%"
-                className="d-inline-block align-top"
-                alt="React Bootstrap logo"
-              />
-            </Navbar.Brand>
-          </Navbar> 
-        </Typography>
-                
+          <Typography variant="h6" noWrap className={classes.title}>
+            <Navbar bg="transparent">
+              <Navbar.Brand>
+                <img
+                  src="/DimeAssets/headerlogo.png"
+                  width="250px"
+                  height="100%"
+                  className="d-inline-block align-top"
+                  alt="React Bootstrap logo"
+                />
+              </Navbar.Brand>
+            </Navbar>
+          </Typography>
+
           <Button
             className="btn-chat mx-3"
             disabled={lockout}
@@ -689,26 +686,27 @@ export default function Home() {
           </Button>
 
           <IconButton
-            color="gray"
+            color="default"
             aria-label="open drawer"
             edge="end"
             onClick={handleDrawerOpen}
-            className={clsx(open && classes.hide)}
-          >
+            className={clsx(open && classes.hide)}>
             <MenuIcon />
           </IconButton>
         </Toolbar>
       </AppBar>
-      
+
       <main
         className={clsx(classes.content, {
           [classes.contentShift]: open,
         })}>
         <div className={classes.drawerHeader} />
-        <h2 className="text-center mt-4 mb-4">Welcome back, {currentUser.firstName}! </h2>
+        <h2 className="text-center mt-4 mb-4">
+          Welcome back, {currentUser.firstName}!{' '}
+        </h2>
         {error && <Alert severity="error">{error}</Alert>}
         {match && match === 'Not searching.' && (
-        <Alert severity="warning">{match}</Alert>
+          <Alert severity="warning">{match}</Alert>
         )}
         {match && match === 'Searching.' && (
           <Alert severity="info">{match}</Alert>
@@ -742,7 +740,9 @@ export default function Home() {
               timeout_5: timeout5,
             },
           }}>
-          {id_of_match === 'none' ? 'No match yet.' : 'Go to chat page with data'}
+          {id_of_match === 'none'
+            ? 'No match yet.'
+            : 'Go to chat page with data'}
         </Link>
         <br></br>
         <br></br>
@@ -762,27 +762,32 @@ export default function Home() {
         open={open}
         classes={{
           paper: classes.drawerPaper,
-        }}
-      >
-        <div className={classes.drawerHeader}
-        >
+        }}>
+        <div className={classes.drawerHeader}>
           <IconButton onClick={handleDrawerClose}>
-            {theme.direction === 'rtl' ? <ChevronLeftIcon /> : <ChevronRightIcon style={{ color: "#e64398", fontSize:'30px', }}/>}
+            {theme.direction === 'rtl' ? (
+              <ChevronLeftIcon />
+            ) : (
+              <ChevronRightIcon
+                style={{ color: '#e64398', fontSize: '30px' }}
+              />
+            )}
           </IconButton>
         </div>
         <Divider />
         <List>
-          {
-            itemsList.map((item, index) => {
-              const {text, icon, onClick} = item;
-              return (
-                <ListItem button key = {text} onClick={onClick}>
-                  {icon && <ListItemIcon>{icon}</ListItemIcon>}
-                  <ListItemText classes={{primary:classes.listItemText}} primary={text}/>
-                </ListItem>
-              );
-            })
-          }
+          {itemsList.map((item, index) => {
+            const { text, icon, onClick } = item;
+            return (
+              <ListItem button key={text} onClick={onClick}>
+                {icon && <ListItemIcon>{icon}</ListItemIcon>}
+                <ListItemText
+                  classes={{ primary: classes.listItemText }}
+                  primary={text}
+                />
+              </ListItem>
+            );
+          })}
         </List>
       </Drawer>
     </React.Fragment>

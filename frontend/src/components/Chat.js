@@ -18,6 +18,7 @@ export default function Chat() {
 
   const timeoutRef1 = useRef();
   const timeoutRef2 = useRef();
+  const extendedTimeoutRef = useRef();
   const socketRef = useRef();
 
   const EXPIRE_IN_MINUTES = 0.1; // 10 minutes
@@ -150,6 +151,23 @@ export default function Chat() {
         state: { match_id: match_id, type: stateString },
       });
     }
+    // This sets both eachothe to success matches, if we get actually get there.
+    async function setSuccessMatches() {
+      await firestore
+        .collection('users')
+        .doc(currentUser.uid)
+        .update({
+          SuccessMatch: firebase.firestore.FieldValue.arrayUnion(match_id),
+        });
+      await firestore
+        .collection('users')
+        .doc(match_id)
+        .update({
+          SuccessMatch: firebase.firestore.FieldValue.arrayUnion(
+            currentUser.uid
+          ),
+        });
+    }
     /*
   Lord Lui Notes:
   it would definetly have to be with sockets 
@@ -192,6 +210,10 @@ export default function Chat() {
         state: { match_id: match_id, type: 'extended_timeout' },
       });
     }, modalExpire);
+
+    // Save in ref incase a regular abandon occurs.
+    extendedTimeoutRef.current = extended_timeout;
+
     // Identify who is who.
     var seeker = 'none';
     var match = 'none';
@@ -220,8 +242,10 @@ export default function Chat() {
         .get();
       if (res.data().matchTail == 'true') {
         // OTHER PERSON SAID YES!!!!
+        setSuccessMatches();
         console.log('match said yes!!');
         clearTimeout(extended_timeout);
+
         leavePageWith('match_made');
       } else {
         // Nothing yet, lets wait for a change to the matchTail.
@@ -235,6 +259,7 @@ export default function Chat() {
               docSnapshot.data().matchTail == 'true'
             ) {
               // THEY SAID YES !! (but after)
+              setSuccessMatches();
               console.log('other person (the match) said yes after');
               observer.current();
               clearTimeout(extended_timeout);
@@ -265,6 +290,7 @@ export default function Chat() {
       var res = await firestore.collection('searching').doc(match_id).get();
       if (res.data().seekerTail == 'true') {
         // OTHER PERSON SAID YES!!!!
+        setSuccessMatches();
         console.log('seeker said yes!!');
         clearTimeout(extended_timeout);
         leavePageWith('match_made');
@@ -280,6 +306,7 @@ export default function Chat() {
               docSnapshot.data().seekerTail == 'true'
             ) {
               // THEY SAID YES !! (but after)
+              setSuccessMatches();
               console.log('other person (the seeker) said yes after');
               observer.current();
               clearTimeout(extended_timeout);
@@ -458,6 +485,8 @@ export default function Chat() {
           clearTimeout(timeoutRef1.current);
         if (timeoutRef2.current !== undefined)
           clearTimeout(timeoutRef2.current);
+        if (extendedTimeoutRef.current !== undefined)
+          clearTimeout(extendedTimeoutRef.current);
         console.log('LEFT MY ROOM');
       }, 0);
     });
