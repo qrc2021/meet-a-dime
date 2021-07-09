@@ -108,17 +108,11 @@ export default function After() {
 
       {error && <Alert severity="error">{error}</Alert>}
       {pageType && pageType == 'match_abandoned' && (
-        <Alert severity="info">
-          {
-          'Your match left.'
-          }
-        </Alert>
+        <Alert severity="info">{'Your match left.'}</Alert>
       )}
       {pageType && pageType == 'user_abandoned' && (
         <Alert severity="info">
-          {
-          "Sorry it didn't go well. Keep flipping the coin!"
-          }
+          {"Sorry it didn't go well. Keep flipping the coin!"}
         </Alert>
       )}
       {pageType && pageType == 'match_didnt_go_well' && (
@@ -135,11 +129,18 @@ export default function After() {
           }
         </Alert>
       )}
+      {pageType && pageType == 'match_timedout' && (
+        <Alert severity="info">{'Match timed out.'}</Alert>
+      )}
       {pageType && pageType == 'match_made' && (
-        <Alert severity="info"
-        >{
-          "You\'ve matched with a Dime!"
-          }
+        <Alert severity="info">{"You've matched with a Dime!"}</Alert>
+      )}
+      {pageType && pageType == 'timeout' && (
+        <Alert severity="info">{'Timeout'}</Alert>
+      )}
+      {pageType && pageType == 'extended_timeout' && (
+        <Alert severity="info">
+          {'Timeout extended (i said yes, they did not)'}
         </Alert>
       )}
       <Container>
