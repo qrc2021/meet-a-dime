@@ -675,7 +675,7 @@ export default function Chat() {
                 Send
               </Button>
               <br></br>
-              <h3>Our room id: {room}</h3>
+              {/* <h3>Our room id: {room}</h3> */}
             </Form>
           )}
         </Container>

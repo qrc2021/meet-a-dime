@@ -138,8 +138,10 @@ export default function Home() {
   // when lockout is true, the search button is disabled. this is for
   // locking the button while states are changing or loading is occuring
   const [lockout, setLockout] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [myPhoto, setMyPhoto] = useState('');
   const [progress, setProgress] = useState(-1);
+  const [transitioning, setTransitioning] = useState(false);
   const [name, setName] = useState('');
   // the firebase firestore instance, used to query, add, delete, edit from DB.
   const firestore = firebase.firestore();
@@ -259,6 +261,7 @@ export default function Home() {
       }
       // Unlock the button now that initial tasks are done.
       setLockout(false);
+      setLoading(false);
     }
     // call the function that was just defined here.
     purgeOld();
@@ -729,6 +732,11 @@ export default function Home() {
             <MenuIcon />
           </IconButton>
         </Toolbar>
+        {loading && (
+          <div>
+            <LinearProgress style={{ backgroundColor: 'pink' }} />
+          </div>
+        )}
       </AppBar>
 
       <main

@@ -138,6 +138,7 @@ export default function Profile() {
   const [progress, setProgress] = useState(0);
   const [selectedFile, setSelectedFile] = useState('');
   const firestore = firebase.firestore();
+  const [switching, setSwitching] = useState(true);
   const { currentUser, logout } = useAuth();
   const history = useHistory();
 
@@ -159,6 +160,7 @@ export default function Profile() {
   }
 
   function redirectToHome() {
+    setSwitching(true);
     history.push('/');
   }
 
@@ -254,6 +256,7 @@ export default function Profile() {
         document.getElementById('sex').innerHTML = userSex;
         document.getElementById('orientation').innerHTML = userOrientation;
         setMyPhoto(photo);
+        setSwitching(false);
 
         // Set some items into local storage for easy reference later
         //   its only 5 items right now just so it matches the other
@@ -286,6 +289,7 @@ export default function Profile() {
   // so to update: set the stuff in database, then call fetchUserData()
   // after that is complete, like in the .then() after the promise.
   useEffect(() => {
+    document.body.style.backgroundColor = 'white';
     fetchUserData();
   }, []);
 
@@ -321,6 +325,11 @@ export default function Profile() {
             <MenuIcon />
           </IconButton>
         </Toolbar>
+        {switching && (
+          <div>
+            <LinearProgress style={{ backgroundColor: 'pink' }} />
+          </div>
+        )}
       </AppBar>
 
       <main
@@ -418,12 +427,12 @@ export default function Profile() {
             Update Profile
           </Link>
         </Container>
-        <Button variant="contained" color="primary">
+        {/* <Button variant="contained" color="primary">
           Home
         </Button>
         <Button variant="contained" color="secondary" onClick={handleLogout}>
           Log Out
-        </Button>
+        </Button> */}
       </main>
 
       <Drawer
