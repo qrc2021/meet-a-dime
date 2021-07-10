@@ -8,7 +8,7 @@ body {
 
 .btn-primary {
   font-weight: bold;
-  font-size: 30px;
+  font-size: 24px;
   color: white;
   background-color: #e64398 !important;
   border-radius: 30px;
@@ -17,7 +17,7 @@ body {
 
 .btn-primary:hover {
   font-weight: bold;
-  font-size: 30px;
+  font-size: 24px;
   color: white;
   background-color: #ca3984 !important;
   border-radius: 30px;
@@ -26,7 +26,7 @@ body {
 
 .btn-secondary {
   font-weight: bold;
-  font-size: 30px;
+  font-size: 24px;
   color: white;
   background-color: #b39bc8 !important;
   border-radius: 30px;
@@ -35,7 +35,7 @@ body {
 
 .btn-secondary:hover {
   font-weight: bold;
-  font-size: 30px;
+  font-size: 24px;
   color: white;
   background-color: #9f88b3 !important;
   border-radius: 30px;

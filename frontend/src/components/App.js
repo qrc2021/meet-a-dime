@@ -13,7 +13,8 @@ import Verify from './Verify';
 import Chat from './Chat';
 import NoContent from './NoContent';
 import After from './After';
-import UpdateProfile from "./UpdateProfile";
+import UpdateProfile from './UpdateProfile';
+import SignInSide from './SignIn';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
           <Route exact path="/verify" component={Verify} />
           <Route path="/signup" component={SignUp} />
           <Route path="/login" component={Login} />
+          <Route path="/signin" component={SignInSide} />
           <Route path="/forgot" component={Forgot} />
           <Route component={NoContent} />
         </Switch>
