@@ -80,17 +80,25 @@ export default function UpdateProfile() {
     setPhoneVal(formattedNumber);
   }
 
+  async function handlePasswordUpdate(e) {
+    if (passwordRef.current.value !== passwordConfirmRef.current.value) {
+        return setError('Passwords do not match.');
+      }
+
+    if (passwordRef.current.value.length <= 6 && passwordRef.current.value.length != "") {
+        return setError('Password should be more than six characters.');
+    }
+
+    if (passwordRef.current.value) {
+        console.log('Password changed I hope!');
+        updatePassword(passwordRef.current.value);
+    }
+
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     var bp = require('../Path.js');
-
-    if (passwordRef.current.value !== passwordConfirmRef.current.value) {
-      return setError('Passwords do not match.');
-    }
-
-    if (passwordRef.current.value.length <= 6 && passwordRef.current.value.length != "") {
-      return setError('Password should be more than six characters.');
-    }
 
     // if (dobRef.current.value === 0)
     // {
@@ -116,38 +124,32 @@ export default function UpdateProfile() {
       3: 'Bisexual',
     };
 
-    const promises = [];
+    var path = '/profile';
     setLoading(true);
     setError("");
-
-    var path = 'profile';
     
-    if (emailRef.current.value !== currentUser.email) {
-        promises.push(updateEmail(emailRef.current.value));
-        path = 'login';
-    }
+    try {
+        if (emailRef.current.value !== currentUser.email) {
+            path = '/login';
+            updateEmail(emailRef.current.value);
+        }
 
-    if (passwordRef.current.value) {
-        promises.push(updatePassword(passwordRef.current.value));
-        path = 'login';
-    }
+        await firestore.collection('users').doc(currentUser.uid).update({firstName: firstRef.current.value.trim()});
+        await firestore.collection('users').doc(currentUser.uid).update({lastName: lastRef.current.value.trim()});
+        await firestore.collection('users').doc(currentUser.uid).update({email: emailRef.current.value});
+        await firestore.collection('users').doc(currentUser.uid).update({birth: dateState});
+        await firestore.collection('users').doc(currentUser.uid).update({sex: optionsState === '1' ? 'Male' : 'Female'});
+        await firestore.collection('users').doc(currentUser.uid).update({sexOrientation: orient[orientationState]});
+        await firestore.collection('users').doc(currentUser.uid).update({phone: phoneVal});
+        await firestore.collection('users').doc(currentUser.uid).update({exitMessage: responseRef.current.value.trim()});
 
-    promises.push(firestore.collection('users').doc(currentUser.uid).update({firstName: firstRef.current.value.trim()}));
-    promises.push(firestore.collection('users').doc(currentUser.uid).update({lastName: lastRef.current.value.trim()}));
-    promises.push(firestore.collection('users').doc(currentUser.uid).update({email: emailRef.current.value}));
-    promises.push(firestore.collection('users').doc(currentUser.uid).update({birth: dateState}));
-    promises.push(firestore.collection('users').doc(currentUser.uid).update({sex: optionsState === '1' ? 'Male' : 'Female'}));
-    promises.push(firestore.collection('users').doc(currentUser.uid).update({sexOrientation: orient[orientationState]}));
-    promises.push(firestore.collection('users').doc(currentUser.uid).update({phone: phoneVal}));
-    promises.push(firestore.collection('users').doc(currentUser.uid).update({exitMessage: responseRef.current.value.trim()}));
-
-    Promise.all(promises).then(() => {
-        history.push('/' + path);
-    }).catch(() => {
-        setError('Failed to update account');
-    }).finally(() => {
+    } catch(error) {
+        setError('Failed to update account: ' + error);
+    } finally {
         setLoading(false);
-    })
+        history.push(path);
+    }
+    
 
     /*try {
         await firestore.collection('users').doc(currentUser.uid).update({firstName: firstRef.current.value.trim()});
@@ -286,6 +288,7 @@ export default function UpdateProfile() {
                 We will never share your email with anyone.
               </Form.Text>
             </Form.Group>
+            <br></br>
             <Form.Group id="password">
               <Form.Label>New password</Form.Label>
               <Form.Control type="password" ref={passwordRef} 
@@ -296,6 +299,11 @@ export default function UpdateProfile() {
               <Form.Control type="password" ref={passwordConfirmRef} 
               placeholder="Leave blank to keep the same."/>
             </Form.Group>
+            <Button className="w-100 mt-3" onClick={handlePasswordUpdate}>
+                Change Password
+            </Button>
+            <br></br>
+            <br></br>
             <Form.Group id="dob">
               <Form.Label>Date of Birth</Form.Label>
               <Form.Control
