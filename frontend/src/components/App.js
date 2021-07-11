@@ -13,7 +13,7 @@ import Verify from './Verify';
 import Chat from './Chat';
 import NoContent from './NoContent';
 import After from './After';
-import UpdateProfile from "./UpdateProfile";
+import UpdateProfile from './UpdateProfile';
 
 function App() {
   return (

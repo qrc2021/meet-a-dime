@@ -45,9 +45,28 @@ export default function Chat() {
   const history = useHistory();
   const observer = useRef(null);
 
-  if (location.state === undefined) window.location.href = '/';
+  // if (location.state === undefined) window.location.href = '/';
 
-  const { match_id, timeout_5 } = location.state;
+  // const { match_id, timeout_5 } = location.state;
+
+  var match_id = null;
+  var timeout_5 = null;
+
+  // In case the user navigates here directly by accident.
+  if (
+    history.location &&
+    history.location.state &&
+    history.location.state.state &&
+    history.location.state.state.match_id
+  ) {
+    match_id = history.location.state.state.match_id;
+    timeout_5 = history.location.state.state.timeout_5;
+  } else {
+    console.log('DOESNT BELONG');
+    if (timeoutRef1.current !== undefined) clearTimeout(timeoutRef1.current);
+    if (timeoutRef2.current !== undefined) clearTimeout(timeoutRef2.current);
+    window.location.href = '/';
+  }
 
   const joinRoomButton = document.getElementById('room-button');
   const messageInput = document.getElementById('message_input');
@@ -372,6 +391,22 @@ export default function Chat() {
     // This is a timeout that carried over from the last page. It deletes
     // the doc in the background.
     clearTimeout(timeout_5);
+
+    // In case the user navigates here directly by accident.
+    if (
+      history.location &&
+      history.location.state &&
+      history.location.state.state &&
+      history.location.state.state.match_id
+    ) {
+    } else {
+      console.log('DOESNT BELONG, useeffect');
+      if (timeoutRef1.current !== undefined) clearTimeout(timeoutRef1.current);
+      if (timeoutRef2.current !== undefined) clearTimeout(timeoutRef2.current);
+      window.location.href = '/';
+      return;
+    }
+
     // This gets the match data.
     fetchMatchInfo();
     const sock = io(bp.buildPath(''), { forceNew: true });
@@ -640,7 +675,7 @@ export default function Chat() {
                 Send
               </Button>
               <br></br>
-              <h3>Our room id: {room}</h3>
+              {/* <h3>Our room id: {room}</h3> */}
             </Form>
           )}
         </Container>

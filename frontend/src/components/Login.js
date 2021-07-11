@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import Link from '@material-ui/core/Link';
 //import { View, Text, ScrollView, TextInput } from 'react-native';
 import { Card, Form, Button, Image, CardDeck } from 'react-bootstrap';
+import Container from '@material-ui/core/Container';
 import { useHistory } from 'react-router-dom';
 import { Alert, AlertTitle } from '@material-ui/lab';
 import { useAuth } from '../contexts/AuthContext';
@@ -106,107 +107,108 @@ export default function Login() {
 
   return (
     <>
-      <CardDeck
-        style={{
-          display: 'flex',
-          flexflow: 'row wrap',
-          alignItems: 'center',
-          backgroundColor: '#DCEAFF',
-        }}>
-        <Card.Img
-          variant="top"
-          src="DimeAssets/homelogo.png"
+      <Container style={{ flex: '1' }}>
+        <CardDeck
           style={{
-            width: '900px',
-            height: '900px',
-            marginRight: 'auto',
-            marginLeft: 'auto',
-          }}
-        />
-
-        <Card
-          varient="top"
-          style={{
-            minWidth: '300px',
-            marginRight: 'auto',
-            maxWidth: '400px',
-            borderRadius: '30px',
+            display: 'flex',
+            flexflow: 'row wrap',
+            alignItems: 'center',
+            backgroundColor: '#DCEAFF',
           }}>
-          <Card.Body>
-            <Card.Img
-              variant="top"
-              className="mb-3"
-              src="DimeAssets/headerlogo.png"
-            />
-            {error && <Alert severity="error">{error}</Alert>}
-            <Form onSubmit={handleSubmit}>
-              <Form.Group
-                id="email"
-                style={{
-                  marginBottom: '15px',
-                }}>
-                <Form.Control
-                  placeholder="Email"
-                  type="email"
-                  ref={emailRef}
-                  required
-                />
-              </Form.Group>
-              <Form.Group
-                id="password"
-                style={{
-                  marginBottom: '15px',
-                }}>
-                <Form.Control
-                  placeholder="Password"
-                  type="password"
-                  ref={passwordRef}
-                  required
-                />
-              </Form.Group>
-              <Form.Group controlId="formBasicCheckbox">
-                <Form.Check
-                  defaultChecked={isChecked}
-                  onClick={() => {
-                    setChecked(!isChecked);
-                  }}
-                  type="checkbox"
-                  label="Keep me logged in"
-                />
-              </Form.Group>
-              <Button
-                disabled={loading}
-                className="btn-primary w-100 mt-2 mb-1"
-                type="submit">
-                Log In
-              </Button>
-            </Form>
-            <div className="w-100 text-center mt-2">
-              {/* <Link to="/forgot">Forgot Password?</Link> */}
-              <Link
-                href=""
-                onClick={(e) => {
-                  e.preventDefault();
-                  history.push('/forgot');
-                }}>
-                Forgot Password?
-              </Link>
-            </div>
-          </Card.Body>
-          <Card.Footer
+          <Card.Img
+            variant="top"
+            src="DimeAssets/homelogo.png"
             style={{
-              color: '#B39BC8',
+              maxWidth: '600px',
+              marginRight: 'auto',
+              marginLeft: 'auto',
+            }}
+          />
+
+          <Card
+            varient="top"
+            style={{
+              minWidth: '300px',
+              marginRight: 'auto',
+              maxWidth: '400px',
               borderRadius: '30px',
             }}>
-            <Button
-              disabled={loading}
-              className="btn-secondary w-100 mt-2"
-              href="/signup">
-              Sign up
-            </Button>
-          </Card.Footer>
-        </Card>
-      </CardDeck>
+            <Card.Body>
+              <Card.Img
+                variant="top"
+                className="mb-3"
+                src="DimeAssets/headerlogo.png"
+              />
+              {error && <Alert severity="error">{error}</Alert>}
+              <Form onSubmit={handleSubmit}>
+                <Form.Group
+                  id="name"
+                  style={{
+                    marginBottom: '15px',
+                  }}>
+                  <Form.Control
+                    placeholder="Email"
+                    type="email"
+                    ref={emailRef}
+                    required
+                  />
+                </Form.Group>
+                <Form.Group
+                  id="password"
+                  style={{
+                    marginBottom: '15px',
+                  }}>
+                  <Form.Control
+                    placeholder="Password"
+                    type="password"
+                    ref={passwordRef}
+                    required
+                  />
+                </Form.Group>
+                <Form.Group controlId="formBasicCheckbox">
+                  <Form.Check
+                    defaultChecked={isChecked}
+                    onClick={() => {
+                      setChecked(!isChecked);
+                    }}
+                    type="checkbox"
+                    label="Keep me logged in"
+                  />
+                </Form.Group>
+                <Button
+                  disabled={loading}
+                  className="btn-primary w-100 mt-2 mb-1"
+                  type="submit">
+                  Log In
+                </Button>
+              </Form>
+              <div className="w-100 text-center mt-2">
+                {/* <Link to="/forgot">Forgot Password?</Link> */}
+                <Link
+                  href=""
+                  onClick={(e) => {
+                    e.preventDefault();
+                    history.push('/forgot');
+                  }}>
+                  Forgot Password?
+                </Link>
+              </div>
+            </Card.Body>
+            <Card.Footer
+              style={{
+                color: '#B39BC8',
+                borderRadius: '30px',
+              }}>
+              <Button
+                disabled={loading}
+                className="btn-secondary w-100 mt-2"
+                href="/signup">
+                Sign up
+              </Button>
+            </Card.Footer>
+          </Card>
+        </CardDeck>
+      </Container>
     </>
   );
 }
