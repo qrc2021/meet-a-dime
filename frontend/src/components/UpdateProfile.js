@@ -22,6 +22,7 @@ export default function UpdateProfile() {
   const firestore = firebase.firestore();
   const { currentUser, signup, logout, updatePassword, updateEmail } = useAuth();
   const [error, setError] = useState('');
+  const [passChange, setPassChange] = useState('');
   const [loading, setLoading] = useState('');
   const [optionsState, setOptionsState] = useState('0');
   const [orientationState, setOrientationState] = useState('0');
@@ -82,16 +83,18 @@ export default function UpdateProfile() {
 
   async function handlePasswordUpdate(e) {
     if (passwordRef.current.value !== passwordConfirmRef.current.value) {
+        setPassChange("");
         return setError('Passwords do not match.');
       }
 
     if (passwordRef.current.value.length <= 6 && passwordRef.current.value.length != "") {
+        setPassChange("");
         return setError('Password should be more than six characters.');
     }
 
     if (passwordRef.current.value) {
-        console.log('Password changed I hope!');
         updatePassword(passwordRef.current.value);
+        return setPassChange('Password successfully changed!');
     }
 
   }
@@ -268,6 +271,7 @@ export default function UpdateProfile() {
         <Card.Body>
           <h2 className="text-center mb-3">Update Profile</h2>
           {error && <Alert variant="danger">{error}</Alert>}
+          {passChange && <Alert variant="success">{passChange}</Alert>}
           <Form onSubmit={handleSubmit}>
             <Form.Group id="firstName">
               <Form.Label>First name:</Form.Label>
