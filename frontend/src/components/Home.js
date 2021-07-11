@@ -6,6 +6,7 @@ import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
 import PhotoCamera from '@material-ui/icons/PhotoCamera';
 import Container from '@material-ui/core/Container';
 // import Button from '@material-ui/core/Button';
+import Modal from '@material-ui/core/Modal'
 import Box from '@material-ui/core/Box';
 import { useAuth } from '../contexts/AuthContext';
 import { useHistory } from 'react-router-dom';
@@ -120,6 +121,7 @@ export default function Home() {
   ];
 
   const theme = useTheme();
+  
   const [open, setOpen] = React.useState(false);
 
   const handleDrawerOpen = () => {
@@ -129,6 +131,21 @@ export default function Home() {
   const handleDrawerClose = () => {
     setOpen(false);
   };
+
+//Search Modal functions
+
+  const [sopen, setOpenSearch] = React.useState(false);
+
+  const handleSearchOpen = () => {
+      setOpenSearch(true);
+      searching();
+  }
+
+  const handleSearchClose = () => {
+      killSearch();
+      setOpenSearch(false);
+      
+  }
 
   const observer = useRef(null);
   // Prevent some prompt issues.
@@ -334,6 +351,15 @@ export default function Home() {
     console.log('tried to clear timeouts in home. this probably didnt work.');
   }
 
+  function killSearch() {
+      
+      setId('none');
+      setMatch('Not searching.');
+      setError('');
+
+      clearAllTimeouts();
+
+  }
   // .
   // ..
   // ...
@@ -701,7 +727,9 @@ export default function Home() {
           [classes.contentShift]: open,
         })}>
         <div className={classes.drawerHeader} />
-        <h2 className="text-center mt-4 mb-4">
+        <h2 className="text-center mt-4 mb-4" style={{
+                  color: "#E64398"
+              }}>
           Welcome back, {currentUser.firstName}!{' '}
         </h2>
         {error && <Alert severity="error">{error}</Alert>}
@@ -747,12 +775,41 @@ export default function Home() {
         <br></br>
         <br></br>
         <Button
-          variant="outlined"
-          color="primary"
-          disabled={lockout}
-          onClick={searching}>
-          Search for Match
+            type="button"
+            onClick={handleSearchOpen}
+            className="btn-primary w-100 mt-2 mb-1"
+            style={{
+                      maxWidth: 300,
+                      maxHeight: 300,
+                      marginRight: '35%',
+                      marginLeft: '35%'
+            }}>
+                  Search
         </Button>
+        <Modal
+                  style={{
+                      width: 420,
+                      height: 420,
+                      marginRight: 'auto',
+                      marginLeft: 'auto',
+                      marginTop: 'auto',
+                      marginBottom: 'auto'
+                  }}
+                  open={sopen}
+                  onClose={handleSearchClose}
+              >
+                  <img
+                      style={{
+                          width: 420,
+                          height: 420,
+                          marginRight: 'auto',
+                          marginLeft: 'auto'
+                      }}
+                      class="img-fluid"
+                      alt="gifload"
+                      src="DimeAssets/youwhat.png"
+                  />
+              </Modal>
       </main>
 
       <Drawer
