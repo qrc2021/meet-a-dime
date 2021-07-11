@@ -6,6 +6,7 @@ import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
 import PhotoCamera from '@material-ui/icons/PhotoCamera';
 import Container from '@material-ui/core/Container';
 // import Button from '@material-ui/core/Button';
+import Modal from '@material-ui/core/Modal';
 import Box from '@material-ui/core/Box';
 import { useAuth } from '../contexts/AuthContext';
 import { useHistory } from 'react-router-dom';
@@ -130,6 +131,19 @@ export default function Home() {
     setOpen(false);
   };
 
+ //Search Modal Functions
+  const [sopen, setOpenSearch] = React.useState(false);
+
+  const handleSearchOpen = () => {
+      setOpenSearch(true);
+      searching();
+  }
+
+  const handleSearchClose = () => {
+      killSearch();
+      setOpenSearch(false);
+
+  }
   const observer = useRef(null);
   const transferTimeoutRef = useRef();
 
@@ -341,6 +355,12 @@ export default function Home() {
     clearTimeout(timeout5);
   }
 
+  function killSearch() {
+      setId('none');
+      setMatch('Not searching.');
+      setError('');
+      clearAllTimeouts();
+  }
   // .
   // ..
   // ...
@@ -719,10 +739,9 @@ export default function Home() {
           <Button
             className="btn-chat mx-3"
             disabled={lockout}
-            onClick={searching}>
+            onClick={handleSearchOpen}>
             New Chat
           </Button>
-
           <IconButton
             color="default"
             aria-label="open drawer"
@@ -816,6 +835,30 @@ export default function Home() {
           onClick={searching}>
           Search for Match
         </Button> */}
+        <Modal
+            style={{
+                width: 420,
+                height: 420,
+                marginRight: 'auto',
+                marginLeft: 'auto',
+                marginTop: 'auto',
+                marginBottom: 'auto'
+            }}
+            open={sopen}
+            onClose={handleSearchClose}
+        >
+            <img
+                style={{
+                    width: 420,
+                    height: 420,
+                    marginRight: 'auto',
+                    marginLeft: 'auto'
+                }}
+                class="img-fluid"
+                alt="gifload"
+                src="DimeAssets/youwhat.png"
+            />
+        </Modal>
       </main>
 
       <Drawer
