@@ -131,19 +131,18 @@ export default function Home() {
     setOpen(false);
   };
 
- //Search Modal Functions
+  //Search Modal Functions
   const [sopen, setOpenSearch] = React.useState(false);
 
   const handleSearchOpen = () => {
-      setOpenSearch(true);
-      searching();
-  }
+    setOpenSearch(true);
+    searching();
+  };
 
   const handleSearchClose = () => {
-      killSearch();
-      setOpenSearch(false);
-
-  }
+    killSearch();
+    setOpenSearch(false);
+  };
   const observer = useRef(null);
   const transferTimeoutRef = useRef();
 
@@ -181,7 +180,8 @@ export default function Home() {
   // var timeout2 = null;
   // var timeout3 = null;
   // var timeout4 = null;
-  var timeout5 = null;
+  // var timeout5 = null;
+  const timeout5 = useRef(null);
 
   // Basic user info for their preferences. Will be referenced in search.
   var userInfo = {
@@ -281,7 +281,7 @@ export default function Home() {
     purgeOld();
     getIntialUserPhoto();
     return () => {
-      clearTimeout(timeout5);
+      clearTimeout(timeout5.current);
       clearAllTimeouts();
       console.log('LEAVING!');
       if (observer.current !== null) {
@@ -352,14 +352,68 @@ export default function Home() {
   }
 
   function clearAllTimeouts() {
-    clearTimeout(timeout5);
+    clearTimeout(timeout5.current);
   }
 
-  function killSearch() {
-      setId('none');
-      setMatch('Not searching.');
-      setError('');
-      clearAllTimeouts();
+  async function killSearch() {
+    setId('none');
+    setMatch('Not searching.');
+    setError('');
+    clearAllTimeouts();
+    if (transferTimeoutRef.current !== undefined)
+      clearInterval(transferTimeoutRef.current);
+    setProgress(-1);
+
+    // Lock the search button until these tasks are complete.
+    setLockout(true);
+    setLoading(true);
+    console.log('Clicking out of modal');
+    if (observer.current !== null) observer.current();
+    try {
+      // If I am "document host", clear the match field first.
+      try {
+        await firestore
+          .collection('searching')
+          .doc(currentUser.uid)
+          .update({ match: '' });
+
+        // Delete the document (if exists) if I am a "document host".
+        await firestore.collection('searching').doc(currentUser.uid).delete();
+      } catch (error) {
+        console.log('Threw error of type', error.code);
+        // this is okay because this most likely wont exist on each load.
+      }
+
+      // The final mechanism for clearing. This is if I was a previous
+      // "document joiner" or "filling in" the existing doc.
+      // I will search all docs where my id is the match field, and clear it.
+      // This will signal to those listening to that field that I am
+      // no longer available.
+      firestore
+        .collection('searching')
+        .where('match', '==', currentUser.uid)
+        .get()
+        .then((querySnapshot) => {
+          querySnapshot.forEach((doc) => {
+            try {
+              firestore
+                .collection('searching')
+                .doc(doc.id)
+                .update({ match: '' });
+            } catch (error) {
+              console.log(error);
+            }
+          });
+        })
+        .catch((error) => {
+          console.log('Error getting documents: ', error);
+        });
+    } catch (error) {
+      console.log(error);
+    }
+    // Unlock the button now that initial tasks are done.
+    setLockout(false);
+    setLoading(false);
   }
   // .
   // ..
@@ -480,7 +534,7 @@ export default function Home() {
             history.push('/chat', {
               state: {
                 match_id: doc_id,
-                timeout_5: timeout5,
+                timeout_5: timeout5.current,
               },
             });
           }
@@ -547,6 +601,7 @@ export default function Home() {
                   setId('none');
                   setMatch('Not searching.');
                   setError('');
+                  setOpenSearch(false);
                   // clearTimeout(timeOut);
                   // These two clear all timeouts.
                   clearAllTimeouts();
@@ -601,102 +656,123 @@ export default function Home() {
         // but it can also get un-filled. Account for both.
         observer.current = firestore
           .collection('searching')
-          .doc(currentUser.uid)
+          .where(
+            firebase.firestore.FieldPath.documentId(),
+            '==',
+            currentUser.uid
+          )
           .onSnapshot((docSnapshot) => {
-            // The data exists AND the match is not empty! We just found one.
-            if (
-              docSnapshot &&
-              docSnapshot.data() &&
-              docSnapshot.data().match !== ''
-            ) {
-              matchFound = true;
-              // Transfer the user to the chat in 4 seconds.
+            docSnapshot.docChanges().forEach((change) => {
+              if (change.type === 'added') return;
 
-              var count = 0;
-              setProgress(count);
-              transferTimeoutRef.current = setInterval(() => {
-                count += (100 / MS_TRANSFER_TO_CHAT) * 100;
+              console.log('some edit change.');
+              // console.log(change.doc.data());
+              if (
+                change &&
+                change.doc &&
+                change.doc.data() &&
+                change.doc.data().match !== ''
+              ) {
+                matchFound = true;
+                // Transfer the user to the chat in 4 seconds.
+
+                var count = 0;
                 setProgress(count);
-                // console.log(docSnapshot.data().match);
-                if (count >= 100) {
+                transferTimeoutRef.current = setInterval(() => {
+                  count += (100 / MS_TRANSFER_TO_CHAT) * 100;
+                  setProgress(count);
+                  // console.log(docSnapshot.data().match);
+                  if (count >= 100) {
+                    clearInterval(transferTimeoutRef.current);
+                    history.push('/chat', {
+                      state: {
+                        match_id: change.doc.data().match,
+                        timeout_5: timeout5.current,
+                      },
+                    });
+                  }
+                }, 100);
+
+                // setId(docSnapshot.data().match);
+                setId(change.doc.data().match);
+                setMatch('Found match! ' + change.doc.data().match);
+                // clearTimeout(timeOut);
+                clearAllTimeouts();
+              } else if (
+                change &&
+                change.doc &&
+                change.doc.data() &&
+                change.doc.data().match === ''
+              ) {
+                // Match left..
+
+                matchFound = false;
+                setId('none');
+                setMatch('Searching.');
+                setError('');
+                // setOpenSearch(false);
+                // clearTimeout(timeOut);
+                // Clear timeouts, to prevent the match abandon refresh.
+                clearAllTimeouts();
+                if (transferTimeoutRef.current !== undefined)
                   clearInterval(transferTimeoutRef.current);
-                  history.push('/chat', {
-                    state: {
-                      match_id: docSnapshot.data().match,
-                      timeout_5: timeout5,
-                    },
-                  });
-                }
-              }, 100);
+                setProgress(-1);
+                timeout5.current = setTimeout(() => {
+                  if (
+                    window.location.pathname == '/' &&
+                    id_of_match === 'none'
+                  ) {
+                    console.log('TIMEOUT DOC HOST');
+                    setLockout(true);
+                    setLoading(true);
+                    setOpenSearch(false);
+                    // Abandoning the search should involve me clearing the old doc
+                    // that I posted up.
+                    async function deleteOldRecordAfterAbandon() {
+                      try {
+                        await firestore
+                          .collection('searching')
+                          .doc(currentUser.uid)
+                          .update({ match: '' });
+                        console.log('cleared old match before delete');
+                      } catch (error) {
+                        console.log(
+                          'tried to clear match before delete, but failed'
+                        );
+                        console.log('most of the time this is ok');
+                        // this is okay because this most likely wont exist on each load.
+                      }
 
-              setId(docSnapshot.data().match);
-              setMatch('Found match! ' + docSnapshot.data().match);
-              // clearTimeout(timeOut);
-              clearAllTimeouts();
-            } else if (
-              docSnapshot &&
-              docSnapshot.data() &&
-              docSnapshot.data().match === ''
-            ) {
-              // Match left..
-              matchFound = false;
-              setId('none');
-              setMatch('Searching.');
-              setError('');
-              // clearTimeout(timeOut);
-              // Clear timeouts, to prevent the match abandon refresh.
-              clearAllTimeouts();
-              if (transferTimeoutRef.current !== undefined)
-                clearInterval(transferTimeoutRef.current);
-              setProgress(-1);
-              timeout5 = setTimeout(() => {
-                if (window.location.pathname == '/' && id_of_match === 'none') {
-                  console.log('TIMEOUT DOC HOST');
-                  setLockout(true);
-                  // Abandoning the search should involve me clearing the old doc
-                  // that I posted up.
-                  async function deleteOldRecordAfterAbandon() {
-                    try {
-                      await firestore
-                        .collection('searching')
-                        .doc(currentUser.uid)
-                        .update({ match: '' });
-                      console.log('cleared old match before delete');
-                    } catch (error) {
-                      console.log(
-                        'tried to clear match before delete, but failed'
-                      );
-                      console.log('most of the time this is ok');
-                      // this is okay because this most likely wont exist on each load.
+                      // Delete the document (if exists) if I am a "document host".
+                      try {
+                        await firestore
+                          .collection('searching')
+                          .doc(currentUser.uid)
+                          .delete();
+                        console.log('deleted my doc');
+                      } catch (error) {
+                        console.log('error:');
+                        console.log(error);
+                      }
                     }
+                    deleteOldRecordAfterAbandon();
 
-                    // Delete the document (if exists) if I am a "document host".
-                    try {
-                      await firestore
-                        .collection('searching')
-                        .doc(currentUser.uid)
-                        .delete();
-                      console.log('deleted my doc');
-                    } catch (error) {
-                      console.log('error:');
-                      console.log(error);
+                    setMatch('Not searching.');
+                    setError('');
+                    if (observer.current !== null) {
+                      observer.current();
+                    } else {
+                      console.log('could not clear observer in dochost');
                     }
-                  }
-                  deleteOldRecordAfterAbandon();
-
-                  setMatch('Not searching.');
-                  setError('');
-                  if (observer.current !== null) {
-                    observer.current();
+                    setLockout(false);
+                    setLoading(false);
                   } else {
-                    console.log('could not clear observer in dochost');
+                    console.log('timeout 5 tried to run, but was ignored.');
                   }
-                  setLockout(false);
-                } else {
-                  console.log('timeout 5 tried to run, but was ignored.');
-                }
-              }, MS_BEFORE_ABANDON_SEARCH);
-            }
+                }, MS_BEFORE_ABANDON_SEARCH);
+              }
+            });
+            // The data exists AND the match is not empty! We just found one.
           });
       } catch (error) {
         alert(error);
@@ -836,28 +912,27 @@ export default function Home() {
           Search for Match
         </Button> */}
         <Modal
+          style={{
+            width: 420,
+            height: 420,
+            marginRight: 'auto',
+            marginLeft: 'auto',
+            marginTop: 'auto',
+            marginBottom: 'auto',
+          }}
+          open={sopen}
+          onClose={handleSearchClose}>
+          <img
             style={{
-                width: 420,
-                height: 420,
-                marginRight: 'auto',
-                marginLeft: 'auto',
-                marginTop: 'auto',
-                marginBottom: 'auto'
+              width: 420,
+              height: 420,
+              marginRight: 'auto',
+              marginLeft: 'auto',
             }}
-            open={sopen}
-            onClose={handleSearchClose}
-        >
-            <img
-                style={{
-                    width: 420,
-                    height: 420,
-                    marginRight: 'auto',
-                    marginLeft: 'auto'
-                }}
-                class="img-fluid"
-                alt="gifload"
-                src="DimeAssets/youwhat.png"
-            />
+            className="img-fluid"
+            alt="gifload"
+            src="DimeAssets/youwhat.png"
+          />
         </Modal>
       </main>
 
