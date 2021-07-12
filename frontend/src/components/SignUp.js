@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Card, Form, Button, Navbar, Container } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
 import { Alert, AlertTitle } from '@material-ui/lab';
+import Grid from '@material-ui/core/Grid';
 import { Link, useHistory } from 'react-router-dom';
 import axios from 'axios';
 import moment from 'moment';
@@ -149,89 +150,89 @@ export default function SignUp() {
       return setError('Please input your last name.');
     }
 
-    if (answer1Ref.current.value.length > maxAnswerLength) {
-      scrollToTop();
-      return setError(
-        'Question 1: Please keep your answer within 280 characters.'
-      );
-    }
+    //if (answer1Ref.current.value.length > maxAnswerLength) {
+    //  scrollToTop();
+    //  return setError(
+    //    'Question 1: Please keep your answer within 280 characters.'
+    //  );
+    //}
 
-    if (answer2Ref.current.value.length > maxAnswerLength) {
-      scrollToTop();
-      return setError(
-        'Question 2: Please keep your answer within 280 characters.'
-      );
-    }
+    //if (answer2Ref.current.value.length > maxAnswerLength) {
+    //  scrollToTop();
+    //  return setError(
+    //    'Question 2: Please keep your answer within 280 characters.'
+    //  );
+    //}
 
-    if (answer3Ref.current.value.length > maxAnswerLength) {
-      scrollToTop();
-      return setError(
-        'Question 3: Please keep your answer within 280 characters.'
-      );
-    }
+    //if (answer3Ref.current.value.length > maxAnswerLength) {
+    //  scrollToTop();
+    //  return setError(
+    //    'Question 3: Please keep your answer within 280 characters.'
+    //  );
+    //}
 
-    if (answer4Ref.current.value.length > maxAnswerLength) {
-      scrollToTop();
-      return setError(
-        'Question 4: Please keep your answer within 280 characters.'
-      );
-    }
+    //if (answer4Ref.current.value.length > maxAnswerLength) {
+    //  scrollToTop();
+    //  return setError(
+    //    'Question 4: Please keep your answer within 280 characters.'
+    //  );
+    //}
 
-    if (answer5Ref.current.value.length > maxAnswerLength) {
-      scrollToTop();
-      return setError(
-        'Question 5: Please keep your answer within 280 characters.'
-      );
-    }
+    //if (answer5Ref.current.value.length > maxAnswerLength) {
+    //  scrollToTop();
+    //  return setError(
+    //    'Question 5: Please keep your answer within 280 characters.'
+    //  );
+    //}
 
-    if (answer6Ref.current.value.length > maxAnswerLength) {
-      scrollToTop();
-      return setError(
-        'Question 6: Please keep your answer within 280 characters.'
-      );
-    }
+    //if (answer6Ref.current.value.length > maxAnswerLength) {
+    //  scrollToTop();
+    //  return setError(
+    //    'Question 6: Please keep your answer within 280 characters.'
+    //  );
+    //}
 
-    if (answer7Ref.current.value.length > maxAnswerLength) {
-      scrollToTop();
-      return setError(
-        'Question 7: Please keep your answer within 280 characters.'
-      );
-    }
+    //if (answer7Ref.current.value.length > maxAnswerLength) {
+    //  scrollToTop();
+    //  return setError(
+    //    'Question 7: Please keep your answer within 280 characters.'
+    //  );
+    //}
 
-    if (answer8Ref.current.value.length > maxAnswerLength) {
-      scrollToTop();
-      return setError(
-        'Question 8: Please keep your answer within 280 characters.'
-      );
-    }
+    //if (answer8Ref.current.value.length > maxAnswerLength) {
+    //  scrollToTop();
+    //  return setError(
+    //    'Question 8: Please keep your answer within 280 characters.'
+    //  );
+    //}
 
-    if (answer9Ref.current.value.length > maxAnswerLength) {
-      scrollToTop();
-      return setError(
-        'Question 9: Please keep your answer within 280 characters.'
-      );
-    }
+    //if (answer9Ref.current.value.length > maxAnswerLength) {
+    //  scrollToTop();
+    //  return setError(
+    //    'Question 9: Please keep your answer within 280 characters.'
+    //  );
+    //}
 
-    if (answer10Ref.current.value.length > maxAnswerLength) {
-      scrollToTop();
-      return setError(
-        'Question 10: Please keep your answer within 280 characters.'
-      );
-    }
+    //if (answer10Ref.current.value.length > maxAnswerLength) {
+    //  scrollToTop();
+    //  return setError(
+    //    'Question 10: Please keep your answer within 280 characters.'
+    //  );
+    //}
 
-    if (answer11Ref.current.value.length > maxAnswerLength) {
-      scrollToTop();
-      return setError(
-        'Question 11: Please keep your answer within 280 characters.'
-      );
-    }
+    //if (answer11Ref.current.value.length > maxAnswerLength) {
+    //  scrollToTop();
+    //  return setError(
+    //    'Question 11: Please keep your answer within 280 characters.'
+    //  );
+    //}
 
-    if (answer12Ref.current.value.length > maxAnswerLength) {
-      scrollToTop();
-      return setError(
-        'Question 12: Please keep your answer within 280 characters.'
-      );
-    }
+    //if (answer12Ref.current.value.length > maxAnswerLength) {
+    //  scrollToTop();
+    //  return setError(
+    //    'Question 12: Please keep your answer within 280 characters.'
+    //  );
+    //}
 
     var orient = {
       1: 'Heterosexual',
@@ -261,18 +262,18 @@ export default function SignUp() {
         initializedProfile: 0,
         FailMatch: [],
         SuccessMatch: [],
-        question1Answer: answer1Ref.current.value.trim(),
-        question2Answer: answer2Ref.current.value.trim(),
-        question3Answer: answer3Ref.current.value.trim(),
-        question4Answer: answer4Ref.current.value.trim(),
-        question5Answer: answer5Ref.current.value.trim(),
-        question6Answer: answer6Ref.current.value.trim(),
-        question7Answer: answer7Ref.current.value.trim(),
-        question8Answer: answer8Ref.current.value.trim(),
-        question9Answer: answer9Ref.current.value.trim(),
-        question10Answer: answer10Ref.current.value.trim(),
-        question11Answer: answer11Ref.current.value.trim(),
-        question12Answer: answer12Ref.current.value.trim(),
+        //question1Answer: answer1Ref.current.value.trim(),
+        //question2Answer: answer2Ref.current.value.trim(),
+        //question3Answer: answer3Ref.current.value.trim(),
+        //question4Answer: answer4Ref.current.value.trim(),
+        //question5Answer: answer5Ref.current.value.trim(),
+        //question6Answer: answer6Ref.current.value.trim(),
+        //question7Answer: answer7Ref.current.value.trim(),
+        //question8Answer: answer8Ref.current.value.trim(),
+        //question9Answer: answer9Ref.current.value.trim(),
+        //question10Answer: answer10Ref.current.value.trim(),
+        //question11Answer: answer11Ref.current.value.trim(),
+        //question12Answer: answer12Ref.current.value.trim(),
       };
 
       var config = {
@@ -313,22 +314,30 @@ export default function SignUp() {
             width="300px"
             height="100%"
             className="d-inline-block align-top"
-            alt="React Bootstrap logo"
+            alt="Dimelogo"
           />
         </Navbar.Brand>
       </Navbar>
 
-      <Container>
+      <Grid container spacing={1}>
+          <Grid item xs={6}>
+              <img
+                  className="img-fluid"
+                  alt="signup"
+                  src="DimeAssets/coinsignup.png"
+              />
+          </Grid>
+          <Grid item xs={5}>
         {/* <Card.Body> */}
-        <h2 className="text-center mb-3">Sign Up</h2>
+        <h2 className="text-center mb-3" style={{color: '#929292'}}>Create an Account</h2>
         {error && <Alert severity="error">{error}</Alert>}
         <Form onSubmit={handleSubmit}>
           <Form.Group id="firstName">
-            <Form.Label>First name:</Form.Label>
+            <Form.Label>First Name</Form.Label>
             <Form.Control type="text" ref={firstRef} />
           </Form.Group>
           <Form.Group id="lastName">
-            <Form.Label>Last name:</Form.Label>
+            <Form.Label>Last Name</Form.Label>
             <Form.Control type="text" ref={lastRef} />
             <Form.Text className="text-muted">
               Your last name will stay private
@@ -346,7 +355,7 @@ export default function SignUp() {
             <Form.Control type="password" ref={passwordRef} required />
           </Form.Group>
           <Form.Group id="password-confirm">
-            <Form.Label>Password confirmation</Form.Label>
+            <Form.Label>Password Confirmation</Form.Label>
             <Form.Control type="password" ref={passwordConfirmRef} required />
           </Form.Group>
           <Form.Group id="dob">
@@ -385,7 +394,7 @@ export default function SignUp() {
             </Form.Control>
           </Form.Row>
           <Form.Group id="customResponse">
-            <Form.Label>Custom end of chat response:</Form.Label>
+            <Form.Label>End of Chat Response</Form.Label>
             <Form.Control type="text" ref={responseRef} />
             <Form.Text className="text-muted">
               Users will see this response at the end of a chat. This can be
@@ -401,85 +410,92 @@ export default function SignUp() {
               required
             />
           </Form.Group>
-          <Form.Group id="question1Answer">
-            <Form.Label>
-              Question 1: What do you like to do for fun or to relax?
-            </Form.Label>
-            <Form.Control type="text" ref={answer1Ref} required />
-          </Form.Group>
-          <Form.Group id="question2Answer">
-            <Form.Label>Question 2: What do you do for a living?</Form.Label>
-            <Form.Control type="text" ref={answer2Ref} required />
-          </Form.Group>
-          <Form.Group id="question3Answer">
-            <Form.Label>
-              Question 3: Would you say you are a romantic?
-            </Form.Label>
-            <Form.Control type="text" ref={answer3Ref} required />
-          </Form.Group>
-          <Form.Group id="question4Answer">
-            <Form.Label>
-              Question 4: Are you an optimist or a pessimist?
-            </Form.Label>
-            <Form.Control type="text" ref={answer4Ref} required />
-          </Form.Group>
-          <Form.Group id="question5Answer">
-            <Form.Label>
-              Question 5: What are you most passionate about?
-            </Form.Label>
-            <Form.Control type="text" ref={answer5Ref} required />
-          </Form.Group>
-          <Form.Group id="question6Answer">
-            <Form.Label>
-              Question 6: Do you like horoscopes? If so, what's your sign?
-            </Form.Label>
-            <Form.Control type="text" ref={answer6Ref} required />
-          </Form.Group>
-          <Form.Group id="question7Answer">
-            <Form.Label>
-              Question 7: What does an ideal date look like in your eyes?
-            </Form.Label>
-            <Form.Control type="text" ref={answer7Ref} required />
-          </Form.Group>
-          <Form.Group id="question8Answer">
-            <Form.Label>
-              Question 8: What does your ideal future look like?
-            </Form.Label>
-            <Form.Control type="text" ref={answer8Ref} required />
-          </Form.Group>
-          <Form.Group id="question9Answer">
-            <Form.Label>
-              Question 9: What is your favorite type of music?
-            </Form.Label>
-            <Form.Control type="text" ref={answer9Ref} required />
-          </Form.Group>
-          <Form.Group id="question10Answer">
-            <Form.Label>
-              Question 10: Do you have any pets? If you do, tell me about them!
-            </Form.Label>
-            <Form.Control type="text" ref={answer10Ref} required />
-          </Form.Group>
-          <Form.Group id="question11Answer">
-            <Form.Label>
-              Question 11: Do you have any sibilings? If so, how many?
-            </Form.Label>
-            <Form.Control type="text" ref={answer11Ref} required />
-          </Form.Group>
-          <Form.Group id="question12Answer">
-            <Form.Label>
-              Question 12: What is your favorite game to play?
-            </Form.Label>
-            <Form.Control type="text" ref={answer12Ref} required />
-          </Form.Group>
+         
           <Button disabled={loading} className="w-100 mt-2" type="submit">
-            Sign Up
+           Register
           </Button>
         </Form>
         {/* </Card.Body> */}
-      </Container>
+
+           
       <div className="w-100 text-center mt-2">
         Already have an account? <Link to="/login">Log In</Link>
       </div>
+          </Grid>
+          </Grid>
     </>
   );
 }
+
+//I'm gonna implement the questions over on the profile page in a different way: WILL ADDRESS 7/13
+
+/*<Form.Group id="question1Answer">
+    <Form.Label>
+        Question 1: What do you like to do for fun or to relax?
+            </Form.Label>
+    <Form.Control type="text" ref={answer1Ref} required />
+</Form.Group>
+    <Form.Group id="question2Answer">
+        <Form.Label>Question 2: What do you do for a living?</Form.Label>
+        <Form.Control type="text" ref={answer2Ref} required />
+    </Form.Group>
+    <Form.Group id="question3Answer">
+        <Form.Label>
+            Question 3: Would you say you are a romantic?
+            </Form.Label>
+        <Form.Control type="text" ref={answer3Ref} required />
+    </Form.Group>
+    <Form.Group id="question4Answer">
+        <Form.Label>
+            Question 4: Are you an optimist or a pessimist?
+            </Form.Label>
+        <Form.Control type="text" ref={answer4Ref} required />
+    </Form.Group>
+    <Form.Group id="question5Answer">
+        <Form.Label>
+            Question 5: What are you most passionate about?
+            </Form.Label>
+        <Form.Control type="text" ref={answer5Ref} required />
+    </Form.Group>
+    <Form.Group id="question6Answer">
+        <Form.Label>
+            Question 6: Do you like horoscopes? If so, what's your sign?
+            </Form.Label>
+        <Form.Control type="text" ref={answer6Ref} required />
+    </Form.Group>
+    <Form.Group id="question7Answer">
+        <Form.Label>
+            Question 7: What does an ideal date look like in your eyes?
+            </Form.Label>
+        <Form.Control type="text" ref={answer7Ref} required />
+    </Form.Group>
+    <Form.Group id="question8Answer">
+        <Form.Label>
+            Question 8: What does your ideal future look like?
+            </Form.Label>
+        <Form.Control type="text" ref={answer8Ref} required />
+    </Form.Group>
+    <Form.Group id="question9Answer">
+        <Form.Label>
+            Question 9: What is your favorite type of music?
+            </Form.Label>
+        <Form.Control type="text" ref={answer9Ref} required />
+    </Form.Group>
+    <Form.Group id="question10Answer">
+        <Form.Label>
+            Question 10: Do you have any pets? If you do, tell me about them!
+            </Form.Label>
+        <Form.Control type="text" ref={answer10Ref} required />
+    </Form.Group>
+    <Form.Group id="question11Answer">
+        <Form.Label>
+            Question 11: Do you have any sibilings? If so, how many?
+            </Form.Label>
+        <Form.Control type="text" ref={answer11Ref} required />
+    </Form.Group>
+    <Form.Group id="question12Answer">
+        <Form.Label>
+            Question 12: What is your favorite game to play?
+            </Form.Label>
+        <Form.Control type="text" ref={answer12Ref} required />
+    </Form.Group>*/
