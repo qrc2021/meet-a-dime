@@ -41,11 +41,13 @@ export default function After() {
   // Fetch the matches' name, birth, sex when page loads.
   async function fetchMatchInfo(id_of_match) {
     try {
+      const token = currentUser && (await currentUser.getIdToken());
       var config = {
         method: 'post',
         url: bp.buildPath('api/getbasicuser'),
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
         data: { uid: id_of_match },
       };

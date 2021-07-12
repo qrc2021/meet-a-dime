@@ -42,7 +42,34 @@ exports.setApp = function (app, admin) {
   });
 
   app.post("/api/getuser", async (req, res) => {
+    const user = req["currentUser"];
+    console.log(user);
     var obj = ({ uid: uid } = req.body);
+
+    if (!user) {
+      responseObj = { error: "You must be logged in." };
+
+      var ret = responseObj;
+      res.status(403).json(ret);
+      return;
+    }
+
+    if (obj.uid === "") {
+      responseObj = { error: "No user specified" };
+
+      var ret = responseObj;
+      res.status(204).json(ret);
+      return;
+    }
+
+    if (obj.uid !== user.user_id) {
+      responseObj = { error: "Not authorized." };
+
+      var ret = responseObj;
+      res.status(403).json(ret);
+      return;
+    }
+
     console.log("fetched user details for " + uid);
     var err = "";
     var response = "";
@@ -62,6 +89,8 @@ exports.setApp = function (app, admin) {
           birth: data.birth,
           exitMessage: data.exitMessage,
           firstName: data.firstName,
+          lastName: data.lastName,
+          phone: data.phone,
           sex: data.sex,
           sexOrientation: data.sexOrientation,
           photo: data.photo,
@@ -79,6 +108,14 @@ exports.setApp = function (app, admin) {
   });
 
   app.post("/api/getbasicuser", async (req, res) => {
+    const user = req["currentUser"];
+    if (!user) {
+      responseObj = { error: "You must be logged in." };
+
+      var ret = responseObj;
+      res.status(403).json(ret);
+      return;
+    }
     var obj = ({ uid: uid } = req.body);
     console.log("fetched basic user details for " + uid);
     var err = "";

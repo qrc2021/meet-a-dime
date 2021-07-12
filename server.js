@@ -14,21 +14,20 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
-// new comment
+async function decodeIDToken(req, res, next) {
+  if (req.headers?.authorization?.startsWith("Bearer ")) {
+    const idToken = req.headers.authorization.split("Bearer ")[1];
 
-// const url = process.env.MONGODB_URI
-// // const MongoClient = require('mongodb').MongoClient;
-// // const client = new MongoClient(url, { useUnifiedTopology: true });
-// // client.connect();
-
-// const mongoose = require('mongoose')
-// mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
-
-// const db = mongoose.connection
-// db.on('error', console.error.bind(console, 'connection error:'))
-// db.once('open', () => {
-//   console.log('connected to db with mongoose!!')
-// })
+    try {
+      const decodedToken = await admin.auth().verifyIdToken(idToken);
+      // console.log(decodedToken);
+      req["currentUser"] = decodedToken;
+    } catch (err) {
+      console.log(err);
+    }
+  }
+  next();
+}
 
 const PORT = process.env.PORT || 5000;
 
@@ -100,6 +99,7 @@ io.on("connection", (socket) => {
 app.set("port", process.env.PORT || 5000);
 
 app.use(cors());
+app.use(decodeIDToken); // for firebase authentication.
 app.use(bodyParser.json());
 
 app.use((req, res, next) => {

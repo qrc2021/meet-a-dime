@@ -81,11 +81,13 @@ export default function Chat() {
   // Fetch the matches' name, birth, sex when page loads.
   async function fetchMatchInfo() {
     try {
+      const token = currentUser && (await currentUser.getIdToken());
       var config = {
         method: 'post',
         url: bp.buildPath('api/getbasicuser'),
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
         data: { uid: match_id },
       };

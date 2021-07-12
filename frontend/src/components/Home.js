@@ -220,15 +220,18 @@ export default function Home() {
   // The matching algorithm/mechanism is described after the useEffect, in
   // the search function.
   useEffect(() => {
+    console.log(currentUser.getIdToken());
     localStorage.removeItem('chatExpiry');
     document.body.style.backgroundColor = 'white';
     async function getIntialUserPhoto() {
       try {
+        const token = currentUser && (await currentUser.getIdToken());
         var config = {
           method: 'post',
           url: bp.buildPath('api/getbasicuser'),
           headers: {
             'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
           },
           data: { uid: currentUser.uid },
         };
@@ -319,11 +322,13 @@ export default function Home() {
   // It returns the user's search preferences.
   async function fetchData() {
     try {
+      const token = currentUser && (await currentUser.getIdToken());
       var config = {
         method: 'post',
         url: bp.buildPath('api/getuser'),
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
         data: { uid: currentUser.uid },
       };
