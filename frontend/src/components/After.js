@@ -1,24 +1,24 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 // import { Button, Alert, Container, Form } from 'react-bootstrap';
-import { Alert, AlertTitle } from '@material-ui/lab';
+import { Alert } from '@material-ui/lab';
 import Container from '@material-ui/core/Container';
 import Button from '@material-ui/core/Button';
 import { useAuth } from '../contexts/AuthContext';
 import { useHistory, useLocation } from 'react-router-dom';
-import { io } from 'socket.io-client';
+// import { io } from 'socket.io-client';
 import axios from 'axios';
-import firebase from 'firebase/app';
+// import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
 import moment from 'moment';
 var bp = require('../Path.js');
-const firestore = firebase.firestore();
+// const firestore = firebase.firestore();
 
 export default function After() {
   // Prevent some prompt issues.
 
-  const [error, setError] = useState('');
-  const { currentUser, logout } = useAuth();
+  // const [error, setError] = useState('');
+  const { currentUser } = useAuth();
 
   const [match_age, setMatchAge] = useState('');
   const [match_name, setMatchName] = useState('user');
@@ -27,7 +27,7 @@ export default function After() {
   const [match_id, setMatchID] = useState('');
   const [pageType, setPageType] = useState('');
 
-  const location = useLocation();
+  useLocation();
   // Gets the passed in match id from the link in the home page
   // timeout_5 is passed in from the home link. it prevents removing the match document in the background.
 
@@ -56,8 +56,8 @@ export default function After() {
       setMatchName(response.data.firstName);
       setMatchSex(response.data.sex);
       setMatchPhoto(response.data.photo);
-    } catch (error) {
-      console.log(error);
+    } catch (err) {
+      console.log(err);
     }
   }
 
@@ -81,7 +81,7 @@ export default function After() {
       redirectToHome();
     }
     // This gets the match data.
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   //   async function handleLogout() {
   //     try {
@@ -106,39 +106,39 @@ export default function After() {
     <React.Fragment>
       <h2 className="text-center mb-4">After Chat</h2>
 
-      {error && <Alert severity="error">{error}</Alert>}
-      {pageType && pageType == 'match_abandoned' && (
+      {/* {error && <Alert severity="error">{error}</Alert>} */}
+      {pageType && pageType === 'match_abandoned' && (
         <Alert severity="info">{'Your match left.'}</Alert>
       )}
-      {pageType && pageType == 'user_abandoned' && (
+      {pageType && pageType === 'user_abandoned' && (
         <Alert severity="info">
           {"Sorry it didn't go well. Keep flipping the coin!"}
         </Alert>
       )}
-      {pageType && pageType == 'match_didnt_go_well' && (
+      {pageType && pageType === 'match_didnt_go_well' && (
         <Alert severity="info">
           {
             'The other user said it didnt go well (I AM PLACEHOLDER TEXT CHANGE ME LATER)'
           }
         </Alert>
       )}
-      {pageType && pageType == 'user_didnt_go_well' && (
+      {pageType && pageType === 'user_didnt_go_well' && (
         <Alert severity="info">
           {
             "Sorry it didn't go well :( Keep looking! (I AM PLACEHOLDER TEXT CHANGE ME LATER)"
           }
         </Alert>
       )}
-      {pageType && pageType == 'match_timedout' && (
+      {pageType && pageType === 'match_timedout' && (
         <Alert severity="info">{'Match timed out.'}</Alert>
       )}
-      {pageType && pageType == 'match_made' && (
+      {pageType && pageType === 'match_made' && (
         <Alert severity="info">{"You've matched with a Dime!"}</Alert>
       )}
-      {pageType && pageType == 'timeout' && (
+      {pageType && pageType === 'timeout' && (
         <Alert severity="info">{'Timeout'}</Alert>
       )}
-      {pageType && pageType == 'extended_timeout' && (
+      {pageType && pageType === 'extended_timeout' && (
         <Alert severity="info">
           {'Timeout extended (i said yes, they did not)'}
         </Alert>
@@ -163,7 +163,8 @@ export default function After() {
             height="100px"
             width="100px"
             src={match_photo}
-            id="matchPhoto"></img>
+            id="matchPhoto"
+            alt="Pic of match"></img>
         ) : (
           <></>
         )}

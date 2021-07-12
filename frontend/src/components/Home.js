@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 // import { Button, Alert, Container } from 'react-bootstrap';
 import { Navbar, Button, Form, Col, Row } from 'react-bootstrap';
-import { Alert, AlertTitle } from '@material-ui/lab';
-import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
-import PhotoCamera from '@material-ui/icons/PhotoCamera';
-import Container from '@material-ui/core/Container';
+import { Alert } from '@material-ui/lab';
+// import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
+// import PhotoCamera from '@material-ui/icons/PhotoCamera';
+// import Container from '@material-ui/core/Container';
 // import Button from '@material-ui/core/Button';
 import Modal from '@material-ui/core/Modal';
-import Box from '@material-ui/core/Box';
+// import Box from '@material-ui/core/Box';
 import { useAuth } from '../contexts/AuthContext';
 import { useHistory } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+// import { Link } from 'react-router-dom';
 import axios from 'axios';
 import firebase from 'firebase/app';
 import 'firebase/auth';
@@ -34,7 +34,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import CreateIcon from '@material-ui/icons/Create';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
-import TextField from '@material-ui/core/TextField';
+// import TextField from '@material-ui/core/TextField';
 import LinearProgress from '@material-ui/core/LinearProgress';
 
 var bp = require('../Path.js');
@@ -154,7 +154,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [myPhoto, setMyPhoto] = useState('');
   const [progress, setProgress] = useState(-1);
-  const [transitioning, setTransitioning] = useState(false);
+  // const [transitioning, setTransitioning] = useState(false);
   const [name, setName] = useState('');
   // the firebase firestore instance, used to query, add, delete, edit from DB.
   const firestore = firebase.firestore();
@@ -168,8 +168,8 @@ export default function Home() {
   const MS_BEFORE_ABANDON_SEARCH = 10000;
   const MS_TRANSFER_TO_CHAT = 3000;
   // Before match expires. they are separate just incase.
-  const MS_BEFORE_ABANDON_MATCH_DOCJOIN = 10000;
-  const MS_BEFORE_ABANDON_MATCH_DOCHOST = 10000;
+  // const MS_BEFORE_ABANDON_MATCH_DOCJOIN = 10000;
+  // const MS_BEFORE_ABANDON_MATCH_DOCHOST = 10000;
   // The observer will eventually be a function that listens for changes
   // to the database. to prevent resource leaks, we can call observer()
   // to stop listening ('unsubscribe' to changes)
@@ -217,6 +217,7 @@ export default function Home() {
         };
         var response = await axios(config);
         setMyPhoto(response.data.photo);
+        console.log(myPhoto);
         setName(response.data.firstName);
       } catch (error) {
         console.log(error);
@@ -719,7 +720,7 @@ export default function Home() {
                 setProgress(-1);
                 timeout5.current = setTimeout(() => {
                   if (
-                    window.location.pathname == '/' &&
+                    window.location.pathname === '/' &&
                     id_of_match === 'none'
                   ) {
                     console.log('TIMEOUT DOC HOST');
@@ -857,6 +858,7 @@ export default function Home() {
               <Form.Control
                 className="text-search mt-2"
                 type="search"
+                data-lpignore="true"
                 placeholder="Search for previous matches..."
               />
             </Col>

@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button, Container, Form, Modal, Image } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
 import { useHistory, useLocation } from 'react-router-dom';
-import { Alert, AlertTitle } from '@material-ui/lab';
+import { Alert } from '@material-ui/lab';
 import { io } from 'socket.io-client';
 import axios from 'axios';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
 import moment from 'moment';
-import { TramRounded } from '@material-ui/icons';
+
 var bp = require('../Path.js');
 const firestore = firebase.firestore();
 
@@ -38,7 +38,7 @@ export default function Chat() {
   const [match_sex, setMatchSex] = useState('');
   const [match_photo, setMatchPhoto] = useState('');
   // console.log(socket);
-  const location = useLocation();
+  useLocation();
   // Gets the passed in match id from the link in the home page
   // timeout_5 is passed in from the home link. it prevents removing the match document in the background.
 
@@ -68,10 +68,10 @@ export default function Chat() {
     window.location.href = '/';
   }
 
-  const joinRoomButton = document.getElementById('room-button');
-  const messageInput = document.getElementById('message_input');
-  const roomInput = document.getElementById('room-input');
-  const form = document.getElementById('form');
+  document.getElementById('room-button');
+  document.getElementById('message_input');
+  document.getElementById('room-input');
+  document.getElementById('form');
 
   // Redirect users if they are not verified.
   if (!currentUser.emailVerified) {
@@ -140,14 +140,14 @@ export default function Chat() {
       match = currentUser.uid;
     }
 
-    if (currentUser.uid == seeker) {
+    if (currentUser.uid === seeker) {
       await firestore.collection('searching').doc(currentUser.uid).update({
         seekerTail: 'timeout',
       });
       console.log('I am the seeker, I set my value TIMEOUT.');
     }
 
-    if (currentUser.uid == match) {
+    if (currentUser.uid === match) {
       await firestore.collection('searching').doc(match_id).update({
         matchTail: 'timeout',
       });
@@ -249,7 +249,7 @@ export default function Chat() {
     }
 
     // If im seeker, I need to set my value to true and wait for matchTail.
-    if (currentUser.uid == seeker) {
+    if (currentUser.uid === seeker) {
       await firestore.collection('searching').doc(currentUser.uid).update({
         seekerTail: 'true',
       });
@@ -259,7 +259,7 @@ export default function Chat() {
         .collection('searching')
         .doc(currentUser.uid)
         .get();
-      if (res.data().matchTail == 'true') {
+      if (res.data().matchTail === 'true') {
         // OTHER PERSON SAID YES!!!!
         setSuccessMatches();
         console.log('match said yes!!');
@@ -275,7 +275,7 @@ export default function Chat() {
             if (
               docSnapshot &&
               docSnapshot.data() &&
-              docSnapshot.data().matchTail == 'true'
+              docSnapshot.data().matchTail === 'true'
             ) {
               // THEY SAID YES !! (but after)
               setSuccessMatches();
@@ -287,7 +287,7 @@ export default function Chat() {
             if (
               docSnapshot &&
               docSnapshot.data() &&
-              docSnapshot.data().matchTail == 'timeout'
+              docSnapshot.data().matchTail === 'timeout'
             ) {
               // The other person timed out..
               console.log('other person (the match) timed out');
@@ -300,14 +300,14 @@ export default function Chat() {
     }
 
     // If im match, I need to set my match to true and wait for seekerTail.
-    if (currentUser.uid == match) {
+    if (currentUser.uid === match) {
       await firestore.collection('searching').doc(match_id).update({
         matchTail: 'true',
       });
       console.log('I am the match, I set my value true.');
       // Now, check immediately just in case.
-      var res = await firestore.collection('searching').doc(match_id).get();
-      if (res.data().seekerTail == 'true') {
+      res = await firestore.collection('searching').doc(match_id).get();
+      if (res.data().seekerTail === 'true') {
         // OTHER PERSON SAID YES!!!!
         setSuccessMatches();
         console.log('seeker said yes!!');
@@ -322,7 +322,7 @@ export default function Chat() {
             if (
               docSnapshot &&
               docSnapshot.data() &&
-              docSnapshot.data().seekerTail == 'true'
+              docSnapshot.data().seekerTail === 'true'
             ) {
               // THEY SAID YES !! (but after)
               setSuccessMatches();
@@ -334,7 +334,7 @@ export default function Chat() {
             if (
               docSnapshot &&
               docSnapshot.data() &&
-              docSnapshot.data().seekerTail == 'timeout'
+              docSnapshot.data().seekerTail === 'timeout'
             ) {
               // The other person timed out..
               console.log('other person (the seeker) timed out');
@@ -471,7 +471,7 @@ export default function Chat() {
       currentUser.uid.toString(),
       new_room.toString(),
       function (message) {
-        if (message == 'joined') {
+        if (message === 'joined') {
           console.log('callback called, joining room now.');
           setRoom(new_room);
           displayMessage('Joined the room! Introduce yourself :)', 'system');
@@ -525,7 +525,7 @@ export default function Chat() {
         console.log('LEFT MY ROOM');
       }, 0);
     });
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -541,13 +541,13 @@ export default function Chat() {
 
   // Two modes added for some extra processing (like maybe classes or etc)
   function displayMessage(message, mode) {
-    if (window.location.pathname == '/chat') {
+    if (window.location.pathname === '/chat') {
       var suffix = '';
       if (mode === 'received') {
         suffix = ' (them)';
-      } else if (mode == 'sent') {
+      } else if (mode === 'sent') {
         suffix = ' (you)';
-      } else if (mode == 'system') {
+      } else if (mode === 'system') {
         suffix = ' [[sys msg, remove suffix later]]';
       }
       const div = document.createElement('div');
@@ -651,7 +651,8 @@ export default function Chat() {
             height="100px"
             width="100px"
             src={match_photo}
-            id="matchPhoto"></img>
+            id="matchPhoto"
+            alt="Profile pic of match"></img>
         ) : (
           <></>
         )}

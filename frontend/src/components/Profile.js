@@ -12,11 +12,9 @@ import 'firebase/auth';
 import 'firebase/firestore';
 import 'firebase/storage';
 import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
-import AlarmIcon from '@material-ui/icons/Alarm';
+
 import { Alert, AlertTitle } from '@material-ui/lab';
-import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
-import PhotoCamera from '@material-ui/icons/PhotoCamera';
+
 import Container from '@material-ui/core/Container';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
@@ -165,9 +163,9 @@ export default function Profile() {
     history.push('/');
   }
 
-  function redirectToUpdateProfile() {
-    history.push('/update-profile');
-  }
+  // function redirectToUpdateProfile() {
+  //   history.push('/update-profile');
+  // }
 
   function processPhoto() {
     const selectedFile = document.getElementById('photoUploadGroup').files[0];
@@ -198,6 +196,9 @@ export default function Profile() {
             break;
           case firebase.storage.TaskState.RUNNING: // or 'running'
             console.log('Upload is running');
+            break;
+          default:
+            console.log('error? in switch');
             break;
         }
       },
@@ -292,7 +293,7 @@ export default function Profile() {
   useEffect(() => {
     document.body.style.backgroundColor = 'white';
     fetchUserData();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <React.Fragment>
@@ -332,33 +333,38 @@ export default function Profile() {
           </div>
         )}
       </AppBar>
-    
+
       <main
         className={clsx(classes.content, {
           [classes.contentShift]: open,
         })}>
-              <div className={classes.drawerHeader} />
-              <Grid container spacing={1}>
-              <Grid item xs={2}>
-                  <Container>
-                      <strong>Photo:</strong>
-                      <br></br>
-                      {myPhoto !== '' ? (
-                          <img height="100px" width="100px" src={myPhoto} id="photo"></img>
-                      ) : (
-                              <img
-                                  className="img-fluid"
-                                  alt="signup"
-                                  src="DimeAssets/coinsignup.png"
-                                  height="100px"
-                                  width="100px"
-                              />
-          )}
-          <br></br>
-                      {/* Temporary file input field, just needs style and
+        <div className={classes.drawerHeader} />
+        <Grid container spacing={1}>
+          <Grid item xs={2}>
+            <Container>
+              <strong>Photo:</strong>
+              <br></br>
+              {myPhoto !== '' ? (
+                <img
+                  height="100px"
+                  width="100px"
+                  src={myPhoto}
+                  id="photo"
+                  alt="My Profile Pic"></img>
+              ) : (
+                <img
+                  className="img-fluid"
+                  src="DimeAssets/coinsignup.png"
+                  height="100px"
+                  width="100px"
+                  alt="Default Pic"
+                />
+              )}
+              <br></br>
+              {/* Temporary file input field, just needs style and
         probably some custom input fields */}
-                      <div className="my-3">
-                          {/* <input type="file" id="photoUploadGroup" />
+              <div className="my-3">
+                {/* <input type="file" id="photoUploadGroup" />
 
           <button
             className="btn btn-primary"
@@ -366,92 +372,91 @@ export default function Profile() {
             onClick={processPhoto}>
             Upload Photo
           </button> */}
-                          <input
-                              onChange={() => {
-                                  if (
-                                      document.getElementById('photoUploadGroup') &&
-                                      document.getElementById('photoUploadGroup').files[0]
-                                  )
-                                      setSelectedFile(
-                                          document.getElementById('photoUploadGroup').files[0].name
-                                      );
-                              }}
-                              accept="image/*"
-                              id="photoUploadGroup"
-                              hidden
-                              type="file"
-                          />
-                          <label htmlFor="photoUploadGroup">
-                              <Button
-                                  variant="contained"
-                                  color="primary"
-                                  component="span"
-                                  startIcon={<AttachmentIcon />}>
-                                  Select
-              </Button>
-                          </label>
-                          <Box my={1}>{selectedFile}</Box>
-                          <Button
-                              variant="contained"
-                              color="default"
-                              endIcon={<CloudUploadIcon />}
-                              id="photoUploadButton"
-                              onClick={processPhoto}
-                              disabled={!selectedFile}>
-                              Upload
-            </Button>
-                      </div>
-                      {isUploading && (
-                          <LinearProgress variant="determinate" value={progress} />
-                      )}
-                      {photoStatus}
-                      <Link to="/update-profile" className="btn btn-primary">
-                          Update Profile
-          </Link>
-                  </Container>
-                  {/* <Button variant="contained" color="primary">
+                <input
+                  onChange={() => {
+                    if (
+                      document.getElementById('photoUploadGroup') &&
+                      document.getElementById('photoUploadGroup').files[0]
+                    )
+                      setSelectedFile(
+                        document.getElementById('photoUploadGroup').files[0]
+                          .name
+                      );
+                  }}
+                  accept="image/*"
+                  id="photoUploadGroup"
+                  hidden
+                  type="file"
+                />
+                <label htmlFor="photoUploadGroup">
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    component="span"
+                    startIcon={<AttachmentIcon />}>
+                    Select
+                  </Button>
+                </label>
+                <Box my={1}>{selectedFile}</Box>
+                <Button
+                  variant="contained"
+                  color="default"
+                  endIcon={<CloudUploadIcon />}
+                  id="photoUploadButton"
+                  onClick={processPhoto}
+                  disabled={!selectedFile}>
+                  Upload
+                </Button>
+              </div>
+              {isUploading && (
+                <LinearProgress variant="determinate" value={progress} />
+              )}
+              {photoStatus}
+              <Link to="/update-profile" className="btn btn-primary">
+                Update Profile
+              </Link>
+            </Container>
+            {/* <Button variant="contained" color="primary">
           Home
         </Button>
         <Button variant="contained" color="secondary" onClick={handleLogout}>
           Log Out
         </Button> */}
-              </Grid>
+          </Grid>
 
-              <Grid item xs={5}>
-        <h2 className="text-center mb-4">Profile</h2>
+          <Grid item xs={5}>
+            <h2 className="text-center mb-4">Profile</h2>
 
-        {error && (
-          <Alert severity="error">
-            <AlertTitle>Error</AlertTitle>
-            {error}
-          </Alert>
-        )}
+            {error && (
+              <Alert severity="error">
+                <AlertTitle>Error</AlertTitle>
+                {error}
+              </Alert>
+            )}
 
-        <Container>
-          <strong>First Name:</strong> <span id="first"></span>
-          <br></br>
-          <strong>Last Name:</strong> <span id="last"></span>
-          <br></br>
-          <strong>Birthday:</strong> <span id="birth"></span>
-          <br></br>
-          <strong>Email:</strong> {currentUser.email}
-          <br></br>
-          <strong>Phone Number:</strong> <span id="phone"></span>
-          <br></br>
-          <strong>Exit Message:</strong> <span id="exit"></span>
-          <br></br>
-          <strong>Sex:</strong> <span id="sex"></span>
-          <br></br>
-          <strong>Sexual Orientation:</strong> <span id="orientation"></span>
-          <br></br>
-          <strong>User ID:</strong> {currentUser.uid}
-          <br></br>
-        </Container>
-
+            <Container>
+              <strong>First Name:</strong> <span id="first"></span>
+              <br></br>
+              <strong>Last Name:</strong> <span id="last"></span>
+              <br></br>
+              <strong>Birthday:</strong> <span id="birth"></span>
+              <br></br>
+              <strong>Email:</strong> {currentUser.email}
+              <br></br>
+              <strong>Phone Number:</strong> <span id="phone"></span>
+              <br></br>
+              <strong>Exit Message:</strong> <span id="exit"></span>
+              <br></br>
+              <strong>Sex:</strong> <span id="sex"></span>
+              <br></br>
+              <strong>Sexual Orientation:</strong>{' '}
+              <span id="orientation"></span>
+              <br></br>
+              <strong>User ID:</strong> {currentUser.uid}
+              <br></br>
+            </Container>
           </Grid>
         </Grid>
-   
-
       </main>
 
       <Drawer

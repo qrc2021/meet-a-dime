@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
-import { Form, Button, Card, Navbar, CardDeck } from 'react-bootstrap';
-import { Alert, AlertTitle } from '@material-ui/lab';
+import { Form, Button, Card, Navbar } from 'react-bootstrap';
+import { Alert } from '@material-ui/lab';
 
 import { useAuth } from '../contexts/AuthContext';
 import { useHistory } from 'react-router-dom';
@@ -50,20 +50,17 @@ export default function Verify() {
 
   return (
     <React.Fragment>
-
-
-    <Navbar bg="transparent">
-      <Navbar.Brand href="login">
-        <img
-          src="/DimeAssets/headerlogo.png"
-          width="300px"
-          height="100%"
-          className="d-inline-block align-top"
-          alt="React Bootstrap logo"
-        />
-      </Navbar.Brand>
-    </Navbar>
-
+      <Navbar bg="transparent">
+        <Navbar.Brand onClick={handleLogout} style={{ cursor: 'pointer' }}>
+          <img
+            src="/DimeAssets/headerlogo.png"
+            width="300px"
+            height="100%"
+            className="d-inline-block align-top"
+            alt="React Bootstrap logo"
+          />
+        </Navbar.Brand>
+      </Navbar>
 
       {currentUser && currentUser.emailVerified ? (
         <Redirect to="/"></Redirect>

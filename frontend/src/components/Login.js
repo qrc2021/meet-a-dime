@@ -1,10 +1,10 @@
 import React, { useRef, useState, useEffect } from 'react';
 import Link from '@material-ui/core/Link';
 //import { View, Text, ScrollView, TextInput } from 'react-native';
-import { Card, Form, Button, Image, CardDeck } from 'react-bootstrap';
+import { Card, Form, Button, CardDeck } from 'react-bootstrap';
 import Container from '@material-ui/core/Container';
 import { useHistory } from 'react-router-dom';
-import { Alert, AlertTitle } from '@material-ui/lab';
+import { Alert } from '@material-ui/lab';
 import { useAuth } from '../contexts/AuthContext';
 import firebase from 'firebase/app';
 import 'firebase/auth';
@@ -83,7 +83,7 @@ export default function Login() {
       // clearAllTimeouts();
       console.log('Ran the clearing methods.');
     }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -105,6 +105,7 @@ export default function Login() {
     if (window.location.pathname === '/login') setLoading(false);
   }
 
+  document.body.style.backgroundColor = '#dceaff';
   return (
     <>
       <Container style={{ flex: '1' }}>
@@ -151,6 +152,7 @@ export default function Login() {
                     type="email"
                     ref={emailRef}
                     required
+                    data-lpignore="true"
                   />
                 </Form.Group>
                 <Form.Group
@@ -163,6 +165,7 @@ export default function Login() {
                     type="password"
                     ref={passwordRef}
                     required
+                    data-lpignore="true"
                   />
                 </Form.Group>
                 <Form.Group controlId="formBasicCheckbox">

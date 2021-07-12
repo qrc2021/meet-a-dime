@@ -5,7 +5,7 @@ import Container from '@material-ui/core/Container';
 import InputLabel from '@material-ui/core/InputLabel';
 import Input from '@material-ui/core/Input';
 // import Button from '@material-ui/core/Button';
-import { Alert, AlertTitle } from '@material-ui/lab';
+import { Alert } from '@material-ui/lab';
 import Card from '@material-ui/core/Card';
 import { useHistory } from 'react-router-dom';
 import CardContent from '@material-ui/core/CardContent';
@@ -44,7 +44,6 @@ export default function Forgot() {
 
   return (
     <>
-  
       <Navbar bg="transparent">
         <Navbar.Brand href="login">
           <img
@@ -68,14 +67,15 @@ export default function Forgot() {
             borderRadius: '30px',
           }}>
           <CardContent>
-            <h2 
+            <h2
               className="text-center mb-2"
               style={{
                 fontWeight: 'bold',
                 fontSize: '50px',
                 color: '#7E7E7E',
               }}>
-              Password Reset</h2>
+              Password Reset
+            </h2>
             <h3
               className="text-center mb-3"
               style={{
@@ -88,10 +88,11 @@ export default function Forgot() {
             {error && <Alert severity="error">{error}</Alert>}
             {message && <Alert severity="success">{message}</Alert>}
             <form onSubmit={handleSubmit}>
-              <FormControl id="email"
+              <FormControl
+                id="email"
                 className="mb-2"
                 style={{
-                  width: '100%'
+                  width: '100%',
                 }}>
                 <InputLabel>Email</InputLabel>
                 <Input type="email" inputRef={emailRef} required />

@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
-import { Card, Form, Button, Navbar, Container } from 'react-bootstrap';
+import { Form, Button, Navbar } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
-import { Alert, AlertTitle } from '@material-ui/lab';
+import { Alert } from '@material-ui/lab';
 import Grid from '@material-ui/core/Grid';
 import { Link, useHistory } from 'react-router-dom';
 import axios from 'axios';
@@ -23,18 +23,18 @@ export default function SignUp() {
   const [optionsState, setOptionsState] = useState('0');
   const [orientationState, setOrientationState] = useState('0');
   const [phoneVal, setPhoneVal] = useState('');
-  const answer1Ref = useRef();
-  const answer2Ref = useRef();
-  const answer3Ref = useRef();
-  const answer4Ref = useRef();
-  const answer5Ref = useRef();
-  const answer6Ref = useRef();
-  const answer7Ref = useRef();
-  const answer8Ref = useRef();
-  const answer9Ref = useRef();
-  const answer10Ref = useRef();
-  const answer11Ref = useRef();
-  const answer12Ref = useRef();
+  // const answer1Ref = useRef();
+  // const answer2Ref = useRef();
+  // const answer3Ref = useRef();
+  // const answer4Ref = useRef();
+  // const answer5Ref = useRef();
+  // const answer6Ref = useRef();
+  // const answer7Ref = useRef();
+  // const answer8Ref = useRef();
+  // const answer9Ref = useRef();
+  // const answer10Ref = useRef();
+  // const answer11Ref = useRef();
+  // const answer12Ref = useRef();
 
   var adult = moment().subtract(18, 'years').calendar();
   console.log(adult);
@@ -89,7 +89,7 @@ export default function SignUp() {
   //counts the number of characters a user is typing for personal questions
   //they get a live count that turns red if they are over the character limit
   //NOTE - Add at a later date
-  var maxAnswerLength = 280;
+  // var maxAnswerLength = 280;
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -320,101 +320,127 @@ export default function SignUp() {
       </Navbar>
 
       <Grid container spacing={1}>
-          <Grid item xs={5}>
-              <img
-                  className="img-fluid"
-                  alt="signup"
-                  src="DimeAssets/coinsignup.png"
+        <Grid item xs={5}>
+          <img
+            className="img-fluid"
+            alt="signup"
+            src="DimeAssets/coinsignup.png"
+          />
+        </Grid>
+        <Grid item xs={5}>
+          {/* <Card.Body> */}
+          <h2 className="text-center mb-3" style={{ color: '#929292' }}>
+            Create an Account
+          </h2>
+          {error && <Alert severity="error">{error}</Alert>}
+          <Form onSubmit={handleSubmit}>
+            <Form.Group id="firstName">
+              <Form.Control
+                type="text"
+                ref={firstRef}
+                placeholder="First Name"
               />
-          </Grid>
-          <Grid item xs={5}>
-        {/* <Card.Body> */}
-        <h2 className="text-center mb-3" style={{color: '#929292'}}>Create an Account</h2>
-        {error && <Alert severity="error">{error}</Alert>}
-        <Form onSubmit={handleSubmit}>
-          <Form.Group id="firstName">
-            <Form.Control type="text" ref={firstRef} placeholder="First Name"/>
-          </Form.Group>
-          <Form.Group id="lastName">
-            <Form.Control type="text" ref={lastRef} placeholder="Last Name"/>
-            <Form.Text className="text-muted">
-              Your last name will stay private
-            </Form.Text>
-          </Form.Group>
-          <Form.Group id="email">
-            <Form.Control type="email" ref={emailRef} required placeholder="Email"/>
-            <Form.Text className="text-muted">
-              We will never share your email with anyone.
-            </Form.Text>
-          </Form.Group>
-          <Form.Group id="password">
-            <Form.Control type="password" ref={passwordRef} required placeholder="Password"/>
-          </Form.Group>
-          <Form.Group id="password-confirm">
-            <Form.Control type="password" ref={passwordConfirmRef} required placeholder="Password Confirmation"/>
-          </Form.Group>
-          <Form.Group id="dob">
-            <Form.Label className="text-muted">Date of Birth</Form.Label>
-            <Form.Control
-              type="date"
-              value={dateState}
-              onChange={(e) => dateWork(e.target.value)}
-              required
-            />
-            <Form.Text className="text-muted">You must be 18+ years.</Form.Text>
-          </Form.Group>
-          <Form.Row id="sex">
-            <Form.Control
-              as="select"
-              value={optionsState}
-              onChange={(e) => setOptionsState(e.target.value)}
-              required>
-              <option value="0">Choose your sex...</option>
-              <option value="1">Male</option>
-              <option value="2">Female</option>
-            </Form.Control>
-          </Form.Row>
-          <Form.Row id="sexualOrientation">
-            <Form.Control
-              as="select"
-              value={orientationState}
-              onChange={(e) => setOrientationState(e.target.value)}
-              required>
-              <option value="0">Choose your sexual orientation...</option>
-              <option value="1">Heterosexual</option>
-              <option value="2">Homosexual</option>
-              <option value="3">Bisexual</option>
-            </Form.Control>
-          </Form.Row>
-          <Form.Group id="customResponse">
-            <Form.Control type="text" ref={responseRef} placeholder="End of Chat Response"/>
-            <Form.Text className="text-muted">
-              Users will see this response at the end of a chat. This can be
-              changed later...
-            </Form.Text>
-          </Form.Group>
-          <Form.Group id="phoneGroup">
-            <Form.Control
-              type="tel"
-              value={phoneVal}
-              onChange={(e) => phoneWork(e)}
-              required
-              placeholder="Phone Number"
-            />
-          </Form.Group>
-         
-          <Button disabled={loading} className="w-100 mt-2" type="submit">
-           Register
-          </Button>
-        </Form>
-        {/* </Card.Body> */}
+            </Form.Group>
+            <Form.Group id="lastName">
+              <Form.Control type="text" ref={lastRef} placeholder="Last Name" />
+              <Form.Text className="text-muted">
+                Your last name will stay private
+              </Form.Text>
+            </Form.Group>
+            <Form.Group id="email">
+              <Form.Control
+                type="email"
+                ref={emailRef}
+                required
+                placeholder="Email"
+              />
+              <Form.Text className="text-muted">
+                We will never share your email with anyone.
+              </Form.Text>
+            </Form.Group>
+            <Form.Group id="password">
+              <Form.Control
+                type="password"
+                ref={passwordRef}
+                required
+                placeholder="Password"
+              />
+            </Form.Group>
+            <Form.Group id="password-confirm">
+              <Form.Control
+                type="password"
+                ref={passwordConfirmRef}
+                required
+                placeholder="Password Confirmation"
+              />
+            </Form.Group>
+            <Form.Group id="dob">
+              <Form.Label className="text-muted">Date of Birth</Form.Label>
+              <Form.Control
+                type="date"
+                value={dateState}
+                onChange={(e) => dateWork(e.target.value)}
+                required
+              />
+              <Form.Text className="text-muted">
+                You must be 18+ years.
+              </Form.Text>
+            </Form.Group>
+            <Form.Row id="sex">
+              <Form.Control
+                as="select"
+                value={optionsState}
+                onChange={(e) => setOptionsState(e.target.value)}
+                required>
+                <option value="0">Choose your sex...</option>
+                <option value="1">Male</option>
+                <option value="2">Female</option>
+              </Form.Control>
+            </Form.Row>
+            <Form.Row id="sexualOrientation">
+              <Form.Control
+                as="select"
+                value={orientationState}
+                onChange={(e) => setOrientationState(e.target.value)}
+                required>
+                <option value="0">Choose your sexual orientation...</option>
+                <option value="1">Heterosexual</option>
+                <option value="2">Homosexual</option>
+                <option value="3">Bisexual</option>
+              </Form.Control>
+            </Form.Row>
+            <Form.Group id="customResponse">
+              <Form.Control
+                type="text"
+                ref={responseRef}
+                placeholder="End of Chat Response"
+              />
+              <Form.Text className="text-muted">
+                Users will see this response at the end of a chat. This can be
+                changed later...
+              </Form.Text>
+            </Form.Group>
+            <Form.Group id="phoneGroup">
+              <Form.Control
+                type="tel"
+                value={phoneVal}
+                onChange={(e) => phoneWork(e)}
+                required
+                placeholder="Phone Number"
+              />
+            </Form.Group>
 
-           
-      <div className="w-100 text-center mt-2">
-        Already have an account? <Link to="/login">Log In</Link>
-      </div>
-          </Grid>
-          </Grid>
+            <Button disabled={loading} className="w-100 mt-2" type="submit">
+              Register
+            </Button>
+          </Form>
+          {/* </Card.Body> */}
+
+          <div className="w-100 text-center mt-2">
+            Already have an account? <Link to="/login">Log In</Link>
+          </div>
+        </Grid>
+      </Grid>
     </>
   );
 }
