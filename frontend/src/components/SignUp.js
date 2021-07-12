@@ -320,7 +320,7 @@ export default function SignUp() {
       </Navbar>
 
       <Grid container spacing={1}>
-          <Grid item xs={6}>
+          <Grid item xs={5}>
               <img
                   className="img-fluid"
                   alt="signup"
@@ -333,43 +333,37 @@ export default function SignUp() {
         {error && <Alert severity="error">{error}</Alert>}
         <Form onSubmit={handleSubmit}>
           <Form.Group id="firstName">
-            <Form.Label>First Name</Form.Label>
-            <Form.Control type="text" ref={firstRef} />
+            <Form.Control type="text" ref={firstRef} placeholder="First Name"/>
           </Form.Group>
           <Form.Group id="lastName">
-            <Form.Label>Last Name</Form.Label>
-            <Form.Control type="text" ref={lastRef} />
+            <Form.Control type="text" ref={lastRef} placeholder="Last Name"/>
             <Form.Text className="text-muted">
               Your last name will stay private
             </Form.Text>
           </Form.Group>
           <Form.Group id="email">
-            <Form.Label>Email</Form.Label>
-            <Form.Control type="email" ref={emailRef} required />
+            <Form.Control type="email" ref={emailRef} required placeholder="Email"/>
             <Form.Text className="text-muted">
               We will never share your email with anyone.
             </Form.Text>
           </Form.Group>
           <Form.Group id="password">
-            <Form.Label>Password</Form.Label>
-            <Form.Control type="password" ref={passwordRef} required />
+            <Form.Control type="password" ref={passwordRef} required placeholder="Password"/>
           </Form.Group>
           <Form.Group id="password-confirm">
-            <Form.Label>Password Confirmation</Form.Label>
-            <Form.Control type="password" ref={passwordConfirmRef} required />
+            <Form.Control type="password" ref={passwordConfirmRef} required placeholder="Password Confirmation"/>
           </Form.Group>
           <Form.Group id="dob">
-            <Form.Label>Date of Birth</Form.Label>
+            <Form.Label className="text-muted">Date of Birth</Form.Label>
             <Form.Control
               type="date"
               value={dateState}
               onChange={(e) => dateWork(e.target.value)}
               required
             />
-            <Form.Text className="text-muted">You must be 18+ years</Form.Text>
+            <Form.Text className="text-muted">You must be 18+ years.</Form.Text>
           </Form.Group>
           <Form.Row id="sex">
-            <Form.Label>Sex</Form.Label>
             <Form.Control
               as="select"
               value={optionsState}
@@ -381,7 +375,6 @@ export default function SignUp() {
             </Form.Control>
           </Form.Row>
           <Form.Row id="sexualOrientation">
-            <Form.Label>Sexual Orientation</Form.Label>
             <Form.Control
               as="select"
               value={orientationState}
@@ -394,20 +387,19 @@ export default function SignUp() {
             </Form.Control>
           </Form.Row>
           <Form.Group id="customResponse">
-            <Form.Label>End of Chat Response</Form.Label>
-            <Form.Control type="text" ref={responseRef} />
+            <Form.Control type="text" ref={responseRef} placeholder="End of Chat Response"/>
             <Form.Text className="text-muted">
               Users will see this response at the end of a chat. This can be
               changed later...
             </Form.Text>
           </Form.Group>
           <Form.Group id="phoneGroup">
-            <Form.Label>Phone number:</Form.Label>
             <Form.Control
               type="tel"
               value={phoneVal}
               onChange={(e) => phoneWork(e)}
               required
+              placeholder="Phone Number"
             />
           </Form.Group>
          
