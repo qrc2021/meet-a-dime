@@ -7,6 +7,7 @@ import { useHistory } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import firebase from 'firebase/app';
 import AttachmentIcon from '@material-ui/icons/Attachment';
+import Grid from '@material-ui/core/Grid';
 import 'firebase/auth';
 import 'firebase/firestore';
 import 'firebase/storage';
@@ -331,12 +332,92 @@ export default function Profile() {
           </div>
         )}
       </AppBar>
-
+    
       <main
         className={clsx(classes.content, {
           [classes.contentShift]: open,
         })}>
-        <div className={classes.drawerHeader} />
+              <div className={classes.drawerHeader} />
+              <Grid container spacing={1}>
+              <Grid item xs={2}>
+                  <Container>
+                      <strong>Photo:</strong>
+                      <br></br>
+                      {myPhoto !== '' ? (
+                          <img height="100px" width="100px" src={myPhoto} id="photo"></img>
+                      ) : (
+                              <img
+                                  className="img-fluid"
+                                  alt="signup"
+                                  src="DimeAssets/coinsignup.png"
+                                  height="100px"
+                                  width="100px"
+                              />
+          )}
+          <br></br>
+                      {/* Temporary file input field, just needs style and
+        probably some custom input fields */}
+                      <div className="my-3">
+                          {/* <input type="file" id="photoUploadGroup" />
+
+          <button
+            className="btn btn-primary"
+            id="photoUploadButton"
+            onClick={processPhoto}>
+            Upload Photo
+          </button> */}
+                          <input
+                              onChange={() => {
+                                  if (
+                                      document.getElementById('photoUploadGroup') &&
+                                      document.getElementById('photoUploadGroup').files[0]
+                                  )
+                                      setSelectedFile(
+                                          document.getElementById('photoUploadGroup').files[0].name
+                                      );
+                              }}
+                              accept="image/*"
+                              id="photoUploadGroup"
+                              hidden
+                              type="file"
+                          />
+                          <label htmlFor="photoUploadGroup">
+                              <Button
+                                  variant="contained"
+                                  color="primary"
+                                  component="span"
+                                  startIcon={<AttachmentIcon />}>
+                                  Select
+              </Button>
+                          </label>
+                          <Box my={1}>{selectedFile}</Box>
+                          <Button
+                              variant="contained"
+                              color="default"
+                              endIcon={<CloudUploadIcon />}
+                              id="photoUploadButton"
+                              onClick={processPhoto}
+                              disabled={!selectedFile}>
+                              Upload
+            </Button>
+                      </div>
+                      {isUploading && (
+                          <LinearProgress variant="determinate" value={progress} />
+                      )}
+                      {photoStatus}
+                      <Link to="/update-profile" className="btn btn-primary">
+                          Update Profile
+          </Link>
+                  </Container>
+                  {/* <Button variant="contained" color="primary">
+          Home
+        </Button>
+        <Button variant="contained" color="secondary" onClick={handleLogout}>
+          Log Out
+        </Button> */}
+              </Grid>
+
+              <Grid item xs={5}>
         <h2 className="text-center mb-4">Profile</h2>
 
         {error && (
@@ -365,74 +446,12 @@ export default function Profile() {
           <br></br>
           <strong>User ID:</strong> {currentUser.uid}
           <br></br>
-          <strong>Photo:</strong>
-          <br></br>
-          {myPhoto !== '' ? (
-            <img height="100px" width="100px" src={myPhoto} id="photo"></img>
-          ) : (
-            <></>
-          )}
-          <br></br>
-          {/* Temporary file input field, just needs style and
-        probably some custom input fields */}
-          <div className="my-3">
-            {/* <input type="file" id="photoUploadGroup" />
-
-          <button
-            className="btn btn-primary"
-            id="photoUploadButton"
-            onClick={processPhoto}>
-            Upload Photo
-          </button> */}
-            <input
-              onChange={() => {
-                if (
-                  document.getElementById('photoUploadGroup') &&
-                  document.getElementById('photoUploadGroup').files[0]
-                )
-                  setSelectedFile(
-                    document.getElementById('photoUploadGroup').files[0].name
-                  );
-              }}
-              accept="image/*"
-              id="photoUploadGroup"
-              hidden
-              type="file"
-            />
-            <label htmlFor="photoUploadGroup">
-              <Button
-                variant="contained"
-                color="primary"
-                component="span"
-                startIcon={<AttachmentIcon />}>
-                Select
-              </Button>
-            </label>
-            <Box my={1}>{selectedFile}</Box>
-            <Button
-              variant="contained"
-              color="default"
-              endIcon={<CloudUploadIcon />}
-              id="photoUploadButton"
-              onClick={processPhoto}
-              disabled={!selectedFile}>
-              Upload
-            </Button>
-          </div>
-          {isUploading && (
-            <LinearProgress variant="determinate" value={progress} />
-          )}
-          {photoStatus}
-          <Link to="/update-profile" className="btn btn-primary">
-            Update Profile
-          </Link>
         </Container>
-        {/* <Button variant="contained" color="primary">
-          Home
-        </Button>
-        <Button variant="contained" color="secondary" onClick={handleLogout}>
-          Log Out
-        </Button> */}
+
+          </Grid>
+        </Grid>
+   
+
       </main>
 
       <Drawer
