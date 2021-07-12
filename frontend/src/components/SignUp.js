@@ -3,6 +3,7 @@ import { Form, Button, Navbar } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
 import { Alert } from '@material-ui/lab';
 import Grid from '@material-ui/core/Grid';
+import Slider from '@material-ui/core/Slider';
 import { Link, useHistory } from 'react-router-dom';
 import axios from 'axios';
 import moment from 'moment';
@@ -23,6 +24,19 @@ export default function SignUp() {
   const [optionsState, setOptionsState] = useState('0');
   const [orientationState, setOrientationState] = useState('0');
   const [phoneVal, setPhoneVal] = useState('');
+  var adult = moment().subtract(18, 'years').calendar();
+
+  var form = moment(adult).format('YYYY-MM-DD');
+  const [dateState, setDateState] = useState(form);
+  const [value, setValue] = useState([
+    18,
+    Math.min(moment().diff(dateState, 'years') + 6, 72),
+  ]);
+
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+    // console.log(newValue);
+  };
   // const answer1Ref = useRef();
   // const answer2Ref = useRef();
   // const answer3Ref = useRef();
@@ -36,11 +50,8 @@ export default function SignUp() {
   // const answer11Ref = useRef();
   // const answer12Ref = useRef();
 
-  var adult = moment().subtract(18, 'years').calendar();
-  console.log(adult);
-  var form = moment(adult).format('YYYY-MM-DD');
-  console.log(form);
-  const [dateState, setDateState] = useState(form);
+  // console.log(form);
+  // console.log(adult);
 
   const history = useHistory();
   // console.log(form)
@@ -48,11 +59,17 @@ export default function SignUp() {
   //console.log(dobRef.current.value)
   //console.log(sexRef.current.value)
   function dateWork(date) {
-    console.log(date);
+    try {
+      // console.log(date);
 
-    //if (date.subtract (18, 'years'))
-    setDateState(date);
-    //console.log(date)
+      //if (date.subtract (18, 'years'))
+      setDateState(date);
+      setValue([
+        Math.max(moment().diff(date, 'years') - 6, 18),
+        Math.min(moment().diff(date, 'years') + 6, 72),
+      ]);
+      //console.log(date)
+    } catch (error) {}
   }
 
   function isLegal(date, minimum_age = 18) {
@@ -238,6 +255,7 @@ export default function SignUp() {
       1: 'Heterosexual',
       2: 'Homosexual',
       3: 'Bisexual',
+      4: 'Bisexual',
     };
     try {
       setError('');
@@ -262,6 +280,8 @@ export default function SignUp() {
         initializedProfile: 0,
         FailMatch: [],
         SuccessMatch: [],
+        ageRangeMin: value[0],
+        ageRangeMax: value[1],
         //question1Answer: answer1Ref.current.value.trim(),
         //question2Answer: answer2Ref.current.value.trim(),
         //question3Answer: answer3Ref.current.value.trim(),
@@ -407,7 +427,55 @@ export default function SignUp() {
                 <option value="1">Heterosexual</option>
                 <option value="2">Homosexual</option>
                 <option value="3">Bisexual</option>
+                <option value="4">Other</option>
               </Form.Control>
+            </Form.Row>
+            {orientationState === '4' && (
+              <Form.Group id="customGender">
+                <Form.Control
+                  type="text"
+                  placeholder="Input a sexual orientation"
+                />
+              </Form.Group>
+            )}
+            <Form.Row>
+              <Form.Label className="text-muted">
+                Select an age range
+              </Form.Label>
+              <Slider
+                value={value}
+                onChange={handleChange}
+                valueLabelDisplay="auto"
+                aria-labelledby="range-slider"
+                min={18}
+                max={72}
+                marks={[
+                  {
+                    value: 18,
+                    label: '18',
+                  },
+                  {
+                    value: 24,
+                    label: '24',
+                  },
+                  {
+                    value: 36,
+                    label: '36',
+                  },
+                  {
+                    value: 48,
+                    label: '48',
+                  },
+                  {
+                    value: 60,
+                    label: '60',
+                  },
+                  {
+                    value: 72,
+                    label: '72',
+                  },
+                ]}
+              />
             </Form.Row>
             <Form.Group id="customResponse">
               <Form.Control

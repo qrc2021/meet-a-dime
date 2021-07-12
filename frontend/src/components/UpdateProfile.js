@@ -2,10 +2,13 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Card, Form, Button, Alert } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
 import { Link, useHistory } from 'react-router-dom';
+import LinearProgress from '@material-ui/core/LinearProgress';
+
 // import axios from 'axios';
 import moment from 'moment';
 import firebase from 'firebase/app';
 import 'firebase/auth';
+import Slider from '@material-ui/core/Slider';
 import 'firebase/firestore';
 import 'firebase/storage';
 
@@ -19,6 +22,7 @@ export default function UpdateProfile() {
   const passwordRef = useRef();
   const responseRef = useRef();
   const passwordConfirmRef = useRef();
+  const [saving, setSaving] = useState(false);
   const firestore = firebase.firestore();
   const { currentUser, updatePassword, updateEmail, deleteUser } = useAuth();
   const [error, setError] = useState('');
@@ -32,10 +36,19 @@ export default function UpdateProfile() {
   const [userExitMessage, setExitMessage] = useState('');
   const [phoneVal, setPhoneVal] = useState('');
   var adult = moment().subtract(18, 'years').calendar();
-  console.log(adult);
+  // console.log(adult);
   var form = moment(adult).format('YYYY-MM-DD');
-  console.log(form);
+  // console.log(form);
   const [dateState, setDateState] = useState(form);
+  const [value, setValue] = useState([
+    18,
+    Math.min(moment().diff(dateState, 'years') + 6, 72),
+  ]);
+  // Changes slider values
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+    // console.log(newValue);
+  };
 
   const history = useHistory();
   // console.log(form)
@@ -43,11 +56,17 @@ export default function UpdateProfile() {
   //console.log(dobRef.current.value)
   //console.log(sexRef.current.value)
   function dateWork(date) {
-    console.log(date);
+    try {
+      // console.log(date);
 
-    //if (date.subtract (18, 'years'))
-    setDateState(date);
-    //console.log(date)
+      //if (date.subtract (18, 'years'))
+      setDateState(date);
+      setValue([
+        Math.max(moment().diff(date, 'years') - 6, 18),
+        Math.min(moment().diff(date, 'years') + 6, 72),
+      ]);
+      //console.log(date)
+    } catch (error) {}
   }
 
   function isLegal(date, minimum_age = 18) {
@@ -82,11 +101,15 @@ export default function UpdateProfile() {
   }
 
   async function handleDelete(e) {
-    if (window.confirm("Are you sure you want to delete your account? This action is permanent")) {
+    if (
+      window.confirm(
+        'Are you sure you want to delete your account? This action is permanent'
+      )
+    ) {
       try {
         await firestore.collection('users').doc(currentUser.uid).delete();
         deleteUser();
-      } catch(error) {
+      } catch (error) {
         return setError('Failed to delete account' + error);
       }
       history.push('/login');
@@ -140,6 +163,7 @@ export default function UpdateProfile() {
       1: 'Heterosexual',
       2: 'Homosexual',
       3: 'Bisexual',
+      4: 'Bisexual',
     };
 
     var path = '/profile';
@@ -152,6 +176,7 @@ export default function UpdateProfile() {
         updateEmail(emailRef.current.value);
       }
 
+      setSaving(true);
       await firestore
         .collection('users')
         .doc(currentUser.uid)
@@ -184,10 +209,20 @@ export default function UpdateProfile() {
         .collection('users')
         .doc(currentUser.uid)
         .update({ exitMessage: responseRef.current.value.trim() });
+      await firestore
+        .collection('users')
+        .doc(currentUser.uid)
+        .update({ ageRangeMin: value[0] });
+      await firestore
+        .collection('users')
+        .doc(currentUser.uid)
+        .update({ ageRangeMax: value[1] });
     } catch (error) {
       setError('Failed to update account: ' + error);
+      setSaving(false);
     } finally {
       setLoading(false);
+      setSaving(false);
       history.push(path);
     }
 
@@ -260,7 +295,7 @@ export default function UpdateProfile() {
   }
 
   async function fetchUserData() {
-    console.log('ran');
+    // console.log('ran');
     var snapshot = await firestore.collection('users').get();
     snapshot.forEach((doc) => {
       if (doc.data().userID === currentUser.uid) {
@@ -270,6 +305,15 @@ export default function UpdateProfile() {
         setPhoneVal(doc.data().phone);
         setExitMessage(doc.data().exitMessage);
         setOptionsState(doc.data().sex === 'Male' ? '1' : '2');
+        if (isNaN(doc.data().ageRangeMin)) {
+          console.log('NAN FOR NOW');
+          setValue([
+            Math.max(moment().diff(doc.data().birth, 'years') - 6, 18),
+            Math.min(moment().diff(doc.data().birth, 'years') + 6, 72),
+          ]);
+        } else {
+          setValue([doc.data().ageRangeMin, doc.data().ageRangeMax]);
+        }
         var userOrientation = doc.data().sexOrientation;
         setOrientationState(
           userOrientation === 'Heterosexual'
@@ -401,7 +445,55 @@ export default function UpdateProfile() {
                 <option value="1">Heterosexual</option>
                 <option value="2">Homosexual</option>
                 <option value="3">Bisexual</option>
+                <option value="4">Other</option>
               </Form.Control>
+            </Form.Row>
+            {orientationState === '4' && (
+              <Form.Group id="customGender">
+                <Form.Control
+                  type="text"
+                  placeholder="Input a sexual orientation"
+                />
+              </Form.Group>
+            )}
+            <Form.Row>
+              <Form.Label className="text-muted">
+                Select an age range
+              </Form.Label>
+              <Slider
+                value={value}
+                onChange={handleChange}
+                valueLabelDisplay="auto"
+                aria-labelledby="range-slider"
+                min={18}
+                max={72}
+                marks={[
+                  {
+                    value: 18,
+                    label: '18',
+                  },
+                  {
+                    value: 24,
+                    label: '24',
+                  },
+                  {
+                    value: 36,
+                    label: '36',
+                  },
+                  {
+                    value: 48,
+                    label: '48',
+                  },
+                  {
+                    value: 60,
+                    label: '60',
+                  },
+                  {
+                    value: 72,
+                    label: '72',
+                  },
+                ]}
+              />
             </Form.Row>
             <Form.Group id="customResponse">
               <Form.Label>Custom end of chat response:</Form.Label>
@@ -436,6 +528,17 @@ export default function UpdateProfile() {
       <div className="w-100 text-center mt-2">
         <Link to="/profile">Cancel</Link>
       </div>
+      {saving && (
+        <div
+          style={{
+            position: 'fixed',
+            left: '0',
+            bottom: '0',
+            width: '100%',
+          }}>
+          <LinearProgress variant="indeterminate" />
+        </div>
+      )}
     </>
   );
 }

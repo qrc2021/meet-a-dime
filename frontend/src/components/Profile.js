@@ -250,6 +250,8 @@ export default function Profile() {
         var userSex = doc.data().sex;
         var userOrientation = doc.data().sexOrientation;
         var photo = doc.data().photo;
+        var ageRangeMax = doc.data().ageRangeMax;
+        var ageRangeMin = doc.data().ageRangeMin;
         document.getElementById('birth').innerHTML = userBirth;
         document.getElementById('first').innerHTML = userFirstName;
         document.getElementById('last').innerHTML = userLastName;
@@ -275,6 +277,8 @@ export default function Profile() {
             sex: userSex,
             sexOrientation: userOrientation,
             photo: photo,
+            ageRangeMin: ageRangeMin,
+            ageRangeMax: ageRangeMax,
           })
         );
       }

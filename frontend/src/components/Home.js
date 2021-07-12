@@ -184,14 +184,31 @@ export default function Home() {
   const timeout5 = useRef(null);
 
   // Basic user info for their preferences. Will be referenced in search.
-  var userInfo = {
+
+  // THIS IS BAD: I changed to a useRef right after this.
+  // it turns out this will just reinitialize on every state change.
+
+  // var userInfo = {
+  //   birth: '',
+  //   exitMessage: '',
+  //   firstName: '',
+  //   sex: '',
+  //   sexOrientation: '',
+  //   photo: '',
+  //   ageRangeMin: '',
+  //   ageRangeMax: '',
+  // };
+
+  const userInfoRef = useRef({
     birth: '',
     exitMessage: '',
     firstName: '',
     sex: '',
     sexOrientation: '',
     photo: '',
-  };
+    ageRangeMin: '',
+    ageRangeMax: '',
+  });
 
   // useEffect occurs only once on page load.
   // This will clear any record of the user in the 'searching' collection
@@ -217,7 +234,7 @@ export default function Home() {
         };
         var response = await axios(config);
         setMyPhoto(response.data.photo);
-        console.log(myPhoto);
+        if (myPhoto) console.log(myPhoto);
         setName(response.data.firstName);
       } catch (error) {
         console.log(error);
@@ -314,12 +331,14 @@ export default function Home() {
       var response = await axios(config);
       console.log(response.data);
 
-      userInfo.birth = response.data.birth;
-      userInfo.exitMessage = response.data.exitMessage;
-      userInfo.firstName = response.data.firstName;
-      userInfo.sex = response.data.sex;
-      userInfo.sexOrientation = response.data.sexOrientation;
-      userInfo.photo = response.data.photo;
+      userInfoRef.current.birth = response.data.birth;
+      userInfoRef.current.exitMessage = response.data.exitMessage;
+      userInfoRef.current.firstName = response.data.firstName;
+      userInfoRef.current.sex = response.data.sex;
+      userInfoRef.current.sexOrientation = response.data.sexOrientation;
+      userInfoRef.current.photo = response.data.photo;
+      userInfoRef.current.ageRangeMax = response.data.ageRangeMax;
+      userInfoRef.current.ageRangeMin = response.data.ageRangeMin;
 
       // Set this into local storage for easy reference and persistence.
       localStorage.setItem('user_data', JSON.stringify(response.data));
@@ -473,13 +492,15 @@ export default function Home() {
     } else {
       // otherwise, its in user data so lets just get it.
       var local = JSON.parse(localStorage.getItem('user_data'));
-      console.log('2');
-      userInfo.birth = local.birth;
-      userInfo.exitMessage = local.exitMessage;
-      userInfo.firstName = local.firstName;
-      userInfo.sex = local.sex;
-      userInfo.sexOrientation = local.sexOrientation;
-      userInfo.photo = local.photo;
+      // console.log('2');
+      userInfoRef.current.birth = local.birth;
+      userInfoRef.current.exitMessage = local.exitMessage;
+      userInfoRef.current.firstName = local.firstName;
+      userInfoRef.current.sex = local.sex;
+      userInfoRef.current.sexOrientation = local.sexOrientation;
+      userInfoRef.current.photo = local.photo;
+      userInfoRef.current.ageRangeMax = local.ageRangeMax;
+      userInfoRef.current.ageRangeMin = local.ageRangeMin;
     }
 
     // Lock the search button for now, until tasks are done.
@@ -493,19 +514,19 @@ export default function Home() {
       // Undeveloped preference logic. This NEEDS support for any, rn
       // is only basic support.
       var searchingSex = '';
-      if (userInfo.sexOrientation === 'Heterosexual') {
-        if (userInfo.sex === 'Male') {
+      if (userInfoRef.current.sexOrientation === 'Heterosexual') {
+        if (userInfoRef.current.sex === 'Male') {
           searchingSex = ['Female'];
         } else {
           searchingSex = ['Male'];
         }
-      } else if (userInfo.sexOrientation === 'Homosexual') {
-        if (userInfo.sex === 'Female') {
+      } else if (userInfoRef.current.sexOrientation === 'Homosexual') {
+        if (userInfoRef.current.sex === 'Female') {
           searchingSex = ['Female'];
         } else {
           searchingSex = ['Male'];
         }
-      } else if (userInfo.sexOrientation === 'Bisexual') {
+      } else if (userInfoRef.current.sexOrientation === 'Bisexual') {
         searchingSex = ['Male', 'Female']; // Not working right now.
       }
       return searchingSex;
@@ -559,18 +580,16 @@ export default function Home() {
       // The database query. Check all docs for possible matches.
       var snapshot = await firestore.collection('searching').get();
       snapshot.forEach((doc) => {
-        // *************************************************************
-        // NEEDS AGE CHECK, and some refactor for any sex.
-        // Is it:
-        //   - no current match
-        //   - are they what I am searching for
-        //   - am I what they are searching for
-        // console.log(doc.data().search_sex);
-        //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+        var myAge = moment().diff(userInfoRef.current.birth, 'years');
+
         if (
           doc.data().match === '' &&
           searchingSex.includes(doc.data().sex) &&
-          doc.data().search_sex.includes(userInfo.sex)
+          doc.data().search_sex.includes(userInfoRef.current.sex) &&
+          myAge <= doc.data().search_age_end &&
+          myAge >= doc.data().search_age_start &&
+          doc.data().age >= userInfoRef.current.ageRangeMin &&
+          doc.data().age <= userInfoRef.current.ageRangeMax
         ) {
           fillMatch(doc.id);
         }
@@ -583,7 +602,7 @@ export default function Home() {
       // now it just kicks you back to the initial state. This is easy to
       // alert, we can just change a state or something.
       if (matchFound) {
-        console.log('yes, but lets listen for changes');
+        // console.log('yes, but lets listen for changes');
         // This works only to see if fields changed, not if doc deleted.
         // The workaround is: before deleting, set the match to "" first.
         observer.current = firestore
@@ -639,10 +658,10 @@ export default function Home() {
           .doc(currentUser.uid)
           .set({
             match: '',
-            age: moment().diff(userInfo.birth, 'years'),
-            sex: userInfo.sex,
-            search_age_start: '18',
-            search_age_end: '99',
+            age: moment().diff(userInfoRef.current.birth, 'years'),
+            sex: userInfoRef.current.sex,
+            search_age_start: userInfoRef.current.ageRangeMin,
+            search_age_end: userInfoRef.current.ageRangeMax,
             search_sex: searchingSex,
             seeker: currentUser.uid,
             host_socket_id: '',
@@ -664,9 +683,67 @@ export default function Home() {
           )
           .onSnapshot((docSnapshot) => {
             docSnapshot.docChanges().forEach((change) => {
-              if (change.type === 'added') return;
+              if (change.type === 'added') {
+                console.log('added a doc');
+                timeout5.current = setTimeout(() => {
+                  console.log('trying to run timeout 5 in ADD');
+                  if (
+                    window.location.pathname === '/' &&
+                    id_of_match === 'none'
+                  ) {
+                    console.log('TIMEOUT DOC HOST');
+                    setLockout(true);
+                    setLoading(true);
+                    setOpenSearch(false);
+                    // Abandoning the search should involve me clearing the old doc
+                    // that I posted up.
+                    async function deleteOldRecordAfterAbandon() {
+                      try {
+                        await firestore
+                          .collection('searching')
+                          .doc(currentUser.uid)
+                          .update({ match: '' });
+                        console.log('cleared old match before delete');
+                      } catch (error) {
+                        console.log(
+                          'tried to clear match before delete, but failed'
+                        );
+                        console.log('most of the time this is ok');
+                        // this is okay because this most likely wont exist on each load.
+                      }
+
+                      // Delete the document (if exists) if I am a "document host".
+                      try {
+                        await firestore
+                          .collection('searching')
+                          .doc(currentUser.uid)
+                          .delete();
+                        console.log('deleted my doc');
+                      } catch (error) {
+                        console.log('error:');
+                        console.log(error);
+                      }
+                    }
+                    deleteOldRecordAfterAbandon();
+
+                    setMatch('Not searching.');
+                    setError('');
+                    if (observer.current !== null) {
+                      observer.current();
+                    } else {
+                      console.log('could not clear observer in dochost');
+                    }
+                    setLockout(false);
+                    setLoading(false);
+                  } else {
+                    console.log('timeout 5 tried to run, but was ignored.');
+                  }
+                }, MS_BEFORE_ABANDON_SEARCH);
+                return;
+              }
 
               console.log('some edit change.');
+              clearAllTimeouts();
               // console.log(change.doc.data());
               if (
                 change &&
@@ -719,6 +796,7 @@ export default function Home() {
                   clearInterval(transferTimeoutRef.current);
                 setProgress(-1);
                 timeout5.current = setTimeout(() => {
+                  console.log('trying to run timeout 5');
                   if (
                     window.location.pathname === '/' &&
                     id_of_match === 'none'

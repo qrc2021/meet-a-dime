@@ -65,6 +65,8 @@ exports.setApp = function (app, admin) {
           sex: data.sex,
           sexOrientation: data.sexOrientation,
           photo: data.photo,
+          ageRangeMin: data.ageRangeMin,
+          ageRangeMax: data.ageRangeMax,
         };
       }
     } catch (error) {
@@ -135,6 +137,8 @@ exports.setApp = function (app, admin) {
       question10Answer,
       question11Answer,
       question12Answer,
+      ageRangeMin,
+      ageRangeMax,
     } = req.body);
 
     var err = "";
