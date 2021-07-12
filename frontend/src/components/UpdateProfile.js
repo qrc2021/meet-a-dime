@@ -20,7 +20,7 @@ export default function UpdateProfile() {
   const responseRef = useRef();
   const passwordConfirmRef = useRef();
   const firestore = firebase.firestore();
-  const { currentUser, updatePassword, updateEmail } = useAuth();
+  const { currentUser, updatePassword, updateEmail, deleteUser } = useAuth();
   const [error, setError] = useState('');
   const [passChange, setPassChange] = useState('');
   const [loading, setLoading] = useState('');
@@ -79,6 +79,20 @@ export default function UpdateProfile() {
     //console.log(phone.target.value)
     const formattedNumber = formatNumber(phone.target.value);
     setPhoneVal(formattedNumber);
+  }
+
+  async function handleDelete(e) {
+    if (window.confirm("Are you sure you want to delete your account? This action is permanent")) {
+      try {
+        await firestore.collection('users').doc(currentUser.uid).delete();
+        deleteUser();
+      } catch(error) {
+        return setError('Failed to delete account' + error);
+      }
+      history.push('/login');
+    } else {
+      //dont do anything
+    }
   }
 
   async function handlePasswordUpdate(e) {
@@ -413,7 +427,9 @@ export default function UpdateProfile() {
             <Button disabled={loading} className="w-100 mt-2" type="submit">
               Save Changes
             </Button>
-            <Button className="w-100 mt-2">Delete Account</Button>
+            <Button className="w-100 mt-2" onClick={handleDelete}>
+              Delete Account
+            </Button>
           </Form>
         </Card.Body>
       </Card>
