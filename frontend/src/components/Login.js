@@ -139,6 +139,7 @@ export default function Login() {
             flexflow: 'row wrap',
             alignItems: 'center',
             backgroundColor: '#DCEAFF',
+            marginTop: '50px'
           }}>
           <Card.Img
             variant="top"
