@@ -316,7 +316,9 @@ export default function Profile() {
                   width="250px"
                   height="100%"
                   className="d-inline-block align-top"
-                  alt="React Bootstrap logo"
+                  alt="logo"
+                  href="home"
+                  onClick={redirectToHome}
                 />
               </Navbar.Brand>
             </Navbar>
@@ -418,6 +420,9 @@ export default function Profile() {
               {photoStatus}
               <Link to="/update-profile" className="btn btn-primary">
                 Update Profile
+              </Link>
+              <Link to="/prompts" className="btn btn-primary">
+                Conversation Starters
               </Link>
             </Container>
             {/* <Button variant="contained" color="primary">

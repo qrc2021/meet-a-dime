@@ -14,6 +14,7 @@ import Chat from './Chat';
 import NoContent from './NoContent';
 import After from './After';
 import UpdateProfile from './UpdateProfile';
+import Prompts from './Prompts';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           <PrivateRoute path="/update-profile" component={UpdateProfile} />
           <PrivateRoute exact path="/chat" component={Chat} />
           <PrivateRoute exact path="/after" component={After} />
+          <PrivateRoute exact path="/prompts" component={Prompts} />
           <Route exact path="/verify" component={Verify} />
           <Route path="/signup" component={SignUp} />
           <Route path="/login" component={Login} />

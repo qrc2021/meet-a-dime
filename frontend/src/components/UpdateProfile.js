@@ -15,6 +15,10 @@ import 'firebase/storage';
 // const DEFAULT_COIN_IMAGE =
 //   'https://firebasestorage.googleapis.com/v0/b/meet-a-dime.appspot.com/o/default_1.png?alt=media&token=23ab5b95-0214-42e3-9c54-d7811362aafc';
 
+function scrollToTop() {
+  window.scrollTo(0, 0);
+}
+
 export default function UpdateProfile() {
   const firstRef = useRef();
   const lastRef = useRef();
@@ -110,6 +114,7 @@ export default function UpdateProfile() {
         await firestore.collection('users').doc(currentUser.uid).delete();
         deleteUser();
       } catch (error) {
+        scrollToTop();
         return setError('Failed to delete account' + error);
       }
       history.push('/login');
@@ -121,6 +126,7 @@ export default function UpdateProfile() {
   async function handlePasswordUpdate(e) {
     if (passwordRef.current.value !== passwordConfirmRef.current.value) {
       setPassChange('');
+      scrollToTop();
       return setError('Passwords do not match.');
     }
 
@@ -129,11 +135,13 @@ export default function UpdateProfile() {
       passwordRef.current.value.length !== ''
     ) {
       setPassChange('');
+      scrollToTop();
       return setError('Password should be more than six characters.');
     }
 
     if (passwordRef.current.value) {
       updatePassword(passwordRef.current.value);
+      scrollToTop();
       return setPassChange('Password successfully changed!');
     }
   }
@@ -148,16 +156,24 @@ export default function UpdateProfile() {
     // }
 
     if (phoneVal.trim().length < 14) {
+      scrollToTop();
       return setError('Please enter a valid phone number.');
     }
 
-    if (!isLegal(dateState)) return setError('You must be 18 years or older');
+    if (!isLegal(dateState)) {
+      scrollToTop();
+      return setError('You must be 18 years or older');
+    }
 
-    if (firstRef.current.value === '')
+    if (firstRef.current.value === '') {
+      scrollToTop();
       return setError('Please input your first name');
+    }
 
-    if (lastRef.current.value === '')
+    if (lastRef.current.value === '') {
+      scrollToTop();
       return setError('Please input your last name');
+    }
 
     var orient = {
       1: 'Heterosexual',
@@ -219,6 +235,7 @@ export default function UpdateProfile() {
         .update({ ageRangeMax: value[1] });
     } catch (error) {
       setError('Failed to update account: ' + error);
+      scrollToTop();
       setSaving(false);
     } finally {
       setLoading(false);
@@ -416,6 +433,7 @@ export default function UpdateProfile() {
               <Form.Label>Date of Birth</Form.Label>
               <Form.Control
                 type="date"
+                disabled
                 value={dateState}
                 onChange={(e) => dateWork(e.target.value)}
                 required
