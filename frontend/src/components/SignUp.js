@@ -7,6 +7,8 @@ import Slider from '@material-ui/core/Slider';
 import { Link, useHistory } from 'react-router-dom';
 import axios from 'axios';
 import moment from 'moment';
+import { Formik } from 'formik';
+import * as yup from 'yup';
 
 const DEFAULT_COIN_IMAGE =
   'https://firebasestorage.googleapis.com/v0/b/meet-a-dime.appspot.com/o/default_1.png?alt=media&token=23ab5b95-0214-42e3-9c54-d7811362aafc';
@@ -25,6 +27,7 @@ export default function SignUp() {
   const [orientationState, setOrientationState] = useState('0');
   const [phoneVal, setPhoneVal] = useState('');
   var adult = moment().subtract(18, 'years').calendar();
+  const [emailInUse, setEmailInUse] = useState(false);
 
   var form = moment(adult).format('YYYY-MM-DD');
   const [dateState, setDateState] = useState(form);
@@ -33,25 +36,39 @@ export default function SignUp() {
     Math.min(moment().diff(dateState, 'years') + 6, 72),
   ]);
 
-  const handleChange = (event, newValue) => {
+  const handleChangeValue = (event, newValue) => {
     setValue(newValue);
     // console.log(newValue);
   };
-  // const answer1Ref = useRef();
-  // const answer2Ref = useRef();
-  // const answer3Ref = useRef();
-  // const answer4Ref = useRef();
-  // const answer5Ref = useRef();
-  // const answer6Ref = useRef();
-  // const answer7Ref = useRef();
-  // const answer8Ref = useRef();
-  // const answer9Ref = useRef();
-  // const answer10Ref = useRef();
-  // const answer11Ref = useRef();
-  // const answer12Ref = useRef();
 
-  // console.log(form);
-  // console.log(adult);
+  const schema = yup.object().shape({
+    firstName: yup.string().required('First name is required.').trim(),
+    lastName: yup.string().required('Last name is required.').trim(),
+    email: yup.string().email('An email is required.').required().trim(),
+    password: yup.string().required('You must have a password.').min(7).trim(),
+    passwordVerify: yup
+      .string()
+      .required('You must have a password.')
+      .min(7)
+      .trim()
+      .when('password', {
+        is: (password) => (password && password.length > 0 ? true : false),
+        then: yup
+          .string()
+          .oneOf([yup.ref('password')], "Password doesn't match"),
+      }),
+    dateOfBirth: yup.string().required().trim(),
+    sex: yup.string().required().trim('You must choose a sex.'),
+    sexOrientation: yup
+      .string()
+      .required('You must choose a sex orientation.')
+      .trim(),
+    phone: yup
+      .string()
+      .required()
+      .trim('You need to list a phone number.')
+      .length(14),
+  });
 
   const history = useHistory();
   // console.log(form)
@@ -81,7 +98,17 @@ export default function SignUp() {
 
     var d1 = new Date(y, m, d);
     var d2 = new Date(year, month, day);
+    // console.log(d2 <= d1 ? true : false);
     return d2 <= d1 ? true : false;
+  }
+
+  function handleErrors(error) {
+    if (error === 'auth/email-already-in-use') {
+      setError('Email is already in use.');
+      setEmailInUse(true);
+    } else {
+      setError(error);
+    }
   }
 
   function formatNumber(val) {
@@ -101,6 +128,7 @@ export default function SignUp() {
     //console.log(phone.target.value)
     const formattedNumber = formatNumber(phone.target.value);
     setPhoneVal(formattedNumber);
+    return formattedNumber;
   }
 
   //counts the number of characters a user is typing for personal questions
@@ -108,148 +136,13 @@ export default function SignUp() {
   //NOTE - Add at a later date
   // var maxAnswerLength = 280;
 
-  async function handleSubmit(e) {
-    e.preventDefault();
+  async function handleSubmitForm() {
     var bp = require('../Path.js');
 
     //scroll to top of page toi see error messages
     function scrollToTop() {
       window.scrollTo(0, 0);
     }
-
-    if (passwordRef.current.value !== passwordConfirmRef.current.value) {
-      scrollToTop();
-      return setError('Passwords do not match.');
-    }
-
-    if (passwordRef.current.value.length <= 6) {
-      scrollToTop();
-      return setError('Password should be more than six characters.');
-    }
-
-    // if (dobRef.current.value === 0)
-    // {
-    //   return setError('Please enter a valid Date of Birth.');
-    // }
-
-    if (optionsState === '0') {
-      scrollToTop();
-      return setError('Please choose your sex.');
-    }
-
-    if (orientationState === '0') {
-      scrollToTop();
-      return setError('Please choose your sexual orientation.');
-    }
-
-    if (phoneVal.trim().length < 14) {
-      scrollToTop();
-      return setError('Please enter a valid phone number.');
-    }
-
-    if (dateState === '') {
-      scrollToTop();
-      return setError('Please enter a valid date.');
-    }
-
-    if (!isLegal(dateState)) {
-      scrollToTop();
-      return setError('You must be 18 years or older to sign up.');
-    }
-
-    if (firstRef.current.value === '') {
-      scrollToTop();
-      return setError('Please input your first name.');
-    }
-
-    if (lastRef.current.value === '') {
-      scrollToTop();
-      return setError('Please input your last name.');
-    }
-
-    //if (answer1Ref.current.value.length > maxAnswerLength) {
-    //  scrollToTop();
-    //  return setError(
-    //    'Question 1: Please keep your answer within 280 characters.'
-    //  );
-    //}
-
-    //if (answer2Ref.current.value.length > maxAnswerLength) {
-    //  scrollToTop();
-    //  return setError(
-    //    'Question 2: Please keep your answer within 280 characters.'
-    //  );
-    //}
-
-    //if (answer3Ref.current.value.length > maxAnswerLength) {
-    //  scrollToTop();
-    //  return setError(
-    //    'Question 3: Please keep your answer within 280 characters.'
-    //  );
-    //}
-
-    //if (answer4Ref.current.value.length > maxAnswerLength) {
-    //  scrollToTop();
-    //  return setError(
-    //    'Question 4: Please keep your answer within 280 characters.'
-    //  );
-    //}
-
-    //if (answer5Ref.current.value.length > maxAnswerLength) {
-    //  scrollToTop();
-    //  return setError(
-    //    'Question 5: Please keep your answer within 280 characters.'
-    //  );
-    //}
-
-    //if (answer6Ref.current.value.length > maxAnswerLength) {
-    //  scrollToTop();
-    //  return setError(
-    //    'Question 6: Please keep your answer within 280 characters.'
-    //  );
-    //}
-
-    //if (answer7Ref.current.value.length > maxAnswerLength) {
-    //  scrollToTop();
-    //  return setError(
-    //    'Question 7: Please keep your answer within 280 characters.'
-    //  );
-    //}
-
-    //if (answer8Ref.current.value.length > maxAnswerLength) {
-    //  scrollToTop();
-    //  return setError(
-    //    'Question 8: Please keep your answer within 280 characters.'
-    //  );
-    //}
-
-    //if (answer9Ref.current.value.length > maxAnswerLength) {
-    //  scrollToTop();
-    //  return setError(
-    //    'Question 9: Please keep your answer within 280 characters.'
-    //  );
-    //}
-
-    //if (answer10Ref.current.value.length > maxAnswerLength) {
-    //  scrollToTop();
-    //  return setError(
-    //    'Question 10: Please keep your answer within 280 characters.'
-    //  );
-    //}
-
-    //if (answer11Ref.current.value.length > maxAnswerLength) {
-    //  scrollToTop();
-    //  return setError(
-    //    'Question 11: Please keep your answer within 280 characters.'
-    //  );
-    //}
-
-    //if (answer12Ref.current.value.length > maxAnswerLength) {
-    //  scrollToTop();
-    //  return setError(
-    //    'Question 12: Please keep your answer within 280 characters.'
-    //  );
-    //}
 
     var orient = {
       1: 'Heterosexual',
@@ -264,6 +157,7 @@ export default function SignUp() {
         emailRef.current.value.trim(),
         passwordRef.current.value
       );
+
       var newUser = newUser_cred.user;
       var obj = {
         firstName: firstRef.current.value.trim(),
@@ -282,18 +176,6 @@ export default function SignUp() {
         SuccessMatch: [],
         ageRangeMin: value[0],
         ageRangeMax: value[1],
-        //question1Answer: answer1Ref.current.value.trim(),
-        //question2Answer: answer2Ref.current.value.trim(),
-        //question3Answer: answer3Ref.current.value.trim(),
-        //question4Answer: answer4Ref.current.value.trim(),
-        //question5Answer: answer5Ref.current.value.trim(),
-        //question6Answer: answer6Ref.current.value.trim(),
-        //question7Answer: answer7Ref.current.value.trim(),
-        //question8Answer: answer8Ref.current.value.trim(),
-        //question9Answer: answer9Ref.current.value.trim(),
-        //question10Answer: answer10Ref.current.value.trim(),
-        //question11Answer: answer11Ref.current.value.trim(),
-        //question12Answer: answer12Ref.current.value.trim(),
       };
 
       var config = {
@@ -314,7 +196,9 @@ export default function SignUp() {
         setError('Axios error');
       }
     } catch (error) {
-      setError('Failed to create an account: ' + error);
+      // setError('Failed to create an account: ' + error.code);
+      handleErrors(error.code === undefined ? error : error.code);
+      scrollToTop();
       try {
         await logout();
         localStorage.removeItem('user_data');
@@ -353,155 +237,274 @@ export default function SignUp() {
             Create an Account
           </h2>
           {error && <Alert severity="error">{error}</Alert>}
-          <Form onSubmit={handleSubmit}>
-            <Form.Group id="firstName">
-              <Form.Control
-                type="text"
-                ref={firstRef}
-                placeholder="First Name"
-              />
-            </Form.Group>
-            <Form.Group id="lastName">
-              <Form.Control type="text" ref={lastRef} placeholder="Last Name" />
-              <Form.Text className="text-muted">
-                Your last name will stay private
-              </Form.Text>
-            </Form.Group>
-            <Form.Group id="email">
-              <Form.Control
-                type="email"
-                ref={emailRef}
-                required
-                placeholder="Email"
-              />
-              <Form.Text className="text-muted">
-                We will never share your email with anyone.
-              </Form.Text>
-            </Form.Group>
-            <Form.Group id="password">
-              <Form.Control
-                type="password"
-                ref={passwordRef}
-                required
-                placeholder="Password"
-              />
-            </Form.Group>
-            <Form.Group id="password-confirm">
-              <Form.Control
-                type="password"
-                ref={passwordConfirmRef}
-                required
-                placeholder="Password Confirmation"
-              />
-            </Form.Group>
-            <Form.Group id="dob">
-              <Form.Label className="text-muted">Date of Birth</Form.Label>
-              <Form.Control
-                type="date"
-                value={dateState}
-                onChange={(e) => dateWork(e.target.value)}
-                required
-              />
-              <Form.Text className="text-muted">
-                You must be 18+ years.
-              </Form.Text>
-            </Form.Group>
-            <Form.Row id="sex">
-              <Form.Control
-                as="select"
-                value={optionsState}
-                onChange={(e) => setOptionsState(e.target.value)}
-                required>
-                <option value="0">Choose your sex...</option>
-                <option value="1">Male</option>
-                <option value="2">Female</option>
-              </Form.Control>
-            </Form.Row>
-            <Form.Row id="sexualOrientation">
-              <Form.Control
-                as="select"
-                value={orientationState}
-                onChange={(e) => setOrientationState(e.target.value)}
-                required>
-                <option value="0">Choose your sexual orientation...</option>
-                <option value="1">Heterosexual</option>
-                <option value="2">Homosexual</option>
-                <option value="3">Bisexual</option>
-                <option value="4">Other</option>
-              </Form.Control>
-            </Form.Row>
-            {orientationState === '4' && (
-              <Form.Group id="customGender">
-                <Form.Control
-                  type="text"
-                  placeholder="Input a sexual orientation"
-                />
-              </Form.Group>
-            )}
-            <Form.Row>
-              <Form.Label className="text-muted">
-                Select an age range
-              </Form.Label>
-              <Slider
-                value={value}
-                onChange={handleChange}
-                valueLabelDisplay="auto"
-                aria-labelledby="range-slider"
-                min={18}
-                max={72}
-                marks={[
-                  {
-                    value: 18,
-                    label: '18',
-                  },
-                  {
-                    value: 24,
-                    label: '24',
-                  },
-                  {
-                    value: 36,
-                    label: '36',
-                  },
-                  {
-                    value: 48,
-                    label: '48',
-                  },
-                  {
-                    value: 60,
-                    label: '60',
-                  },
-                  {
-                    value: 72,
-                    label: '72',
-                  },
-                ]}
-              />
-            </Form.Row>
-            <Form.Group id="customResponse">
-              <Form.Control
-                type="text"
-                ref={responseRef}
-                placeholder="End of Chat Response"
-              />
-              <Form.Text className="text-muted">
-                Users will see this response at the end of a chat. This can be
-                changed later...
-              </Form.Text>
-            </Form.Group>
-            <Form.Group id="phoneGroup">
-              <Form.Control
-                type="tel"
-                value={phoneVal}
-                onChange={(e) => phoneWork(e)}
-                required
-                placeholder="Phone Number"
-              />
-            </Form.Group>
 
-            <Button disabled={loading} className="w-100 mt-2" type="submit">
-              Register
-            </Button>
-          </Form>
+          <Formik
+            validationSchema={schema}
+            onSubmit={(values) => {
+              handleSubmitForm();
+            }}
+            initialValues={{
+              firstName: '',
+              lastName: '',
+              email: '',
+              password: '',
+              passwordVerify: '',
+              dateOfBirth: form,
+              sex: '',
+              sexOrientation: '',
+              phone: '',
+            }}>
+            {({
+              handleSubmit,
+              handleChange,
+              setFieldValue,
+              handleBlur,
+              values,
+              touched,
+              isValid,
+              errors,
+            }) => (
+              <Form noValidate onSubmit={handleSubmit}>
+                <Form.Group controlId="validationFormik01" id="firstName">
+                  <Form.Control
+                    type="text"
+                    ref={firstRef}
+                    value={values.firstName}
+                    onChange={handleChange}
+                    name="firstName"
+                    isValid={touched.firstName && !errors.firstName}
+                    isInvalid={touched.firstName && errors.firstName}
+                    placeholder="First Name"
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    {errors.firstName}
+                  </Form.Control.Feedback>
+                </Form.Group>
+                <Form.Group id="lastName">
+                  <Form.Control
+                    type="text"
+                    value={values.lastName}
+                    name="lastName"
+                    onChange={handleChange}
+                    isValid={touched.lastName && !errors.lastName}
+                    isInvalid={touched.lastName && errors.lastName}
+                    ref={lastRef}
+                    placeholder="Last Name"
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    {errors.lastName}
+                  </Form.Control.Feedback>
+                  <Form.Text className="text-muted">
+                    Your last name will stay private
+                  </Form.Text>
+                </Form.Group>
+                <Form.Group id="email">
+                  <Form.Control
+                    type="email"
+                    ref={emailRef}
+                    value={values.email}
+                    name="email"
+                    onChange={handleChange}
+                    isValid={touched.email && !errors.email}
+                    isInvalid={(touched.email && errors.email) || emailInUse}
+                    placeholder="Email"
+                  />
+
+                  <Form.Text className="text-muted">
+                    We will never share your email with anyone.
+                  </Form.Text>
+                </Form.Group>
+                <Form.Group id="password">
+                  <Form.Control
+                    type="password"
+                    ref={passwordRef}
+                    value={values.password}
+                    name="password"
+                    onChange={handleChange}
+                    isValid={touched.password && !errors.password}
+                    isInvalid={touched.password && errors.password}
+                    placeholder="Password"
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    {errors.password}
+                  </Form.Control.Feedback>
+                </Form.Group>
+                <Form.Group id="password-confirm">
+                  <Form.Control
+                    type="password"
+                    ref={passwordConfirmRef}
+                    value={values.passwordVerify}
+                    name="passwordVerify"
+                    onChange={handleChange}
+                    isValid={touched.passwordVerify && !errors.passwordVerify}
+                    isInvalid={touched.passwordVerify && errors.passwordVerify}
+                    placeholder="Password Confirmation"
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    {errors.passwordVerify}
+                  </Form.Control.Feedback>
+                </Form.Group>
+                <Form.Label className="text-muted">Phone Number</Form.Label>
+                <Form.Group id="phoneGroup">
+                  <Form.Control
+                    type="tel"
+                    value={values.phone}
+                    onChange={(e) => {
+                      var formatted = phoneWork(e);
+                      setFieldValue('phone', formatted);
+                      // handleChange(e);
+                    }}
+                    name="phone"
+                    isValid={touched.phone && !errors.phone}
+                    isInvalid={touched.phone && errors.phone}
+                    placeholder="Phone Number"
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    Phone number is invalid.
+                  </Form.Control.Feedback>
+                </Form.Group>
+                <Form.Group id="dob">
+                  <Form.Label className="text-muted">Date of Birth</Form.Label>
+                  <Form.Control
+                    type="date"
+                    // value={dateState}
+                    // onChange={(e) => dateWork(e.target.value)}
+                    name="dateOfBirth"
+                    value={values.dateOfBirth}
+                    onChange={(e) => {
+                      dateWork(e.target.value);
+                      handleChange(e);
+                    }}
+                    isValid={
+                      touched.dateOfBirth &&
+                      !errors.dateOfBirth &&
+                      isLegal(values.dateOfBirth)
+                    }
+                    isInvalid={
+                      touched.dateOfBirth &&
+                      (errors.dateOfBirth || !isLegal(dateState))
+                    }
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    You must be 18 years or older to use Meet a Dime.
+                  </Form.Control.Feedback>
+                  <Form.Text className="text-muted">
+                    You must be 18+ years.
+                  </Form.Text>
+                </Form.Group>
+                <Form.Row id="sex">
+                  <Form.Control
+                    as="select"
+                    // value={optionsState}
+                    value={values.sex}
+                    onChange={(e) => {
+                      setOptionsState(e.target.value);
+                      handleChange(e);
+                    }}
+                    name="sex"
+                    isValid={touched.sex && !errors.sex}
+                    isInvalid={
+                      touched.sex && (errors.sex || values.sex === '0')
+                    }>
+                    <option value="0">Choose your sex...</option>
+                    <option value="1">Male</option>
+                    <option value="2">Female</option>
+                  </Form.Control>
+                  <Form.Control.Feedback type="invalid">
+                    {errors.sex || 'You must choose a sex.'}
+                  </Form.Control.Feedback>
+                </Form.Row>
+                <Form.Row id="sexualOrientation">
+                  <Form.Control
+                    as="select"
+                    // value={orientationState}
+                    value={values.sexOrientation}
+                    onChange={(e) => {
+                      setOrientationState(e.target.value);
+                      handleChange(e);
+                    }}
+                    name="sexOrientation"
+                    isValid={touched.sexOrientation && !errors.sexOrientation}
+                    isInvalid={
+                      touched.sexOrientation &&
+                      (errors.sexOrientation || values.sexOrientation === '0')
+                    }>
+                    <option value="0">Choose your sexual orientation...</option>
+                    <option value="1">Heterosexual</option>
+                    <option value="2">Homosexual</option>
+                    <option value="3">Bisexual</option>
+                    <option value="4">Other</option>
+                  </Form.Control>
+                  <Form.Control.Feedback type="invalid">
+                    {errors.sexOrientation ||
+                      'You must choose a sex orientation.'}
+                  </Form.Control.Feedback>
+                </Form.Row>
+                {orientationState === '4' && (
+                  <Form.Group id="customGender">
+                    <Form.Control
+                      type="text"
+                      placeholder="Input a sexual orientation"
+                    />
+                  </Form.Group>
+                )}
+                <Form.Row>
+                  <Form.Label className="text-muted">
+                    Select an age range
+                  </Form.Label>
+                  <Slider
+                    value={value}
+                    onChange={handleChangeValue}
+                    valueLabelDisplay="auto"
+                    aria-labelledby="range-slider"
+                    min={18}
+                    max={72}
+                    marks={[
+                      {
+                        value: 18,
+                        label: '18',
+                      },
+                      {
+                        value: 24,
+                        label: '24',
+                      },
+                      {
+                        value: 36,
+                        label: '36',
+                      },
+                      {
+                        value: 48,
+                        label: '48',
+                      },
+                      {
+                        value: 60,
+                        label: '60',
+                      },
+                      {
+                        value: 72,
+                        label: '72',
+                      },
+                    ]}
+                  />
+                </Form.Row>
+                <Form.Group id="customResponse">
+                  <Form.Control
+                    type="text"
+                    ref={responseRef}
+                    placeholder="End of Chat Response"
+                  />
+                  <Form.Text className="text-muted">
+                    Users will see this response at the end of a chat. This can
+                    be changed later...
+                  </Form.Text>
+                </Form.Group>
+
+                <Button disabled={loading} className="w-100 mt-2" type="submit">
+                  Register
+                </Button>
+              </Form>
+            )}
+          </Formik>
           {/* </Card.Body> */}
 
           <div className="w-100 text-center mt-2">
