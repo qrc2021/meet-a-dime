@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Card, Form, Button, Alert } from 'react-bootstrap';
+import { Card, Form, Button, Alert, Container } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
 import { Link, useHistory } from 'react-router-dom';
 import LinearProgress from '@material-ui/core/LinearProgress';
@@ -375,172 +375,174 @@ export default function UpdateProfile() {
           <h2 className="text-center mb-3">Update Profile</h2>
           {error && <Alert variant="danger">{error}</Alert>}
           {passChange && <Alert variant="success">{passChange}</Alert>}
-          <Form onSubmit={handleSubmit}>
-            <Form.Group id="firstName">
-              <Form.Label>First name:</Form.Label>
-              <Form.Control
-                type="text"
-                ref={firstRef}
-                defaultValue={userFirstName}
-              />
-            </Form.Group>
-            <Form.Group id="lastName">
-              <Form.Label>Last name:</Form.Label>
-              <Form.Control
-                type="text"
-                ref={lastRef}
-                defaultValue={userLastName}
-              />
-              <Form.Text className="text-muted">
-                Your last name will stay private
-              </Form.Text>
-            </Form.Group>
-            <Form.Group id="email">
-              <Form.Label>Email</Form.Label>
-              <Form.Control
-                type="email"
-                ref={emailRef}
-                required
-                defaultValue={currentUser.email}
-              />
-              <Form.Text className="text-muted">
-                We will never share your email with anyone.
-              </Form.Text>
-            </Form.Group>
-            <br></br>
-            <Form.Group id="password">
-              <Form.Label>New password</Form.Label>
-              <Form.Control
-                type="password"
-                ref={passwordRef}
-                placeholder="Leave blank to keep the same."
-              />
-            </Form.Group>
-            <Form.Group id="password-confirm">
-              <Form.Label>New password confirmation</Form.Label>
-              <Form.Control
-                type="password"
-                ref={passwordConfirmRef}
-                placeholder="Leave blank to keep the same."
-              />
-            </Form.Group>
-            <Button className="w-100 mt-3" onClick={handlePasswordUpdate}>
-              Change Password
-            </Button>
-            <br></br>
-            <br></br>
-            <Form.Group id="dob">
-              <Form.Label>Date of Birth</Form.Label>
-              <Form.Control
-                type="date"
-                disabled
-                value={dateState}
-                onChange={(e) => dateWork(e.target.value)}
-                required
-              />
-              <Form.Text className="text-muted">
-                You must be 18+ years
-              </Form.Text>
-            </Form.Group>
-            <Form.Row id="sex">
-              <Form.Label>Sex</Form.Label>
-              <Form.Control
-                as="select"
-                value={optionsState}
-                onChange={(e) => setOptionsState(e.target.value)}
-                required>
-                <option value="1">Male</option>
-                <option value="2">Female</option>
-              </Form.Control>
-            </Form.Row>
-            <Form.Row id="sexualOrientation">
-              <Form.Label>Sexual Orientation</Form.Label>
-              <Form.Control
-                as="select"
-                value={orientationState}
-                onChange={(e) => setOrientationState(e.target.value)}
-                required>
-                <option value="1">Heterosexual</option>
-                <option value="2">Homosexual</option>
-                <option value="3">Bisexual</option>
-                <option value="4">Other</option>
-              </Form.Control>
-            </Form.Row>
-            {orientationState === '4' && (
-              <Form.Group id="customGender">
+          <Container>
+            <Form onSubmit={handleSubmit}>
+              <Form.Group id="firstName">
+                <Form.Label>First name:</Form.Label>
                 <Form.Control
                   type="text"
-                  placeholder="Input a sexual orientation"
+                  ref={firstRef}
+                  defaultValue={userFirstName}
                 />
               </Form.Group>
-            )}
-            <Form.Row>
-              <Form.Label className="text-muted">
-                Select an age range
-              </Form.Label>
-              <Slider
-                value={value}
-                onChange={handleChange}
-                valueLabelDisplay="auto"
-                aria-labelledby="range-slider"
-                min={18}
-                max={72}
-                marks={[
-                  {
-                    value: 18,
-                    label: '18',
-                  },
-                  {
-                    value: 24,
-                    label: '24',
-                  },
-                  {
-                    value: 36,
-                    label: '36',
-                  },
-                  {
-                    value: 48,
-                    label: '48',
-                  },
-                  {
-                    value: 60,
-                    label: '60',
-                  },
-                  {
-                    value: 72,
-                    label: '72',
-                  },
-                ]}
-              />
-            </Form.Row>
-            <Form.Group id="customResponse">
-              <Form.Label>Custom end of chat response:</Form.Label>
-              <Form.Control
-                type="text"
-                ref={responseRef}
-                defaultValue={userExitMessage}
-              />
-              <Form.Text className="text-muted">
-                Users will see this response at the end of a chat. This can be
-                changed later...
-              </Form.Text>
-            </Form.Group>
-            <Form.Group id="phoneGroup">
-              <Form.Label>Phone number:</Form.Label>
-              <Form.Control
-                type="tel"
-                value={phoneVal}
-                onChange={(e) => phoneWork(e)}
-                required
-              />
-            </Form.Group>
-            <Button disabled={loading} className="w-100 mt-2" type="submit">
-              Save Changes
-            </Button>
-            <Button className="w-100 mt-2" onClick={handleDelete}>
-              Delete Account
-            </Button>
-          </Form>
+              <Form.Group id="lastName">
+                <Form.Label>Last name:</Form.Label>
+                <Form.Control
+                  type="text"
+                  ref={lastRef}
+                  defaultValue={userLastName}
+                />
+                <Form.Text className="text-muted">
+                  Your last name will stay private
+                </Form.Text>
+              </Form.Group>
+              <Form.Group id="email">
+                <Form.Label>Email</Form.Label>
+                <Form.Control
+                  type="email"
+                  ref={emailRef}
+                  required
+                  defaultValue={currentUser.email}
+                />
+                <Form.Text className="text-muted">
+                  We will never share your email with anyone.
+                </Form.Text>
+              </Form.Group>
+              <br></br>
+              <Form.Group id="password">
+                <Form.Label>New password</Form.Label>
+                <Form.Control
+                  type="password"
+                  ref={passwordRef}
+                  placeholder="Leave blank to keep the same."
+                />
+              </Form.Group>
+              <Form.Group id="password-confirm">
+                <Form.Label>New password confirmation</Form.Label>
+                <Form.Control
+                  type="password"
+                  ref={passwordConfirmRef}
+                  placeholder="Leave blank to keep the same."
+                />
+              </Form.Group>
+              <Button className="w-100 mt-3" onClick={handlePasswordUpdate}>
+                Change Password
+              </Button>
+              <br></br>
+              <br></br>
+              <Form.Group id="dob">
+                <Form.Label>Date of Birth</Form.Label>
+                <Form.Control
+                  type="date"
+                  disabled
+                  value={dateState}
+                  onChange={(e) => dateWork(e.target.value)}
+                  required
+                />
+                <Form.Text className="text-muted">
+                  You must be 18+ years
+                </Form.Text>
+              </Form.Group>
+              <Form.Row id="sex">
+                <Form.Label>Sex</Form.Label>
+                <Form.Control
+                  as="select"
+                  value={optionsState}
+                  onChange={(e) => setOptionsState(e.target.value)}
+                  required>
+                  <option value="1">Male</option>
+                  <option value="2">Female</option>
+                </Form.Control>
+              </Form.Row>
+              <Form.Row id="sexualOrientation">
+                <Form.Label>Sexual Orientation</Form.Label>
+                <Form.Control
+                  as="select"
+                  value={orientationState}
+                  onChange={(e) => setOrientationState(e.target.value)}
+                  required>
+                  <option value="1">Heterosexual</option>
+                  <option value="2">Homosexual</option>
+                  <option value="3">Bisexual</option>
+                  <option value="4">Other</option>
+                </Form.Control>
+              </Form.Row>
+              {orientationState === '4' && (
+                <Form.Group id="customGender">
+                  <Form.Control
+                    type="text"
+                    placeholder="Input a sexual orientation"
+                  />
+                </Form.Group>
+              )}
+              <Form.Row>
+                <Form.Label className="text-muted">
+                  Select an age range
+                </Form.Label>
+                <Slider
+                  value={value}
+                  onChange={handleChange}
+                  valueLabelDisplay="auto"
+                  aria-labelledby="range-slider"
+                  min={18}
+                  max={72}
+                  marks={[
+                    {
+                      value: 18,
+                      label: '18',
+                    },
+                    {
+                      value: 24,
+                      label: '24',
+                    },
+                    {
+                      value: 36,
+                      label: '36',
+                    },
+                    {
+                      value: 48,
+                      label: '48',
+                    },
+                    {
+                      value: 60,
+                      label: '60',
+                    },
+                    {
+                      value: 72,
+                      label: '72',
+                    },
+                  ]}
+                />
+              </Form.Row>
+              <Form.Group id="customResponse">
+                <Form.Label>Custom end of chat response:</Form.Label>
+                <Form.Control
+                  type="text"
+                  ref={responseRef}
+                  defaultValue={userExitMessage}
+                />
+                <Form.Text className="text-muted">
+                  Users will see this response at the end of a chat. This can be
+                  changed later...
+                </Form.Text>
+              </Form.Group>
+              <Form.Group id="phoneGroup">
+                <Form.Label>Phone number:</Form.Label>
+                <Form.Control
+                  type="tel"
+                  value={phoneVal}
+                  onChange={(e) => phoneWork(e)}
+                  required
+                />
+              </Form.Group>
+              <Button disabled={loading} className="w-100 mt-2" type="submit">
+                Save Changes
+              </Button>
+              <Button className="w-100 mt-2" onClick={handleDelete}>
+                Delete Account
+              </Button>
+            </Form>
+          </Container>
         </Card.Body>
       </Card>
       <div className="w-100 text-center mt-2">
