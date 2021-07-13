@@ -316,7 +316,9 @@ export default function Profile() {
                   width="250px"
                   height="100%"
                   className="d-inline-block align-top"
-                  alt="React Bootstrap logo"
+                  alt="logo"
+                  href="home"
+                  onClick={redirectToHome}
                 />
               </Navbar.Brand>
             </Navbar>

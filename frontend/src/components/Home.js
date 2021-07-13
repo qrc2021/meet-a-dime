@@ -37,6 +37,9 @@ import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 // import TextField from '@material-ui/core/TextField';
 import LinearProgress from '@material-ui/core/LinearProgress';
 
+import Paper from '@material-ui/core/Paper';
+import Grid from '@material-ui/core/Grid';
+
 var bp = require('../Path.js');
 
 const drawerWidth = 300;
@@ -102,6 +105,7 @@ const useStyles = makeStyles((theme) => ({
     }),
     marginRight: 0,
   },
+
 }));
 
 export default function Home() {
@@ -210,6 +214,8 @@ export default function Home() {
     ageRangeMax: '',
   });
 
+
+
   // useEffect occurs only once on page load.
   // This will clear any record of the user in the 'searching' collection
   // so that it not only resets the searching state, but
@@ -223,6 +229,7 @@ export default function Home() {
     console.log(currentUser.getIdToken());
     localStorage.removeItem('chatExpiry');
     document.body.style.backgroundColor = 'white';
+
     async function getIntialUserPhoto() {
       try {
         const token = currentUser && (await currentUser.getIdToken());
@@ -890,7 +897,7 @@ export default function Home() {
                   width="250px"
                   height="100%"
                   className="d-inline-block align-top"
-                  alt="React Bootstrap logo"
+                  alt="logo"
                 />
               </Navbar.Brand>
             </Navbar>
@@ -934,12 +941,12 @@ export default function Home() {
         {/* Fixing search bar */}
         <Row>
           <Form.Group as={Row} controlId="formPlaintextPassword">
-            <Form.Label className="text-matches" column sm="2">
+            <Form.Label className="text-matches" column xs="3">
               My Matches
             </Form.Label>
-            <Col className="pr-4" sm="8">
+            <Col className="mx-1" >
               <Form.Control
-                className="text-search mt-2"
+                className="text-search mt-2 mb-4"
                 type="search"
                 data-lpignore="true"
                 placeholder="Search for previous matches..."
@@ -947,7 +954,6 @@ export default function Home() {
             </Col>
           </Form.Group>
         </Row>
-
         {error && <Alert severity="error">{error}</Alert>}
         {match && match === 'Not searching.' && (
           <Alert severity="warning">{match}</Alert>
