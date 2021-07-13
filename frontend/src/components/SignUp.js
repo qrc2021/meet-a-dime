@@ -13,6 +13,8 @@ import * as yup from 'yup';
 const DEFAULT_COIN_IMAGE =
   'https://firebasestorage.googleapis.com/v0/b/meet-a-dime.appspot.com/o/default_1.png?alt=media&token=23ab5b95-0214-42e3-9c54-d7811362aafc';
 
+moment.suppressDeprecationWarnings = true;
+
 export default function SignUp() {
   const firstRef = useRef();
   const lastRef = useRef();

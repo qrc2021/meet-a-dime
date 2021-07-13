@@ -108,6 +108,7 @@ export default function Login() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleSubmitForm() {
+    console.log('attempting submit.');
     try {
       setError('');
       setInvalidEmail(false);

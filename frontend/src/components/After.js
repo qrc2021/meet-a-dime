@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 // import { Button, Alert, Container, Form } from 'react-bootstrap';
 import { Alert } from '@material-ui/lab';
 import Container from '@material-ui/core/Container';
@@ -26,6 +26,8 @@ export default function After() {
   const [match_photo, setMatchPhoto] = useState('');
   const [match_id, setMatchID] = useState('');
   const [pageType, setPageType] = useState('');
+  const [match_exitMessage, setExitMessage] = useState('');
+  const [match_phoneNumber, setPhoneNumber] = useState('');
 
   useLocation();
   // Gets the passed in match id from the link in the home page
@@ -63,6 +65,44 @@ export default function After() {
     }
   }
 
+  async function fetchMatchOnMatchMade() {
+    try {
+      const token = currentUser && (await currentUser.getIdToken());
+      // console.log(token);
+      var config = {
+        method: 'post',
+        url: bp.buildPath('api/getendmessages'),
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        data: {
+          user_uid: currentUser.uid,
+          match_uid: history.location.state.state.match_id,
+        },
+      };
+      var response = await axios(config);
+
+      // Recursion! Keep calling until it resolves.
+      if (
+        response &&
+        response.data &&
+        response.data.error === 'Not authorized; missing from matches'
+      ) {
+        setTimeout(() => {
+          fetchMatchOnMatchMade();
+        }, 500);
+      }
+
+      setExitMessage(response.data.matchExitMessage);
+      setPhoneNumber(response.data.matchPhone);
+      console.log(response.data.matchExitMessage);
+      console.log(response.data.matchPhone);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   // this effect only runs once.
   useEffect(() => {
     if (
@@ -81,7 +121,14 @@ export default function After() {
     } else {
       console.log('not from chat');
       redirectToHome();
+      return;
     }
+
+    // So they say they made a match. Lets verify this!
+    if (history.location.state.state.type === 'match_made') {
+      fetchMatchOnMatchMade();
+    }
+
     // This gets the match data.
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -103,7 +150,7 @@ export default function After() {
     history.push('/');
     // window.location.reload(); CHANGED_NOW
   }
-
+  document.body.style.backgroundColor = 'white';
   return (
     <React.Fragment>
       <h2 className="text-center mb-4">After Chat</h2>
@@ -171,6 +218,9 @@ export default function After() {
           <></>
         )}
         <hr></hr>
+        {pageType === 'match_made' && <h3>Super temporary:</h3>}
+        {pageType === 'match_made' && <h3>their #: {match_phoneNumber}</h3>}
+        {pageType === 'match_made' && <h3>their msg: {match_exitMessage}</h3>}
       </Container>
       <Button variant="contained" color="primary" onClick={redirectToHome}>
         Home

@@ -38,7 +38,7 @@ import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import LinearProgress from '@material-ui/core/LinearProgress';
 
 var bp = require('../Path.js');
-
+moment.suppressDeprecationWarnings = true;
 const drawerWidth = 300;
 
 const useStyles = makeStyles((theme) => ({
@@ -226,6 +226,7 @@ export default function Home() {
     async function getIntialUserPhoto() {
       try {
         const token = currentUser && (await currentUser.getIdToken());
+        // console.log(token);
         var config = {
           method: 'post',
           url: bp.buildPath('api/getbasicuser'),

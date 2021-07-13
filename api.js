@@ -148,6 +148,87 @@ exports.setApp = function (app, admin) {
     res.status(200).json(ret);
   });
 
+  // This retrieves the messages when
+  app.post("/api/getendmessages", async (req, res) => {
+    const user = req["currentUser"];
+    var obj = ({ user_uid: user_uid, match_uid: match_uid } = req.body);
+
+    if (!user) {
+      responseObj = { error: "You must be logged in." };
+
+      var ret = responseObj;
+      res.status(403).json(ret);
+      return;
+    }
+
+    if (obj.user_uid === "" || obj.match_uid === "") {
+      responseObj = { error: "Missing specification." };
+
+      var ret = responseObj;
+      res.status(204).json(ret);
+      return;
+    }
+
+    if (obj.user_uid !== user.user_id) {
+      responseObj = { error: "Not authorized." };
+
+      var ret = responseObj;
+      res.status(403).json(ret);
+      return;
+    }
+
+    console.log(obj.user_uid, "is fetching other details for", obj.match_uid);
+    var err = "";
+    var response = "";
+    var responseObj = {};
+    try {
+      var user_in_match = false;
+      var match_in_user = false;
+
+      var match_doc = await admin
+        .firestore()
+        .collection("users")
+        .doc(obj.match_uid)
+        .get();
+      var user_doc = await admin
+        .firestore()
+        .collection("users")
+        .doc(obj.user_uid)
+        .get();
+
+      if (
+        match_doc.exists &&
+        match_doc.data().SuccessMatch.includes(obj.user_uid)
+      )
+        user_in_match = true;
+      if (
+        user_doc.exists &&
+        user_doc.data().SuccessMatch.includes(obj.match_uid)
+      )
+        match_in_user = true;
+
+      if (user_in_match && match_in_user) {
+        console.log(match_doc.data().exitMessage);
+        responseObj = {
+          matchExitMessage: match_doc.data().exitMessage,
+          matchPhone: match_doc.data().phone,
+        };
+      } else {
+        responseObj = { error: "Not authorized; missing from matches" };
+
+        var ret = responseObj;
+        res.status(200).json(ret);
+        return;
+      }
+    } catch (error) {
+      err = error.message;
+      responseObj = { error: err };
+    }
+
+    var ret = responseObj;
+    res.status(200).json(ret);
+  });
+
   app.post("/api/newuser", async (req, res) => {
     const obj = ({
       email,
