@@ -190,6 +190,7 @@ export default function SignUp() {
       var response = await axios(config);
       // var parsedRes = JSON.parse(response);
       if (response.data.error === '') {
+        setEmailInUse(false);
         setLoading(false);
         history.push('/verify');
       } else {

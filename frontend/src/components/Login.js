@@ -9,6 +9,8 @@ import { useAuth } from '../contexts/AuthContext';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
+import { Formik } from 'formik';
+import * as yup from 'yup';
 
 export default function Login() {
   const emailRef = useRef();
@@ -18,7 +20,27 @@ export default function Login() {
   const [error, setError] = useState('');
   const [isChecked, setChecked] = useState(false);
   const [loading, setLoading] = useState('');
+  const [invalidEmail, setInvalidEmail] = useState(false);
+  const [invalidPassword, setInvalidPassword] = useState(false);
+  const schema = yup.object().shape({
+    email: yup.string().email('An email is required.').required().trim(),
+    password: yup.string().required('You must have a password.').min(7).trim(),
+  });
 
+  function handleErrors(error) {
+    // console.log(error);
+    if (error === 'auth/wrong-password') {
+      // setError('Incorrect password.');
+      setInvalidPassword(true);
+    } else if (error === 'auth/user-not-found') {
+      // setError('Your account does not exist.');
+      setInvalidEmail(true);
+    } else if (error === 'auth/too-many-requests') {
+      setError('You are submitting too many requests, wait a few minutes.');
+    } else {
+      setError(error);
+    }
+  }
   // This is to clear the old searching data when a user logouts.
   useEffect(() => {
     const firestore = firebase.firestore();
@@ -85,11 +107,11 @@ export default function Login() {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-
+  async function handleSubmitForm() {
     try {
       setError('');
+      setInvalidEmail(false);
+      setInvalidPassword(false);
       setLoading(true);
       if (!isChecked) {
         await firebase
@@ -100,7 +122,8 @@ export default function Login() {
       history.push('/verify');
       // window.location.reload();
     } catch (error) {
-      setError('Failed to login: ' + error.message);
+      // setError('Failed to login: ' + error.message);
+      handleErrors(error.code === undefined ? error : error.code);
     }
     if (window.location.pathname === '/login') setLoading(false);
   }
@@ -141,50 +164,89 @@ export default function Login() {
                 src="DimeAssets/headerlogo.png"
               />
               {error && <Alert severity="error">{error}</Alert>}
-              <Form onSubmit={handleSubmit}>
-                <Form.Group
-                  id="name"
-                  style={{
-                    marginBottom: '15px',
-                  }}>
-                  <Form.Control
-                    placeholder="Email"
-                    type="email"
-                    ref={emailRef}
-                    required
-                    data-lpignore="true"
-                  />
-                </Form.Group>
-                <Form.Group
-                  id="password"
-                  style={{
-                    marginBottom: '15px',
-                  }}>
-                  <Form.Control
-                    placeholder="Password"
-                    type="password"
-                    ref={passwordRef}
-                    required
-                    data-lpignore="true"
-                  />
-                </Form.Group>
-                <Form.Group controlId="formBasicCheckbox">
-                  <Form.Check
-                    defaultChecked={isChecked}
-                    onClick={() => {
-                      setChecked(!isChecked);
-                    }}
-                    type="checkbox"
-                    label="Keep me logged in"
-                  />
-                </Form.Group>
-                <Button
-                  disabled={loading}
-                  className="btn-primary w-100 mt-2 mb-1"
-                  type="submit">
-                  Log In
-                </Button>
-              </Form>
+              <Formik
+                validationSchema={schema}
+                onSubmit={(values) => {
+                  handleSubmitForm();
+                }}
+                initialValues={{
+                  email: '',
+                  password: '',
+                }}>
+                {({
+                  handleSubmit,
+                  handleChange,
+                  setFieldValue,
+                  handleBlur,
+                  values,
+                  touched,
+                  isValid,
+                  errors,
+                }) => (
+                  <Form noValidate onSubmit={handleSubmit}>
+                    <Form.Group
+                      id="name"
+                      style={{
+                        marginBottom: '15px',
+                      }}>
+                      <Form.Control
+                        placeholder="Email"
+                        type="email"
+                        ref={emailRef}
+                        value={values.email}
+                        name="email"
+                        onChange={handleChange}
+                        isValid={touched.email && !errors.email}
+                        isInvalid={
+                          (touched.email && errors.email) || invalidEmail
+                        }
+                        data-lpignore="true"
+                      />
+                      <Form.Control.Feedback type="invalid">
+                        {invalidEmail && 'Your account does not exist.'}
+                      </Form.Control.Feedback>
+                    </Form.Group>
+                    <Form.Group
+                      id="password"
+                      style={{
+                        marginBottom: '15px',
+                      }}>
+                      <Form.Control
+                        placeholder="Password"
+                        type="password"
+                        ref={passwordRef}
+                        value={values.password}
+                        name="password"
+                        onChange={handleChange}
+                        isInvalid={
+                          (touched.password && errors.password) ||
+                          invalidPassword
+                        }
+                        data-lpignore="true"
+                      />
+                      <Form.Control.Feedback type="invalid">
+                        {invalidPassword && 'Incorrect password.'}
+                      </Form.Control.Feedback>
+                    </Form.Group>
+                    <Form.Group controlId="formBasicCheckbox">
+                      <Form.Check
+                        defaultChecked={isChecked}
+                        onClick={() => {
+                          setChecked(!isChecked);
+                        }}
+                        type="checkbox"
+                        label="Keep me logged in"
+                      />
+                    </Form.Group>
+                    <Button
+                      disabled={loading}
+                      className="btn-primary w-100 mt-2 mb-1"
+                      type="submit">
+                      Log In
+                    </Button>
+                  </Form>
+                )}
+              </Formik>
               <div className="w-100 text-center mt-2">
                 {/* <Link to="/forgot">Forgot Password?</Link> */}
                 <Link
