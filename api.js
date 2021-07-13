@@ -148,7 +148,7 @@ exports.setApp = function (app, admin) {
     res.status(200).json(ret);
   });
 
-  // This retrieves the messages when
+  // This retrieves the messages when users heart eachother.
   app.post("/api/getendmessages", async (req, res) => {
     const user = req["currentUser"];
     var obj = ({ user_uid: user_uid, match_uid: match_uid } = req.body);
@@ -226,6 +226,77 @@ exports.setApp = function (app, admin) {
     }
 
     var ret = responseObj;
+    res.status(200).json(ret);
+  });
+
+  // This retrieves the messages when users heart eachother.
+  app.post("/api/getmatches", async (req, res) => {
+    const user = req["currentUser"];
+    var obj = ({ uid: uid } = req.body);
+
+    if (!user) {
+      responseObj = { error: "You must be logged in." };
+
+      var ret = responseObj;
+      res.status(403).json(ret);
+      return;
+    }
+
+    if (obj.uid !== user.user_id) {
+      responseObj = { error: "Not authorized." };
+
+      var ret = responseObj;
+      res.status(403).json(ret);
+      return;
+    }
+
+    async function getMatchesData(matches_array) {
+      var jsonReturn = [];
+      for (let index = 0; index < matches_array.length; index++) {
+        // console.log("ran once");
+        var match_data = await admin
+          .firestore()
+          .collection("users")
+          .doc(matches_array[index])
+          .get();
+
+        var obj = {
+          firstName: match_data.data().firstName,
+          photo: match_data.data().photo,
+          phone: match_data.data().phone,
+          lastName: match_data.data().lastName,
+          sex: match_data.data().sex,
+          sexOrientation: match_data.data().sexOrientation,
+          exitMessage: match_data.data().exitMessage,
+          birth: match_data.data().birth,
+        };
+        jsonReturn.push(obj);
+      }
+      return jsonReturn;
+    }
+
+    var err = "";
+    var response = "";
+    var responseObj = {};
+    try {
+      var user_doc = await admin
+        .firestore()
+        .collection("users")
+        .doc(obj.uid)
+        .get();
+
+      var matches_array = user_doc.data().SuccessMatch;
+      var result = await getMatchesData(matches_array);
+      var ret = result;
+      res.status(200).json(ret);
+      return;
+    } catch (error) {
+      err = error.message;
+      responseObj = { error: err };
+    }
+
+    var ret = responseObj;
+    // console.log(responseObj);
     res.status(200).json(ret);
   });
 

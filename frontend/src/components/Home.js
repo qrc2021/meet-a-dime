@@ -105,7 +105,6 @@ const useStyles = makeStyles((theme) => ({
     }),
     marginRight: 0,
   },
-
 }));
 
 export default function Home() {
@@ -214,8 +213,6 @@ export default function Home() {
     ageRangeMax: '',
   });
 
-
-
   // useEffect occurs only once on page load.
   // This will clear any record of the user in the 'searching' collection
   // so that it not only resets the searching state, but
@@ -233,7 +230,7 @@ export default function Home() {
     async function getIntialUserPhoto() {
       try {
         const token = currentUser && (await currentUser.getIdToken());
-        // console.log(token);
+        console.log(token);
         var config = {
           method: 'post',
           url: bp.buildPath('api/getbasicuser'),
@@ -945,7 +942,7 @@ export default function Home() {
             <Form.Label className="text-matches" column xs="3">
               My Matches
             </Form.Label>
-            <Col className="mx-1" >
+            <Col className="mx-1">
               <Form.Control
                 className="text-search mt-2 mb-4"
                 type="search"

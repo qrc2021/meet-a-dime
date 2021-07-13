@@ -10,3 +10,4 @@ env.local
 setup.sh
 dev.sh
 /.vs/slnx.sqlite
+test.http
