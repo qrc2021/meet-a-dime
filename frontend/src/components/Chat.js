@@ -134,7 +134,7 @@ export default function Chat() {
   const extendedTimeoutRef = useRef();
   const socketRef = useRef();
 
-  const EXPIRE_IN_MINUTES = 10; // 10 minutes
+  const EXPIRE_IN_MINUTES = 0.2; // 10 minutes
   const modalExpire = 10000; // 30 seconds in MS
   const [room, setRoom] = useState('');
   //const [message, setMessage] = useState('');
@@ -186,7 +186,8 @@ export default function Chat() {
   document.getElementById('room-input');
   document.getElementById('form');
 
-  var localStorageKey = 1701;
+  // var localStorageKey.current = 1701;
+  const localStorageKey = useRef(1701);
 
   // Redirect users if they are not verified.
   if (!currentUser.emailVerified) {
@@ -221,6 +222,7 @@ export default function Chat() {
   function noMatch() {
     if (timeoutRef1.current !== undefined) clearTimeout(timeoutRef1.current);
     if (timeoutRef2.current !== undefined) clearTimeout(timeoutRef2.current);
+    clearChatData();
     setTimeout(async () => {
       await firestore
         .collection('users')
@@ -381,7 +383,7 @@ export default function Chat() {
         setSuccessMatches();
         console.log('match said yes!!');
         clearTimeout(extended_timeout);
-
+        clearChatData();
         leavePageWith('match_made');
       } else {
         // Nothing yet, lets wait for a change to the matchTail.
@@ -399,6 +401,7 @@ export default function Chat() {
               console.log('other person (the match) said yes after');
               observer.current();
               clearTimeout(extended_timeout);
+              clearChatData();
               leavePageWith('match_made');
             }
             if (
@@ -410,6 +413,7 @@ export default function Chat() {
               console.log('other person (the match) timed out');
               observer.current();
               clearTimeout(extended_timeout);
+              clearChatData();
               leavePageWith('match_timedout');
             }
           });
@@ -429,6 +433,7 @@ export default function Chat() {
         setSuccessMatches();
         console.log('seeker said yes!!');
         clearTimeout(extended_timeout);
+        clearChatData();
         leavePageWith('match_made');
       } else {
         // I need to passively listen for a document change.
@@ -446,6 +451,7 @@ export default function Chat() {
               console.log('other person (the seeker) said yes after');
               observer.current();
               clearTimeout(extended_timeout);
+              clearChatData();
               leavePageWith('match_made');
             }
             if (
@@ -457,6 +463,7 @@ export default function Chat() {
               console.log('other person (the seeker) timed out');
               observer.current();
               clearTimeout(extended_timeout);
+              clearChatData();
               leavePageWith('match_timedout');
             }
           });
@@ -552,7 +559,7 @@ export default function Chat() {
       );
     });
 
-    if (localStorage.getItem('1701')!==null) {
+    if (localStorage.getItem('1701') !== null) {
       restorePreviousMessages();
     }
 
@@ -623,11 +630,11 @@ export default function Chat() {
     sock.on('message', (message, user) => {
       if (user !== currentUser.uid) {
         displayMessage(message, 'received');
-        localStorage.setItem(JSON.stringify(localStorageKey), 'them');
-        localStorageKey+=7;
-        localStorage.setItem(JSON.stringify(localStorageKey), message);
-        localStorageKey+=7;
-      } 
+        localStorage.setItem(JSON.stringify(localStorageKey.current), 'them');
+        localStorageKey.current += 7;
+        localStorage.setItem(JSON.stringify(localStorageKey.current), message);
+        localStorageKey.current += 7;
+      }
       console.log(user);
     });
     sock.on('abandoned', (message) => {
@@ -676,17 +683,17 @@ export default function Chat() {
   function restorePreviousMessages() {
     var temp = 1701;
 
-    while (localStorage.getItem(JSON.stringify(temp))!==null) {
-      if (localStorage.getItem(JSON.stringify(temp))==='me') {
-        temp+=7
+    while (localStorage.getItem(JSON.stringify(temp)) !== null) {
+      if (localStorage.getItem(JSON.stringify(temp)) === 'me') {
+        temp += 7;
         displayMessage(localStorage.getItem(JSON.stringify(temp)), 'sent');
       } else {
-        temp+=7;
+        temp += 7;
         displayMessage(localStorage.getItem(JSON.stringify(temp)), 'received');
       }
       temp += 7;
     }
-    localStorageKey = temp;
+    localStorageKey.current = temp;
   }
 
   function handleSubmit(e) {
@@ -695,14 +702,14 @@ export default function Chat() {
     // const room_ = room;
 
     if (message === '') return;
-    
+
     displayMessage(message, 'sent');
 
     //send value of message to local storage
-    localStorage.setItem(JSON.stringify(localStorageKey), 'me');
-    localStorageKey+=7;
-    localStorage.setItem(JSON.stringify(localStorageKey), message);
-    localStorageKey+=7;
+    localStorage.setItem(JSON.stringify(localStorageKey.current), 'me');
+    localStorageKey.current += 7;
+    localStorage.setItem(JSON.stringify(localStorageKey.current), message);
+    localStorageKey.current += 7;
 
     // ARGS ARE: from, room, message
     socket.emit('send-to-room', currentUser.uid, room, message);
@@ -729,10 +736,10 @@ export default function Chat() {
   //erase chat log stored in local storage
   function clearChatData() {
     var temp = 1701;
-
-    while (localStorage.getItem(JSON.stringify(temp))!==null) {
+    console.log('Cleared chat data.');
+    while (localStorage.getItem(JSON.stringify(temp)) !== null) {
       localStorage.removeItem(JSON.stringify(temp));
-      temp+=7;
+      temp += 7;
     }
   }
 
