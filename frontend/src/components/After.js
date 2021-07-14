@@ -11,10 +11,120 @@ import axios from 'axios';
 import 'firebase/auth';
 import 'firebase/firestore';
 import moment from 'moment';
+import IconButton from '@material-ui/core/IconButton';
+import LinearProgress from '@material-ui/core/LinearProgress';
+import { Navbar } from 'react-bootstrap';
+
+import clsx from 'clsx';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
+import Drawer from '@material-ui/core/Drawer';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import List from '@material-ui/core/List';
+import Typography from '@material-ui/core/Typography';
+import Divider from '@material-ui/core/Divider';
+import MenuIcon from '@material-ui/icons/Menu';
+import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
+import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import HomeIcon from '@material-ui/icons/Home';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+
 var bp = require('../Path.js');
 // const firestore = firebase.firestore();
 
+// Drawer
+const drawerWidth = 300;
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    display: 'flex',
+  },
+  appBar: {
+    transition: theme.transitions.create(['margin', 'width'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+  },
+  appBarShift: {
+    width: `calc(100% - ${drawerWidth}px)`,
+    transition: theme.transitions.create(['margin', 'width'], {
+      easing: theme.transitions.easing.easeOut,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+    marginRight: drawerWidth,
+  },
+  title: {
+    flexGrow: 1,
+  },
+  hide: {
+    display: 'none',
+  },
+  drawer: {
+    width: drawerWidth,
+    flexShrink: 0,
+  },
+  drawerPaper: {
+    width: drawerWidth,
+    background: '#FFDCF2',
+  },
+  drawerHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    padding: theme.spacing(0, 1),
+    // necessary for content to be below app bar
+    ...theme.mixins.toolbar,
+    justifyContent: 'flex-start',
+  },
+  listItemText: {
+    fontSize: '25px',
+    fontWeight: 'bold',
+    color: '#E64398',
+  },
+  content: {
+    flexGrow: 1,
+    padding: theme.spacing(3),
+    transition: theme.transitions.create('margin', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+    // marginRight: -drawerWidth,
+  },
+  contentShift: {
+    transition: theme.transitions.create('margin', {
+      easing: theme.transitions.easing.easeOut,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+    marginRight: 0,
+  },
+}));
+
 export default function After() {
+   // Drawer
+   const classes = useStyles();
+   const itemsList = [
+     {
+       text: 'Home',
+       icon: <HomeIcon style={{ color: '#e64398' }} />,
+       onClick: redirectToHome,
+     },
+   ];
+ 
+   const theme = useTheme();
+   const [open, setOpen] = React.useState(false);
+ 
+   const handleDrawerOpen = () => {
+     setOpen(true);
+   };
+ 
+   const handleDrawerClose = () => {
+     setOpen(false);
+   };
+ 
+   const [switching, setSwitching] = useState(true);
+
   // Prevent some prompt issues.
 
   // const [error, setError] = useState('');
@@ -153,7 +263,45 @@ export default function After() {
   document.body.style.backgroundColor = 'white';
   return (
     <React.Fragment>
-      <h2 className="text-center mb-4">After Chat</h2>
+      <AppBar
+        style={{ background: '#ffffff' }}
+        position="fixed"
+        className={clsx(classes.appBar, {
+          [classes.appBarShift]: open,
+        })}>
+        <Toolbar>
+          <Typography variant="h6" noWrap className={classes.title}>
+            <Navbar bg="transparent">
+              <Navbar.Brand>
+                <img
+                  src="/DimeAssets/headerlogo.png"
+                  width="250px"
+                  height="100%"
+                  className="d-inline-block align-top"
+                  alt="logo"
+                  href="home"
+                  onClick={redirectToHome}
+                />
+              </Navbar.Brand>
+            </Navbar>
+          </Typography>
+
+          <IconButton
+            color="default"
+            aria-label="open drawer"
+            edge="end"
+            onClick={handleDrawerOpen}
+            className={clsx(open && classes.hide)}>
+            <MenuIcon />
+          </IconButton>
+        </Toolbar>
+        {switching && (
+          <div>
+            <LinearProgress style={{ backgroundColor: 'pink' }} />
+          </div>
+        )}
+      </AppBar>
+      <h2 className="text-center mb-4 pt-4 mt-4">After Chat</h2>
 
       {/* {error && <Alert severity="error">{error}</Alert>} */}
       {pageType && pageType === 'match_abandoned' && (
@@ -225,6 +373,41 @@ export default function After() {
       <Button variant="contained" color="primary" onClick={redirectToHome}>
         Home
       </Button>
+      <Drawer
+        className={classes.drawer}
+        variant="persistent"
+        anchor="right"
+        open={open}
+        classes={{
+          paper: classes.drawerPaper,
+        }}>
+        <div className={classes.drawerHeader}>
+          <IconButton onClick={handleDrawerClose}>
+            {theme.direction === 'rtl' ? (
+              <ChevronLeftIcon />
+            ) : (
+              <ChevronRightIcon
+                style={{ color: '#e64398', fontSize: '30px' }}
+              />
+            )}
+          </IconButton>
+        </div>
+        <Divider style={{ background: '#e64398' }} />
+        <List>
+          {itemsList.map((item, index) => {
+            const { text, icon, onClick } = item;
+            return (
+              <ListItem button key={text} onClick={onClick}>
+                {icon && <ListItemIcon>{icon}</ListItemIcon>}
+                <ListItemText
+                  classes={{ primary: classes.listItemText }}
+                  primary={text}
+                />
+              </ListItem>
+            );
+          })}
+        </List>
+      </Drawer>
     </React.Fragment>
   );
 }
