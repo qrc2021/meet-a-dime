@@ -134,7 +134,7 @@ export default function Chat() {
   const extendedTimeoutRef = useRef();
   const socketRef = useRef();
 
-  const EXPIRE_IN_MINUTES = 0.1; // 10 minutes
+  const EXPIRE_IN_MINUTES = 10; // 10 minutes
   const modalExpire = 10000; // 30 seconds in MS
   const [room, setRoom] = useState('');
   //const [message, setMessage] = useState('');
@@ -185,6 +185,8 @@ export default function Chat() {
   document.getElementById('message_input');
   document.getElementById('room-input');
   document.getElementById('form');
+
+  var localStorageKey = 1701;
 
   // Redirect users if they are not verified.
   if (!currentUser.emailVerified) {
@@ -550,6 +552,10 @@ export default function Chat() {
       );
     });
 
+    if (localStorage.getItem('1701')!==null) {
+      restorePreviousMessages();
+    }
+
     if (localStorage.getItem('chatExpiry') === null) {
       var exp = Date.now() + EXPIRE_IN_MINUTES * 60000;
       localStorage.setItem('chatExpiry', exp);
@@ -615,12 +621,19 @@ export default function Chat() {
     socketRef.current = sock;
     // Wait for incoming private messages.
     sock.on('message', (message, user) => {
-      if (user !== currentUser.uid) displayMessage(message, 'received');
+      if (user !== currentUser.uid) {
+        displayMessage(message, 'received');
+        localStorage.setItem(JSON.stringify(localStorageKey), 'them');
+        localStorageKey+=7;
+        localStorage.setItem(JSON.stringify(localStorageKey), message);
+        localStorageKey+=7;
+      } 
       console.log(user);
     });
     sock.on('abandoned', (message) => {
       //match left & setting the pair as no match
       displayMessage('Your match left the chat. Switching..', 'system');
+      clearChatData();
       setTimeout(async () => {
         await firestore
           .collection('users')
@@ -659,13 +672,22 @@ export default function Chat() {
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  //array to store users name and message (used for local storages purposes)
-  //
-  //store key as a string with numbers that will increment with every message.
-  //why? because we can just loop through the strings (numbers) to access all of the messages in a loop
-  //ie. we don't need to generate a ton of original keys every time we add a message
-  var localStorageKey = 1701;
-  var localStorageTracker = new Array();
+  //restore previous messages if the localStorage array indicates that some key was used
+  function restorePreviousMessages() {
+    var temp = 1701;
+
+    while (localStorage.getItem(JSON.stringify(temp))!==null) {
+      if (localStorage.getItem(JSON.stringify(temp))==='me') {
+        temp+=7
+        displayMessage(localStorage.getItem(JSON.stringify(temp)), 'sent');
+      } else {
+        temp+=7;
+        displayMessage(localStorage.getItem(JSON.stringify(temp)), 'received');
+      }
+      temp += 7;
+    }
+    localStorageKey = temp;
+  }
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -673,16 +695,14 @@ export default function Chat() {
     // const room_ = room;
 
     if (message === '') return;
+    
     displayMessage(message, 'sent');
 
     //send value of message to local storage
-    localStorage.setItem(JSON.stringify(localStorageKey), JSON.stringify(message));
+    localStorage.setItem(JSON.stringify(localStorageKey), 'me');
     localStorageKey+=7;
-
-    //store user that sent message as well as message in array
-    //note - even-numbered indices will be users while the odd number after the index will be the sent message
-    localStorageTracker[localStorageTracker.length]=currentUser.uid;
-    localStorageTracker[localStorageTracker.length]=toString(message);
+    localStorage.setItem(JSON.stringify(localStorageKey), message);
+    localStorageKey+=7;
 
     // ARGS ARE: from, room, message
     socket.emit('send-to-room', currentUser.uid, room, message);
@@ -706,6 +726,16 @@ export default function Chat() {
     }
   }
 
+  //erase chat log stored in local storage
+  function clearChatData() {
+    var temp = 1701;
+
+    while (localStorage.getItem(JSON.stringify(temp))!==null) {
+      localStorage.removeItem(JSON.stringify(temp));
+      temp+=7;
+    }
+  }
+
   async function handleLogout() {
     try {
       // Push the state to login that we need to purge the old user searches.
@@ -725,6 +755,7 @@ export default function Chat() {
 
       socket.emit('leave-room', currentUser.uid, room);
       console.log('LEFT ROOM DUE TO LOGOUT');
+      clearChatData();
       if (timeoutRef1.current !== undefined) clearTimeout(timeoutRef1.current);
       if (timeoutRef2.current !== undefined) clearTimeout(timeoutRef2.current);
       await logout();
@@ -743,6 +774,7 @@ export default function Chat() {
     // socket.emit('leave-room', currentUser.uid, room);
     socket.emit('leave-room', currentUser.uid, room);
     console.log('LEFT ROOM WENT HOME');
+    clearChatData();
     if (timeoutRef1.current !== undefined) clearTimeout(timeoutRef1.current);
     if (timeoutRef2.current !== undefined) clearTimeout(timeoutRef2.current);
     history.push('/');
@@ -753,6 +785,7 @@ export default function Chat() {
     // user left & setting pair to no match
     socket.emit('leave-room', currentUser.uid, room);
     console.log('LEFT ROOM: REDIRECT TO AFTER');
+    clearChatData();
     await firestore
       .collection('users')
       .doc(currentUser.uid)
