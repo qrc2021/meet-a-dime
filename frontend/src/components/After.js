@@ -102,28 +102,28 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function After() {
-   // Drawer
-   const classes = useStyles();
-   const itemsList = [
-     {
-       text: 'Home',
-       icon: <HomeIcon style={{ color: '#e64398' }} />,
-       onClick: redirectToHome,
-     },
-   ];
- 
-   const theme = useTheme();
-   const [open, setOpen] = React.useState(false);
- 
-   const handleDrawerOpen = () => {
-     setOpen(true);
-   };
- 
-   const handleDrawerClose = () => {
-     setOpen(false);
-   };
- 
-   const [switching, setSwitching] = useState(true);
+  // Drawer
+  const classes = useStyles();
+  const itemsList = [
+    {
+      text: 'Home',
+      icon: <HomeIcon style={{ color: '#e64398' }} />,
+      onClick: redirectToHome,
+    },
+  ];
+
+  const theme = useTheme();
+  const [open, setOpen] = React.useState(false);
+
+  const handleDrawerOpen = () => {
+    setOpen(true);
+  };
+
+  const handleDrawerClose = () => {
+    setOpen(false);
+  };
+
+  const [switching, setSwitching] = useState(false);
 
   // Prevent some prompt issues.
 
@@ -274,6 +274,7 @@ export default function After() {
             <Navbar bg="transparent">
               <Navbar.Brand>
                 <img
+                  style={{ cursor: 'pointer' }}
                   src="/DimeAssets/headerlogo.png"
                   width="250px"
                   height="100%"
@@ -370,9 +371,9 @@ export default function After() {
         {pageType === 'match_made' && <h3>their #: {match_phoneNumber}</h3>}
         {pageType === 'match_made' && <h3>their msg: {match_exitMessage}</h3>}
       </Container>
-      <Button variant="contained" color="primary" onClick={redirectToHome}>
+      {/* <Button variant="contained" color="primary" onClick={redirectToHome}>
         Home
-      </Button>
+      </Button> */}
       <Drawer
         className={classes.drawer}
         variant="persistent"

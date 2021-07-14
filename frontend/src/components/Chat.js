@@ -125,7 +125,7 @@ export default function Chat() {
     setOpen(false);
   };
 
-  const [switching, setSwitching] = useState(true);
+  const [switching, setSwitching] = useState(false);
 
   const messageRef = useRef();
 
@@ -479,20 +479,24 @@ export default function Chat() {
         </Modal.Header>
         <Modal.Body
           style={{
-            backgroundColor: '#e64398', 
+            backgroundColor: '#e64398',
           }}>
-          <h4 
+          <h4
             style={{
               color: '#ffffff',
               fontWeight: 'bold',
               textAlign: 'center',
-            }}>You did the time! Do you want the Dime?</h4>
+            }}>
+            You did the time! Do you want the Dime?
+          </h4>
           <h5
-           style={{
-            color: '#ffffff',
-            fontWeight: 'normal',
-            textAlign: 'center',
-            }}>Please select Tails to Match or Heads to Pass.</h5>
+            style={{
+              color: '#ffffff',
+              fontWeight: 'normal',
+              textAlign: 'center',
+            }}>
+            Please select Tails to Match or Heads to Pass.
+          </h5>
         </Modal.Body>
         <Modal.Footer className="mx-auto">
           <Image
@@ -764,6 +768,7 @@ export default function Chat() {
             <Navbar bg="transparent">
               <Navbar.Brand>
                 <img
+                  style={{ cursor: 'pointer' }}
                   src="/DimeAssets/headerlogo.png"
                   width="250px"
                   height="100%"
@@ -775,9 +780,7 @@ export default function Chat() {
               </Navbar.Brand>
             </Navbar>
           </Typography>
-          <Button
-            className="btn-abandon mx-3"
-            onClick={redirectToAfter}>
+          <Button className="btn-abandon mx-3" onClick={redirectToAfter}>
             Abandon Chat
           </Button>
           <IconButton
@@ -830,8 +833,7 @@ export default function Chat() {
       </Container>
       <React.Fragment>
         <Container>
-          <div id="message-container"
-            className=""></div>
+          <div id="message-container" className=""></div>
           <hr></hr>
           {!afterChat && (
             <Form onSubmit={handleSubmit}>
@@ -851,17 +853,17 @@ export default function Chat() {
             </Form>
           )}
         </Container>
-        <Button
+        {/* <Button
           className={!afterChat ? 'btn btn-danger' : 'btn btn-primary'}
           onClick={!afterChat ? redirectToAfter : redirectToHome}>
           {!afterChat ? 'Abandon Chat' : 'Go Home'}
-        </Button>
+        </Button> */}
       </React.Fragment>
-      <div className="w-100 text-center mt-2">
+      {/* <div className="w-100 text-center mt-2">
         <Button variant="link" onClick={handleLogout}>
           Log Out
         </Button>
-      </div>
+      </div> */}
       <MatchModal
         backdrop="static"
         show={modalShow}
