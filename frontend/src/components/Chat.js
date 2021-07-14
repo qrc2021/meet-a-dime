@@ -659,6 +659,14 @@ export default function Chat() {
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  //array to store users name and message (used for local storages purposes)
+  //
+  //store key as a string with numbers that will increment with every message.
+  //why? because we can just loop through the strings (numbers) to access all of the messages in a loop
+  //ie. we don't need to generate a ton of original keys every time we add a message
+  var localStorageKey = 1701;
+  var localStorageTracker = new Array();
+
   function handleSubmit(e) {
     e.preventDefault();
     const message = messageRef.current.value;
@@ -666,6 +674,16 @@ export default function Chat() {
 
     if (message === '') return;
     displayMessage(message, 'sent');
+
+    //send value of message to local storage
+    localStorage.setItem(JSON.stringify(localStorageKey), JSON.stringify(message));
+    localStorageKey+=7;
+
+    //store user that sent message as well as message in array
+    //note - even-numbered indices will be users while the odd number after the index will be the sent message
+    localStorageTracker[localStorageTracker.length]=currentUser.uid;
+    localStorageTracker[localStorageTracker.length]=toString(message);
+
     // ARGS ARE: from, room, message
     socket.emit('send-to-room', currentUser.uid, room, message);
     messageRef.current.value = '';
