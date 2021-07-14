@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 // import { Button, Alert, Container, Form } from 'react-bootstrap';
 import { Alert } from '@material-ui/lab';
 import Container from '@material-ui/core/Container';
-import Button from '@material-ui/core/Button';
+// import Button from '@material-ui/core/Button';
 import { useAuth } from '../contexts/AuthContext';
 import { useHistory, useLocation } from 'react-router-dom';
 // import { io } from 'socket.io-client';
@@ -12,7 +12,7 @@ import 'firebase/auth';
 import 'firebase/firestore';
 import moment from 'moment';
 import IconButton from '@material-ui/core/IconButton';
-import LinearProgress from '@material-ui/core/LinearProgress';
+// import LinearProgress from '@material-ui/core/LinearProgress';
 import { Navbar } from 'react-bootstrap';
 
 import clsx from 'clsx';
@@ -30,7 +30,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import HomeIcon from '@material-ui/icons/Home';
-import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+// import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
 var bp = require('../Path.js');
 // const firestore = firebase.firestore();
@@ -123,7 +123,7 @@ export default function After() {
     setOpen(false);
   };
 
-  const [switching, setSwitching] = useState(false);
+  // const [switching, setSwitching] = useState(false);
 
   // Prevent some prompt issues.
 
@@ -296,11 +296,6 @@ export default function After() {
             <MenuIcon />
           </IconButton>
         </Toolbar>
-        {switching && (
-          <div>
-            <LinearProgress style={{ backgroundColor: 'pink' }} />
-          </div>
-        )}
       </AppBar>
       <h2 className="text-center mb-4 pt-4 mt-4">After Chat</h2>
 

@@ -19,7 +19,7 @@ import { Alert, AlertTitle } from '@material-ui/lab';
 
 import Fab from '@material-ui/core/Fab';
 import CheckIcon from '@material-ui/icons/Check';
-import SaveIcon from '@material-ui/icons/Save';
+// import SaveIcon from '@material-ui/icons/Save';
 import Container from '@material-ui/core/Container';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
@@ -161,10 +161,10 @@ export default function Profile() {
   // Prevent some prompt issues.
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
-  const [photoStatus, setPhotoStatus] = useState('');
+  // const [photoStatus, setPhotoStatus] = useState('');
   const [myPhoto, setMyPhoto] = useState('');
   const [isUploading, setIsUploading] = useState(false);
-  const [progress, setProgress] = useState(0);
+  // const [progress, setProgress] = useState(0);
   const [selectedFile, setSelectedFile] = useState('');
   const firestore = firebase.firestore();
   const [switching, setSwitching] = useState(true);
@@ -202,15 +202,16 @@ export default function Profile() {
 
   function processPhoto() {
     const selectedFile = document.getElementById('photoUploadGroup').files[0];
-    if (selectedFile === undefined) return setPhotoStatus('no file selected');
+    // if (selectedFile === undefined) return setPhotoStatus('no file selected');
+    if (selectedFile === undefined) return;
 
     // Regex that gets the file extension
     var re = /(?:\.([^.]+))?$/;
     var ext = re.exec(selectedFile.name)[1];
-    setPhotoStatus('Uploading...');
+    // setPhotoStatus('Uploading...');
     setIsUploading(true);
     setSuccess(false);
-    setProgress(0);
+    // setProgress(0);
     var storageRef = firebase.storage().ref();
     var profileRef = storageRef.child(currentUser.uid + '.' + ext);
     var uploadTask = profileRef.put(selectedFile);
@@ -222,7 +223,7 @@ export default function Profile() {
         var progress_ = Math.round(
           (snapshot.bytesTransferred / snapshot.totalBytes) * 100
         );
-        setProgress(progress_);
+        // setProgress(progress_);
         console.log('Upload is ' + progress_ + '% done');
         switch (snapshot.state) {
           case firebase.storage.TaskState.PAUSED: // or 'paused'
@@ -252,7 +253,7 @@ export default function Profile() {
             .update({ photo: downloadURL })
             .then(() => {
               console.log('photo set to user in database!');
-              setPhotoStatus('Done!');
+              // setPhotoStatus('Done!');
               setMyPhoto(downloadURL);
               document.getElementById('photoUploadGroup').value = null;
               setSelectedFile('');
@@ -260,14 +261,14 @@ export default function Profile() {
               setSuccess(true);
               setIsUploading(false);
               setTimeout(() => {
-                setPhotoStatus(false);
+                // setPhotoStatus(false);
                 setSuccess(false);
               }, 3000);
             })
             .catch((error) => {
               console.log(error);
-              // setError('something went wrong');
-              setPhotoStatus('something went wrong.');
+              setError('something went wrong');
+              // setPhotoStatus('something went wrong.');
             });
         });
       }
@@ -430,14 +431,6 @@ export default function Profile() {
               {firstName + ' ' + lastName}
             </h2>
           </Grid>
-          {/* <input type="file" id="photoUploadGroup" />
-
-          <button
-            className="btn btn-primary"
-            id="photoUploadButton"
-            onClick={processPhoto}>
-            Upload Photo
-          </button> */}
 
           <input
             onChange={() => {
@@ -468,21 +461,6 @@ export default function Profile() {
             </label>
           )}
 
-          {/* {showPicUploader && (
-            <Button
-              className="btn btn-primary"
-              variant="contained"
-              color="default"
-              endIcon={<CloudUploadIcon />}
-              id="photoUploadButton"
-              onClick={processPhoto}
-              disabled={!selectedFile}
-              style={{
-                marginBottom: '15px',
-              }}>
-              Upload
-            </Button>
-          )} */}
           {showPicUploader && (
             <div className={classes.wrapper}>
               <Fab
@@ -500,12 +478,7 @@ export default function Profile() {
             </div>
           )}
           {showPicUploader && <Box my={1}>{selectedFile}</Box>}
-          {/* {showPicUploader && photoStatus} */}
-          <Container>
-            {/* {isUploading && (
-              <LinearProgress variant="determinate" value={progress} />
-            )} */}
-          </Container>
+
           {error && (
             <Alert severity="error">
               <AlertTitle>Error</AlertTitle>
