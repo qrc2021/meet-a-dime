@@ -896,6 +896,7 @@ export default function Home() {
                   height="100%"
                   className="d-inline-block align-top"
                   alt="logo"
+                  style={{ cursor: 'pointer' }}
                 />
               </Navbar.Brand>
             </Navbar>

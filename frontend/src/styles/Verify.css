@@ -17,10 +17,10 @@ body {
 
 .btn-primary:hover {
   font-weight: bold;
-  font-size: 24px;
+  /* font-size: 24px; The button inherits the font size from btn-primary */
   color: white;
   background-color: #ca3984 !important;
-  border-radius: 30px;
+  /* border-radius: 30px; The button inherits the border radius from btn-primary */
   border-color: #ca3984 !important;
 }
 

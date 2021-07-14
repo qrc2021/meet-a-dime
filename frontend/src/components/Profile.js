@@ -1,7 +1,8 @@
-import React, { useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navbar } from 'react-bootstrap';
-import ReactRoundedImage from "react-rounded-image";
+import ReactRoundedImage from 'react-rounded-image';
 import LinearProgress from '@material-ui/core/LinearProgress';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import { useAuth } from '../contexts/AuthContext';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import { useHistory } from 'react-router-dom';
@@ -16,6 +17,9 @@ import IconButton from '@material-ui/core/IconButton';
 
 import { Alert, AlertTitle } from '@material-ui/lab';
 
+import Fab from '@material-ui/core/Fab';
+import CheckIcon from '@material-ui/icons/Check';
+import SaveIcon from '@material-ui/icons/Save';
 import Container from '@material-ui/core/Container';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
@@ -100,6 +104,31 @@ const useStyles = makeStyles((theme) => ({
     }),
     marginRight: 0,
   },
+  wrapper: {
+    margin: theme.spacing(1),
+    position: 'relative',
+  },
+  buttonSuccess: {
+    backgroundColor: '#4caf50',
+    '&:hover': {
+      backgroundColor: '#4caf50',
+    },
+  },
+  fabProgress: {
+    color: '#4caf50',
+    position: 'absolute',
+    top: -6,
+    left: -6,
+    zIndex: 1,
+  },
+  buttonProgress: {
+    color: '#4caf50',
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    marginTop: -12,
+    marginLeft: -12,
+  },
 }));
 
 export default function Profile() {
@@ -130,7 +159,7 @@ export default function Profile() {
   };
 
   // Prevent some prompt issues.
-
+  const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
   const [photoStatus, setPhotoStatus] = useState('');
   const [myPhoto, setMyPhoto] = useState('');
@@ -141,6 +170,9 @@ export default function Profile() {
   const [switching, setSwitching] = useState(true);
   const { currentUser, logout } = useAuth();
   const history = useHistory();
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [showPicUploader, setShowPicUploader] = useState(false);
 
   // Redirect users if they are not verified.
   if (!currentUser.emailVerified) {
@@ -177,6 +209,7 @@ export default function Profile() {
     var ext = re.exec(selectedFile.name)[1];
     setPhotoStatus('Uploading...');
     setIsUploading(true);
+    setSuccess(false);
     setProgress(0);
     var storageRef = firebase.storage().ref();
     var profileRef = storageRef.child(currentUser.uid + '.' + ext);
@@ -221,11 +254,14 @@ export default function Profile() {
               console.log('photo set to user in database!');
               setPhotoStatus('Done!');
               setMyPhoto(downloadURL);
+              document.getElementById('photoUploadGroup').value = null;
               setSelectedFile('');
               setIsUploading('Done');
+              setSuccess(true);
+              setIsUploading(false);
               setTimeout(() => {
                 setPhotoStatus(false);
-                setIsUploading(false);
+                setSuccess(false);
               }, 3000);
             })
             .catch((error) => {
@@ -254,8 +290,10 @@ export default function Profile() {
         var ageRangeMax = doc.data().ageRangeMax;
         var ageRangeMin = doc.data().ageRangeMin;
         document.getElementById('birth').innerHTML = userBirth;
-        document.getElementById('first').innerHTML = userFirstName;
-        document.getElementById('last').innerHTML = userLastName;
+        // document.getElementById('first').innerHTML = userFirstName;
+        // document.getElementById('last').innerHTML = userLastName;
+        setLastName(userLastName);
+        setFirstName(userFirstName);
         document.getElementById('phone').innerHTML = userPhone;
         document.getElementById('exit').innerHTML = userExitMessage;
         document.getElementById('sex').innerHTML = userSex;
@@ -300,6 +338,10 @@ export default function Profile() {
     fetchUserData();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const buttonClassname = clsx({
+    [classes.buttonSuccess]: success,
+  });
+
   return (
     <React.Fragment>
       <AppBar
@@ -319,6 +361,7 @@ export default function Profile() {
                   className="d-inline-block align-top"
                   alt="logo"
                   href="home"
+                  style={{ cursor: 'pointer' }}
                   onClick={redirectToHome}
                 />
               </Navbar.Brand>
@@ -345,53 +388,49 @@ export default function Profile() {
         className={clsx(classes.content, {
           [classes.contentShift]: open,
         })}>
-              <div className={classes.drawerHeader} />
-              <Grid
-                  container
-                  direction="column"
-                  xs="sm"
-                  justifyContent="flex-start"
-                  alignItems="center"
-                  
-              >
-           
-              {myPhoto !== '' ? (
-                <ReactRoundedImage
-                  imageHeight="300"
-                  imageWidth="300"
-                  image={myPhoto}
-                  id="photo"
-                  roundedSize="13"
-                  borderRadius="150"
-                  alt="My Profile Pic"
-                  hoverColor="pink"
-                  style={{
-                              marginBottom: '15px',
-                              marginTop: '5px'
-                          }}
-                   />
-              ) : (
-                <ReactRoundedImage
-                  className="img-fluid"
-                  image="DimeAssets/coinsignup.png"
-                  height="300px"
-                  width="300px"
-                  roundedSize="13"
-                  borderRadius="150"
-                  alt="Default Pic"
-                  hoverColor="pink"
-                  style={{
-                                  marginBottom: '15px',
-                                  marginTop: '5px'
-                  }}
-                />
-              )}
-              <Grid container justifyContent="center" alignItems="center">
-                      <h2 className="text-center mb-4" style={{ color: '#DCEAFF' }} id="first"/>
-                      <h2 className="text-center mb-4" style={{ color: '#DCEAFF' }} id="last"/>
-
-                      </Grid>
-                {/* <input type="file" id="photoUploadGroup" />
+        <div className={classes.drawerHeader} />
+        <Grid
+          container
+          direction="column"
+          justifyContent="flex-start"
+          alignItems="center">
+          {myPhoto !== '' ? (
+            <ReactRoundedImage
+              imageHeight="300"
+              imageWidth="300"
+              image={myPhoto}
+              id="photo"
+              roundedSize="13"
+              borderRadius="150"
+              alt="My Profile Pic"
+              hoverColor="pink"
+              style={{
+                marginBottom: '15px',
+                marginTop: '5px',
+              }}
+            />
+          ) : (
+            <ReactRoundedImage
+              className="img-fluid"
+              image="DimeAssets/coinsignup.png"
+              height="300px"
+              width="300px"
+              roundedSize="13"
+              borderRadius="150"
+              alt="Default Pic"
+              hoverColor="pink"
+              style={{
+                marginBottom: '15px',
+                marginTop: '5px',
+              }}
+            />
+          )}
+          <Grid container justifyContent="center" alignItems="center">
+            <h2 className="text-center mb-4" style={{ color: '#DCEAFF' }}>
+              {firstName + ' ' + lastName}
+            </h2>
+          </Grid>
+          {/* <input type="file" id="photoUploadGroup" />
 
           <button
             className="btn btn-primary"
@@ -399,104 +438,125 @@ export default function Profile() {
             onClick={processPhoto}>
             Upload Photo
           </button> */}
-                
-                <input
-                  onChange={() => {
-                    if (
-                      document.getElementById('photoUploadGroup') &&
-                      document.getElementById('photoUploadGroup').files[0]
-                    )
-                      setSelectedFile(
-                        document.getElementById('photoUploadGroup').files[0]
-                          .name
-                      );
-                  }}
-                  accept="image/*"
-                  id="photoUploadGroup"
-                  hidden
-                  type="file"
-                />
-           
-                <label htmlFor="photoUploadGroup">
-                  <Button
-                    className="btn btn-primary"
-                    variant="contained"
-                    color="primary"
-                    component="span"
-                    startIcon={<AttachmentIcon />}
-                    >
-                    Select
-                  </Button>
-                </label>
-                <Box my={1}>{selectedFile}</Box>
-                
-                <Button
-                  className="btn btn-primary"
-                  variant="contained"
-                  color="default"
-                  endIcon={<CloudUploadIcon />}
-                  id="photoUploadButton"
-                  onClick={processPhoto}
-                  disabled={!selectedFile}
-                  style={{
-                              marginBottom: '15px'
-                  }}>
-                  Upload
-                </Button>
 
+          <input
+            onChange={() => {
+              if (
+                document.getElementById('photoUploadGroup') &&
+                document.getElementById('photoUploadGroup').files[0]
+              )
+                setSelectedFile(
+                  document.getElementById('photoUploadGroup').files[0].name
+                );
+            }}
+            accept="image/*"
+            id="photoUploadGroup"
+            hidden
+            type="file"
+          />
+
+          {showPicUploader && (
+            <label htmlFor="photoUploadGroup">
+              <Button
+                className="btn btn-primary"
+                variant="contained"
+                style={{ color: 'white' }}
+                component="span"
+                startIcon={<AttachmentIcon />}>
+                Select
+              </Button>
+            </label>
+          )}
+
+          {/* {showPicUploader && (
+            <Button
+              className="btn btn-primary"
+              variant="contained"
+              color="default"
+              endIcon={<CloudUploadIcon />}
+              id="photoUploadButton"
+              onClick={processPhoto}
+              disabled={!selectedFile}
+              style={{
+                marginBottom: '15px',
+              }}>
+              Upload
+            </Button>
+          )} */}
+          {showPicUploader && (
+            <div className={classes.wrapper}>
+              <Fab
+                aria-label="save"
+                color="primary"
+                className={buttonClassname}
+                onClick={() => {
+                  if (selectedFile) processPhoto();
+                }}>
+                {success ? <CheckIcon /> : <CloudUploadIcon />}
+              </Fab>
               {isUploading && (
-                <LinearProgress variant="determinate" value={progress} />
+                <CircularProgress size={68} className={classes.fabProgress} />
               )}
-              {photoStatus}
-            
-            {/* <Button variant="contained" color="primary">
-          Home
-        </Button>
-        <Button variant="contained" color="secondary" onClick={handleLogout}>
-          Log Out
-        </Button> */}
-
-            {error && (
-              <Alert severity="error">
-                <AlertTitle>Error</AlertTitle>
-                {error}
-              </Alert>
-            )}
-
-            <Container>
-               <span id="first"> </span>
-            <span id="last"/>
-              <br></br>
-              <strong>Birthday:</strong> <span id="birth"></span>
-              <br></br>
-              <strong>Email:</strong> {currentUser.email}
-              <br></br>
-              <strong>Phone Number:</strong> <span id="phone"></span>
-              <br></br>
-              <strong>Exit Message:</strong> <span id="exit"></span>
-              <br></br>
-              <strong>Sex:</strong> <span id="sex"></span>
-              <br></br>
-              <strong>Sexual Orientation:</strong>{' '}
-              <span id="orientation"></span>
-              <br></br>
-              <strong>User ID:</strong> {currentUser.uid}
-              <br></br>
-            </Container>
-
-            <Link to="/update-profile" className="btn btn-primary" style={{
-                marginBottom: '15px'
+            </div>
+          )}
+          {showPicUploader && <Box my={1}>{selectedFile}</Box>}
+          {/* {showPicUploader && photoStatus} */}
+          <Container>
+            {/* {isUploading && (
+              <LinearProgress variant="determinate" value={progress} />
+            )} */}
+          </Container>
+          {error && (
+            <Alert severity="error">
+              <AlertTitle>Error</AlertTitle>
+              {error}
+            </Alert>
+          )}
+          <button
+            className="btn btn-primary"
+            style={{
+              marginBottom: '15px',
+            }}
+            onClick={() => setShowPicUploader(!showPicUploader)}>
+            Change Profile Picture {showPicUploader && '(hide)'}
+          </button>
+          <Link
+            to="/update-profile"
+            className="btn btn-primary"
+            style={{
+              marginBottom: '15px',
             }}>
-                Update Profile
-              </Link>
-
-            <Link to="/prompts" className="btn btn-primary" style={{
-                marginBottom: '15px'
+            Update Profile
+          </Link>
+          <Link
+            to="/prompts"
+            className="btn btn-primary"
+            style={{
+              marginBottom: '15px',
             }}>
-                Conversation Starters
-              </Link>
-                  </Grid>
-       </main>
+            Conversation Starters
+          </Link>
+        </Grid>
+      </main>
+      <Container>
+        <span id="first"> </span>
+        <span id="last" />
+        <br></br>
+        <strong>Birthday:</strong> <span id="birth"></span>
+        <br></br>
+        <strong>Email:</strong> {currentUser.email}
+        <br></br>
+        <strong>Phone Number:</strong> <span id="phone"></span>
+        <br></br>
+        <strong>Exit Message:</strong> <span id="exit"></span>
+        <br></br>
+        <strong>Sex:</strong> <span id="sex"></span>
+        <br></br>
+        <strong>Sexual Orientation:</strong> <span id="orientation"></span>
+        <br></br>
+        <strong>User ID:</strong> {currentUser.uid}
+        <br></br>
+      </Container>
 
       <Drawer
         className={classes.drawer}
