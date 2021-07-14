@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect} from 'react';
 import { Navbar } from 'react-bootstrap';
+import ReactRoundedImage from "react-rounded-image";
 import LinearProgress from '@material-ui/core/LinearProgress';
 import { useAuth } from '../contexts/AuthContext';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
@@ -344,32 +345,52 @@ export default function Profile() {
         className={clsx(classes.content, {
           [classes.contentShift]: open,
         })}>
-        <div className={classes.drawerHeader} />
-        <Grid container spacing={1}>
-          <Grid item xs={2}>
-            <Container>
-              <strong>Photo:</strong>
-              <br></br>
+              <div className={classes.drawerHeader} />
+              <Grid
+                  container
+                  direction="column"
+                  xs="sm"
+                  justifyContent="flex-start"
+                  alignItems="center"
+                  
+              >
+           
               {myPhoto !== '' ? (
-                <img
-                  height="100px"
-                  width="100px"
-                  src={myPhoto}
+                <ReactRoundedImage
+                  imageHeight="300"
+                  imageWidth="300"
+                  image={myPhoto}
                   id="photo"
-                  alt="My Profile Pic"></img>
+                  roundedSize="13"
+                  borderRadius="150"
+                  alt="My Profile Pic"
+                  hoverColor="pink"
+                  style={{
+                              marginBottom: '15px',
+                              marginTop: '5px'
+                          }}
+                   />
               ) : (
-                <img
+                <ReactRoundedImage
                   className="img-fluid"
-                  src="DimeAssets/coinsignup.png"
-                  height="100px"
-                  width="100px"
+                  image="DimeAssets/coinsignup.png"
+                  height="300px"
+                  width="300px"
+                  roundedSize="13"
+                  borderRadius="150"
                   alt="Default Pic"
+                  hoverColor="pink"
+                  style={{
+                                  marginBottom: '15px',
+                                  marginTop: '5px'
+                  }}
                 />
               )}
-              <br></br>
-              {/* Temporary file input field, just needs style and
-        probably some custom input fields */}
-              <div className="my-3">
+              <Grid container justifyContent="center" alignItems="center">
+                      <h2 className="text-center mb-4" style={{ color: '#DCEAFF' }} id="first"/>
+                      <h2 className="text-center mb-4" style={{ color: '#DCEAFF' }} id="last"/>
+
+                      </Grid>
                 {/* <input type="file" id="photoUploadGroup" />
 
           <button
@@ -378,6 +399,7 @@ export default function Profile() {
             onClick={processPhoto}>
             Upload Photo
           </button> */}
+                
                 <input
                   onChange={() => {
                     if (
@@ -394,47 +416,45 @@ export default function Profile() {
                   hidden
                   type="file"
                 />
+           
                 <label htmlFor="photoUploadGroup">
                   <Button
+                    className="btn btn-primary"
                     variant="contained"
                     color="primary"
                     component="span"
-                    startIcon={<AttachmentIcon />}>
+                    startIcon={<AttachmentIcon />}
+                    >
                     Select
                   </Button>
                 </label>
                 <Box my={1}>{selectedFile}</Box>
+                
                 <Button
+                  className="btn btn-primary"
                   variant="contained"
                   color="default"
                   endIcon={<CloudUploadIcon />}
                   id="photoUploadButton"
                   onClick={processPhoto}
-                  disabled={!selectedFile}>
+                  disabled={!selectedFile}
+                  style={{
+                              marginBottom: '15px'
+                  }}>
                   Upload
                 </Button>
-              </div>
+
               {isUploading && (
                 <LinearProgress variant="determinate" value={progress} />
               )}
               {photoStatus}
-              <Link to="/update-profile" className="btn btn-primary">
-                Update Profile
-              </Link>
-              <Link to="/prompts" className="btn btn-primary">
-                Conversation Starters
-              </Link>
-            </Container>
+            
             {/* <Button variant="contained" color="primary">
           Home
         </Button>
         <Button variant="contained" color="secondary" onClick={handleLogout}>
           Log Out
         </Button> */}
-          </Grid>
-
-          <Grid item xs={5}>
-            <h2 className="text-center mb-4">Profile</h2>
 
             {error && (
               <Alert severity="error">
@@ -444,9 +464,8 @@ export default function Profile() {
             )}
 
             <Container>
-              <strong>First Name:</strong> <span id="first"></span>
-              <br></br>
-              <strong>Last Name:</strong> <span id="last"></span>
+               <span id="first"> </span>
+            <span id="last"/>
               <br></br>
               <strong>Birthday:</strong> <span id="birth"></span>
               <br></br>
@@ -464,9 +483,20 @@ export default function Profile() {
               <strong>User ID:</strong> {currentUser.uid}
               <br></br>
             </Container>
-          </Grid>
-        </Grid>
-      </main>
+
+            <Link to="/update-profile" className="btn btn-primary" style={{
+                marginBottom: '15px'
+            }}>
+                Update Profile
+              </Link>
+
+            <Link to="/prompts" className="btn btn-primary" style={{
+                marginBottom: '15px'
+            }}>
+                Conversation Starters
+              </Link>
+                  </Grid>
+       </main>
 
       <Drawer
         className={classes.drawer}

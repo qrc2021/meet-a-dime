@@ -1020,7 +1020,7 @@ export default function Home() {
             }}
             className="img-fluid"
             alt="gifload"
-            src="DimeAssets/youwhat.png"
+            src="DimeAssets/searchcoin.gif"
           />
         </Modal>
       </main>
