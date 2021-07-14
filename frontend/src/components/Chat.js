@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Button, Container, Form, Modal, Image } from 'react-bootstrap';
+import { Navbar, Container, Form, Modal, Image, Button } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Alert } from '@material-ui/lab';
@@ -9,11 +9,124 @@ import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
 import moment from 'moment';
+import IconButton from '@material-ui/core/IconButton';
+import LinearProgress from '@material-ui/core/LinearProgress';
+
+import clsx from 'clsx';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
+import Drawer from '@material-ui/core/Drawer';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import List from '@material-ui/core/List';
+import Typography from '@material-ui/core/Typography';
+import Divider from '@material-ui/core/Divider';
+import MenuIcon from '@material-ui/icons/Menu';
+import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
+import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import HomeIcon from '@material-ui/icons/Home';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
 var bp = require('../Path.js');
 const firestore = firebase.firestore();
 
+// Drawer
+const drawerWidth = 300;
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    display: 'flex',
+  },
+  appBar: {
+    transition: theme.transitions.create(['margin', 'width'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+  },
+  appBarShift: {
+    width: `calc(100% - ${drawerWidth}px)`,
+    transition: theme.transitions.create(['margin', 'width'], {
+      easing: theme.transitions.easing.easeOut,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+    marginRight: drawerWidth,
+  },
+  title: {
+    flexGrow: 1,
+  },
+  hide: {
+    display: 'none',
+  },
+  drawer: {
+    width: drawerWidth,
+    flexShrink: 0,
+  },
+  drawerPaper: {
+    width: drawerWidth,
+    background: '#FFDCF2',
+  },
+  drawerHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    padding: theme.spacing(0, 1),
+    // necessary for content to be below app bar
+    ...theme.mixins.toolbar,
+    justifyContent: 'flex-start',
+  },
+  listItemText: {
+    fontSize: '25px',
+    fontWeight: 'bold',
+    color: '#E64398',
+  },
+  content: {
+    flexGrow: 1,
+    padding: theme.spacing(3),
+    transition: theme.transitions.create('margin', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+    // marginRight: -drawerWidth,
+  },
+  contentShift: {
+    transition: theme.transitions.create('margin', {
+      easing: theme.transitions.easing.easeOut,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+    marginRight: 0,
+  },
+}));
+
 export default function Chat() {
+  // Drawer
+  const classes = useStyles();
+  const itemsList = [
+    {
+      text: 'Home',
+      icon: <HomeIcon style={{ color: '#e64398' }} />,
+      onClick: redirectToHome,
+    },
+    {
+      text: 'Logout',
+      icon: <ExitToAppIcon style={{ color: '#e64398' }} />,
+      onClick: handleLogout,
+    },
+  ];
+
+  const theme = useTheme();
+  const [open, setOpen] = React.useState(false);
+
+  const handleDrawerOpen = () => {
+    setOpen(true);
+  };
+
+  const handleDrawerClose = () => {
+    setOpen(false);
+  };
+
+  const [switching, setSwitching] = useState(true);
+
   const messageRef = useRef();
 
   const timeoutRef1 = useRef();
@@ -353,22 +466,35 @@ export default function Chat() {
     return (
       <Modal
         {...props}
-        size="lg"
+        size="md"
         aria-labelledby="contained-modal-title-vcenter"
         centered>
         <Modal.Header>
           <Modal.Title id="contained-modal-title-vcenter">
             <Image
-              style={{ height: '100px', width: '300px', cursor: 'pointer' }}
+              style={{ height: '100%', width: '250px', cursor: 'pointer' }}
               src="DimeAssets/headerlogo.png"
             />
           </Modal.Title>
         </Modal.Header>
-        <Modal.Body>
-          <h4>You did the time! Do you want the Dime?</h4>
-          <p>Please select Tails to Match or Heads to Pass.</p>
+        <Modal.Body
+          style={{
+            backgroundColor: '#e64398', 
+          }}>
+          <h4 
+            style={{
+              color: '#ffffff',
+              fontWeight: 'bold',
+              textAlign: 'center',
+            }}>You did the time! Do you want the Dime?</h4>
+          <h5
+           style={{
+            color: '#ffffff',
+            fontWeight: 'normal',
+            textAlign: 'center',
+            }}>Please select Tails to Match or Heads to Pass.</h5>
         </Modal.Body>
-        <Modal.Footer>
+        <Modal.Footer className="mx-auto">
           <Image
             style={{ height: '200px', width: '200px', cursor: 'pointer' }}
             src="DimeAssets/hearteyes.png"
@@ -627,7 +753,49 @@ export default function Chat() {
 
   return (
     <React.Fragment>
-      <h2 className="text-center mb-4">Chat</h2>
+      <AppBar
+        style={{ background: '#ffffff' }}
+        position="fixed"
+        className={clsx(classes.appBar, {
+          [classes.appBarShift]: open,
+        })}>
+        <Toolbar>
+          <Typography variant="h6" noWrap className={classes.title}>
+            <Navbar bg="transparent">
+              <Navbar.Brand>
+                <img
+                  src="/DimeAssets/headerlogo.png"
+                  width="250px"
+                  height="100%"
+                  className="d-inline-block align-top"
+                  alt="logo"
+                  href="home"
+                  onClick={redirectToHome}
+                />
+              </Navbar.Brand>
+            </Navbar>
+          </Typography>
+          <Button
+            className="btn-abandon mx-3"
+            onClick={redirectToAfter}>
+            Abandon Chat
+          </Button>
+          <IconButton
+            color="default"
+            aria-label="open drawer"
+            edge="end"
+            onClick={handleDrawerOpen}
+            className={clsx(open && classes.hide)}>
+            <MenuIcon />
+          </IconButton>
+        </Toolbar>
+        {switching && (
+          <div>
+            <LinearProgress style={{ backgroundColor: 'pink' }} />
+          </div>
+        )}
+      </AppBar>
+      <h2 className="text-center mb-4 mt-4 pt-4">Chat</h2>
       <h3 className="text-center mb-4">
         (going home will make the users lose the match). for now they can still
         research for eachother tho
@@ -662,7 +830,8 @@ export default function Chat() {
       </Container>
       <React.Fragment>
         <Container>
-          <div id="message-container"></div>
+          <div id="message-container"
+            className=""></div>
           <hr></hr>
           {!afterChat && (
             <Form onSubmit={handleSubmit}>
@@ -698,6 +867,41 @@ export default function Chat() {
         show={modalShow}
         onHide={() => setModalShow(false)}
       />
+      <Drawer
+        className={classes.drawer}
+        variant="persistent"
+        anchor="right"
+        open={open}
+        classes={{
+          paper: classes.drawerPaper,
+        }}>
+        <div className={classes.drawerHeader}>
+          <IconButton onClick={handleDrawerClose}>
+            {theme.direction === 'rtl' ? (
+              <ChevronLeftIcon />
+            ) : (
+              <ChevronRightIcon
+                style={{ color: '#e64398', fontSize: '30px' }}
+              />
+            )}
+          </IconButton>
+        </div>
+        <Divider style={{ background: '#e64398' }} />
+        <List>
+          {itemsList.map((item, index) => {
+            const { text, icon, onClick } = item;
+            return (
+              <ListItem button key={text} onClick={onClick}>
+                {icon && <ListItemIcon>{icon}</ListItemIcon>}
+                <ListItemText
+                  classes={{ primary: classes.listItemText }}
+                  primary={text}
+                />
+              </ListItem>
+            );
+          })}
+        </List>
+      </Drawer>
     </React.Fragment>
   );
 }

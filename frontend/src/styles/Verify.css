@@ -60,6 +60,24 @@ body {
   border-color: #ca3984 !important;
 }
 
+.btn-abandon {
+  font-weight: bold;
+  font-size: 23px;
+  color: white;
+  background-color: #da3636 !important;
+  border-radius: 30px;
+  border-color: #da3636 !important;
+}
+
+.btn-abandon:hover {
+  font-weight: bold;
+  font-size: 23px;
+  color: white;
+  background-color: #bb2b2b !important;
+  border-radius: 30px;
+  border-color: #bb2b2b !important;
+}
+
 .text-welcome {
   font-weight: bold;
   font-size: 40px;
@@ -81,5 +99,4 @@ body {
   text-align: left;
   min-width: 250px;
   display: flex;
-
 }
