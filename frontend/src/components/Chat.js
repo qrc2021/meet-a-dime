@@ -322,7 +322,8 @@ export default function Chat() {
     //document.getElementById('sleepyImage').style.display = 'none';
     ShowHide('heartEyesImage');
     ShowHide('sleepyImage');
-    ShowHide('initialModal');
+    document.getElementById('initialModal').style.display = 'none';
+    document.getElementById('verifyFailMessage').style.display = 'none';
     ShowHide('waitingForMatch');
     ShowHide('coinWaiting');
 
