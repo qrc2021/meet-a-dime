@@ -28,6 +28,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import HomeIcon from '@material-ui/icons/Home';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import ReportIcon from '@material-ui/icons/Report';
 
 var bp = require('../Path.js');
 const firestore = firebase.firestore();
@@ -80,6 +81,11 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 'bold',
     color: '#E64398',
   },
+  listItemReportText: {
+    fontSize: '25px',
+    fontWeight: 'bold',
+    color: 'white',
+  },
   content: {
     flexGrow: 1,
     padding: theme.spacing(3),
@@ -107,10 +113,16 @@ export default function Chat() {
       icon: <HomeIcon style={{ color: '#e64398' }} />,
       onClick: redirectToHome,
     },
+
     {
       text: 'Logout',
       icon: <ExitToAppIcon style={{ color: '#e64398' }} />,
       onClick: handleLogout,
+    },
+    {
+      text: 'Report Chat',
+      icon: <ReportIcon style={{ color: 'white' }} />,
+      onClick: handleReport,
     },
   ];
 
@@ -134,7 +146,7 @@ export default function Chat() {
   const extendedTimeoutRef = useRef();
   const socketRef = useRef();
 
-  const EXPIRE_IN_MINUTES = 0.2; // 10 minutes
+  const EXPIRE_IN_MINUTES = 10; // 10 minutes
   const modalExpire = 10000; // 30 seconds in MS
   const [room, setRoom] = useState('');
   //const [message, setMessage] = useState('');
@@ -186,7 +198,7 @@ export default function Chat() {
   document.getElementById('room-input');
   document.getElementById('form');
 
-  // var localStorageKey.current = 1701;
+  // var localStorageKey = 1701;
   const localStorageKey = useRef(1701);
 
   // Redirect users if they are not verified.
@@ -248,6 +260,7 @@ export default function Chat() {
   async function noMatchTimeout() {
     var seeker = 'none';
     var match = 'none';
+    clearChatData();
 
     var docRef = firestore.collection('searching').doc(currentUser.uid);
     var doc = await docRef.get();
@@ -743,6 +756,80 @@ export default function Chat() {
     }
   }
 
+  async function handleReport() {
+    var chat_history = [];
+
+    var temp = 1701;
+
+    while (localStorage.getItem(JSON.stringify(temp)) !== null) {
+      if (localStorage.getItem(JSON.stringify(temp)) === 'me') {
+        temp += 7;
+        chat_history.push(
+          '[me] ' +
+            `[${currentUser.uid}] ` +
+            localStorage.getItem(JSON.stringify(temp))
+        );
+      } else {
+        temp += 7;
+        chat_history.push(
+          `[${match_name}] ` +
+            `[${match_id}] ` +
+            localStorage.getItem(JSON.stringify(temp))
+        );
+      }
+      temp += 7;
+    }
+    localStorageKey.current = temp;
+
+    console.log(chat_history);
+
+    try {
+      var result = await firestore
+        .collection('reports')
+        .doc(currentUser.uid)
+        .get();
+      if (result.exists) {
+        const obj = {};
+        obj[match_id] = chat_history;
+        await firestore.collection('reports').doc(currentUser.uid).update(obj);
+      } else {
+        const obj = {};
+        obj[match_id] = chat_history;
+        await firestore.collection('reports').doc(currentUser.uid).set(obj);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+
+    socket.emit('leave-room', currentUser.uid, room);
+    console.log('REPORTED OTHER USER.');
+    clearChatData();
+    try {
+      await firestore
+        .collection('users')
+        .doc(currentUser.uid)
+        .update({
+          FailMatch: firebase.firestore.FieldValue.arrayUnion(match_id),
+        });
+      await firestore
+        .collection('users')
+        .doc(match_id)
+        .update({
+          FailMatch: firebase.firestore.FieldValue.arrayUnion(currentUser.uid),
+        });
+    } catch (error) {
+      console.log(error);
+    }
+    if (timeoutRef1.current !== undefined) clearTimeout(timeoutRef1.current);
+    if (timeoutRef2.current !== undefined) clearTimeout(timeoutRef2.current);
+
+    history.push('/after', {
+      state: { match_id: match_id, type: 'user_reported' },
+    });
+
+    return;
+  }
+
   async function handleLogout() {
     try {
       // Push the state to login that we need to purge the old user searches.
@@ -813,6 +900,7 @@ export default function Chat() {
     });
   }
 
+  document.body.style.backgroundColor = 'white';
   return (
     <React.Fragment>
       <AppBar
@@ -899,6 +987,7 @@ export default function Chat() {
               <Form.Control
                 type="text"
                 id="message_input"
+                autoComplete="off"
                 ref={messageRef}></Form.Control>
               <Button
                 disabled={room === '' || afterChat ? true : false}
@@ -950,11 +1039,22 @@ export default function Chat() {
         <List>
           {itemsList.map((item, index) => {
             const { text, icon, onClick } = item;
+            const redBGifReport =
+              text === 'Report Chat' ? { backgroundColor: '#da3636' } : null;
+            const classToUse =
+              text === 'Report Chat'
+                ? classes.listItemReportText
+                : classes.listItemText;
+
             return (
-              <ListItem button key={text} onClick={onClick}>
+              <ListItem
+                button
+                key={text}
+                onClick={onClick}
+                style={redBGifReport}>
                 {icon && <ListItemIcon>{icon}</ListItemIcon>}
                 <ListItemText
-                  classes={{ primary: classes.listItemText }}
+                  classes={{ primary: classToUse }}
                   primary={text}
                 />
               </ListItem>

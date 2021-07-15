@@ -336,6 +336,13 @@ export default function After() {
           {'Timeout extended (i said yes, they did not)'}
         </Alert>
       )}
+      {pageType && pageType === 'user_reported' && (
+        <Alert severity="success">
+          {
+            'Other user was reported. This report is secret: the other user was not alerted.'
+          }
+        </Alert>
+      )}
       <Container>
         <strong>Email:</strong> {currentUser.email}
         <br></br>
