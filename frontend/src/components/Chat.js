@@ -294,7 +294,28 @@ export default function Chat() {
     console.log('Left room silently');
   }
 
+  function ShowHide(divId)
+  {
+    if(document.getElementById(divId).style.display == 'none')
+    {
+      document.getElementById(divId).style.display='block';
+    }
+    else
+    {
+      document.getElementById(divId).style.display = 'none';
+    }
+  }
+
   async function pendingMatch() {
+    // hide & show images
+    //document.getElementById('heartEyesImage').style.display = 'none';
+    //document.getElementById('sleepyImage').style.display = 'none';
+    ShowHide('heartEyesImage');
+    ShowHide('sleepyImage');
+    ShowHide('initialModal');
+    ShowHide('waitingForMatch');
+    ShowHide('coinWaiting');
+
     // This disconnects then sends to the /after page with a state.
     function leavePageWith(stateString) {
       socketRef.current.emit('leave-room-silently', currentUser.uid, room);
@@ -319,36 +340,7 @@ export default function Chat() {
           ),
         });
     }
-    /*
-  Lord Lui Notes:
-  it would definetly have to be with sockets 
-  (emit an event to the other user) 
-  
-  or 
-  with a firebase database listener to wait for changes 
-  to the searching doc (like two fields would need to 
-  be added to the doc, one for each of the users whether 
-  they say yes. if it gets edited you can capture that)
-
-  the searching doc gets created when the user searches, and stays up 
-  during the chat until they go back to home
-
-  so it should be accessible on the chat page to edit and update and read
-
-  for each pair: one person is the title of the document, 
-  and the other has their ID in the 'match' field
-
-  def recommend making two accounts to test with, and one has to be 
-  logged in on incognito mode or a different browser
-
-  (just cause otherwise they share the same data when testing)*/
-
-    // if (localStorage.getItem('modalExpiry') === null) {
-    //   var exp = Date.now() + modalExpire * 60000;
-    //   localStorage.setItem('modalExpiry', exp);
-    //   console.log('set to', exp);
-    // }
-
+   
     // If a user clicks a match dime, stop the timeouts.
     if (timeoutRef1.current !== undefined) clearTimeout(timeoutRef1.current);
     if (timeoutRef2.current !== undefined) clearTimeout(timeoutRef2.current);
@@ -512,26 +504,51 @@ export default function Chat() {
             You did the time! Do you want the Dime?
           </h4>
           <h5
+            id = "initialModal"
             style={{
               color: '#ffffff',
               fontWeight: 'normal',
               textAlign: 'center',
+              display: 'block',
             }}>
-            Please select Tails to Match or Heads to Pass.
+            Please select Tails to Match or Heads to Pass. 
+            If you pass, you will no longer be able to find this dime!
+          </h5>
+          <h5
+            id = "waitingForMatch"
+            style={{
+              color: '#ffffff',
+              fontWeight: 'normal',
+              textAlign: 'center',
+              display: 'none',
+            }}>
+            Waiting for your Match!
           </h5>
         </Modal.Body>
         <Modal.Footer className="mx-auto">
           <Image
             style={{ height: '200px', width: '200px', cursor: 'pointer' }}
             src="DimeAssets/hearteyes.png"
+            id = "heartEyesImage"
             onClick={pendingMatch}
             alt="Tails"
           />
           <Image
             style={{ height: '200px', width: '200px', cursor: 'pointer' }}
             src="DimeAssets/sleepycoin.png"
+            id = "sleepyImage"
             onClick={noMatch}
             alt="Heads"
+          />
+            <Image
+            style={{ 
+              height: '200px', 
+              width: '200px', 
+              cursor: 'pointer', 
+              display: 'none', }}
+            src="DimeAssets/coinFlip.gif"
+            id = "coinWaiting"
+            alt="Waiting..."
           />
         </Modal.Footer>
       </Modal>
