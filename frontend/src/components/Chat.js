@@ -177,6 +177,9 @@ export default function Chat() {
   var match_id = null;
   var timeout_5 = null;
 
+  var verifyFail = false;
+
+
   // In case the user navigates here directly by accident.
   if (
     history.location &&
@@ -232,29 +235,36 @@ export default function Chat() {
   }
 
   function noMatch() {
-    if (timeoutRef1.current !== undefined) clearTimeout(timeoutRef1.current);
-    if (timeoutRef2.current !== undefined) clearTimeout(timeoutRef2.current);
-    clearChatData();
-    setTimeout(async () => {
-      await firestore
-        .collection('users')
-        .doc(currentUser.uid)
-        .update({
-          FailMatch: firebase.firestore.FieldValue.arrayUnion(match_id),
-        });
-      await firestore
-        .collection('users')
-        .doc(match_id)
-        .update({
-          FailMatch: firebase.firestore.FieldValue.arrayUnion(currentUser.uid),
-        });
-      socket.emit('leave-room', currentUser.uid, room);
-      console.log('LEFT MY ROOM TOO');
+    if (verifyFail == true){
+      if (timeoutRef1.current !== undefined) clearTimeout(timeoutRef1.current);
+      if (timeoutRef2.current !== undefined) clearTimeout(timeoutRef2.current);
+      clearChatData();
+      setTimeout(async () => {
+        await firestore
+          .collection('users')
+          .doc(currentUser.uid)
+          .update({
+            FailMatch: firebase.firestore.FieldValue.arrayUnion(match_id),
+          });
+        await firestore
+          .collection('users')
+          .doc(match_id)
+          .update({
+            FailMatch: firebase.firestore.FieldValue.arrayUnion(currentUser.uid),
+          });
+        socket.emit('leave-room', currentUser.uid, room);
+        console.log('LEFT MY ROOM TOO');
 
-      history.push('/after', {
-        state: { match_id: match_id, type: 'user_didnt_go_well' },
-      });
-    }, 0);
+        history.push('/after', {
+          state: { match_id: match_id, type: 'user_didnt_go_well' },
+        });
+      }, 0);
+    }
+    else{
+      verifyFail = true;
+      ShowHide('initialModal');
+      ShowHide('verifyFailMessage');
+    }
   }
 
   async function noMatchTimeout() {
@@ -524,6 +534,17 @@ export default function Chat() {
             }}>
             Waiting for your Match!
           </h5>
+          <h5
+            id = "verifyFailMessage"
+            style={{
+              color: '#ffffff',
+              fontWeight: 'normal',
+              textAlign: 'center',
+              display: 'none',
+            }}>
+            Are you sure? If you pass, you will no longer be able to find this dime!
+            Please click Heads to Pass.
+          </h5>
         </Modal.Body>
         <Modal.Footer className="mx-auto">
           <Image
@@ -546,7 +567,7 @@ export default function Chat() {
               width: '200px', 
               cursor: 'pointer', 
               display: 'none', }}
-            src="DimeAssets/coinFlip.gif"
+            src="DimeAssets/coinWaiting.gif"
             id = "coinWaiting"
             alt="Waiting..."
           />
