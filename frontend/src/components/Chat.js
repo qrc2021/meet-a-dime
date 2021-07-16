@@ -322,7 +322,10 @@ export default function Chat() {
     //document.getElementById('sleepyImage').style.display = 'none';
     ShowHide('heartEyesImage');
     ShowHide('sleepyImage');
-    ShowHide('initialModal');
+    if(document.getElementById('initialModal').style.display = 'block')
+      ShowHide('initialModal');
+    if(document.getElementById('verifyFailMessage').style.display = 'block')
+      ShowHide('verifyFailMessage');
     ShowHide('waitingForMatch');
     ShowHide('coinWaiting');
 
