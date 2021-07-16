@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Navbar, Container, Form, Modal, Image, Button } from 'react-bootstrap';
+import ReactRoundedImage from 'react-rounded-image';
+import Grid from '@material-ui/core/Grid';
 import { useAuth } from '../contexts/AuthContext';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Alert } from '@material-ui/lab';
@@ -137,6 +139,17 @@ export default function Chat() {
 
   const handleDrawerClose = () => {
     setOpen(false);
+  };
+
+
+  const [modalOpen, setModalOpen] = React.useState(false);
+
+  const handleModalOpen = () => {
+      setModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+      setModalOpen(false);
   };
 
   const [switching, setSwitching] = useState(false);
@@ -982,39 +995,87 @@ export default function Chat() {
           </div>
         )}
       </AppBar>
-      <h2 className="text-center mb-4 mt-4 pt-4">Chat</h2>
       <h3 className="text-center mb-4">
         (going home will make the users lose the match). for now they can still
         research for eachother tho
       </h3>
       {error && <Alert severity="error">{error}</Alert>}
-      <Container>
-        <strong>Email:</strong> {currentUser.email}
-        <br></br>
-        <strong>User ID:</strong> {currentUser.uid}
-        <br></br>
-        <strong>MATCH:</strong> {match_id}
-        <br></br>
-        <strong>their age:</strong> {match_age}
-        <br></br>
-        <strong>their name:</strong> {match_name}
-        <br></br>
-        <strong>their sex:</strong> {match_sex}
-        <br></br>
-        <strong>their photo:</strong>
-        <br></br>
-        {match_photo !== '' ? (
-          <img
-            height="100px"
-            width="100px"
-            src={match_photo}
-            id="matchPhoto"
-            alt="Profile pic of match"></img>
-        ) : (
-          <></>
-        )}
-        <hr></hr>
-      </Container>
+
+     
+          
+     
+      <Grid container direction="column" justifyContent="center" alignItems="center">
+
+             
+              {match_photo !== '' ? (
+                  <ReactRoundedImage
+                      imageHeight="300"
+                      imageWidth="300"
+                      image={match_photo}
+                      id="photo"
+                      roundedSize="13"
+                      borderRadius="150"
+                      alt="My Profile Pic"
+                      hoverColor="pink"
+                      onClick={handleModalOpen}
+                      style={{
+                          cursor: 'pointer',
+                          marginTop: '5px'
+                      }}
+                  />
+              ) : (
+                      <ReactRoundedImage
+                          className="img-fluid"
+                          image="DimeAssets/coinsignup.png"
+                          height="300px"
+                          width="300px"
+                          roundedSize="13"
+                          borderRadius="150"
+                          alt="Default Pic"
+                          hoverColor="pink"
+                          onClick={handleModalOpen}
+                          style={{
+                              cursor: 'pointer',
+                              marginTop: '5px'
+                          }}
+                      />
+                  )
+              }
+              <Modal
+                  style={{
+                      marginRight: 'auto',
+                      marginLeft: 'auto',
+                      marginTop: '50%',
+                      marginBottom: 'auto',
+                  }}
+                  open={modalOpen}
+                  onClose={handleModalClose}>
+                  <h2 className="text-center mb-3" style={{ color: '#E64398' }}>
+                      {match_name}
+                  </h2>
+                  <h2 className="text-center mb-3" style={{ color: '#E64398' }}>
+                      {match_age}
+                  </h2>
+                  <h2 className="text-center mb-3" style={{ color: '#E64398' }}>
+                      {match_sex}
+                  </h2>
+              </Modal>
+              {/*       <Button
+                  className="btn-chat mx-3"
+                  onClick={handleModalOpen}>
+                  Info
+          </Button>     */}
+              <h2 className="text-center mb-3" style={{ color: '#E64398' }} >
+                  {match_name}
+              </h2>
+              <h2 className="text-center mb-3" style={{ color: '#E64398' }}>
+                  {match_age}
+              </h2>
+              <h2 className="text-center mb-3" style={{ color: '#E64398' }}>
+                  {match_sex}
+              </h2>
+      </Grid>
+      
       <React.Fragment>
         <Container>
           <div id="message-container" className=""></div>
