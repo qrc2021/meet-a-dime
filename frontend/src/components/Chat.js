@@ -270,6 +270,7 @@ export default function Chat() {
         if (extendedTimeoutRef.current !== undefined)
           clearTimeout(extendedTimeoutRef.current);
         clearChatData();
+        console.log('pushing to after');
         history.push('/after', {
           state: { match_id: match_id, type: 'error' },
         });

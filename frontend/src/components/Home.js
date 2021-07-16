@@ -569,12 +569,15 @@ export default function Home() {
 
         var count = 0;
         setProgress(count);
-        transferTimeoutRef.current = setInterval(() => {
+        var local2 = (transferTimeoutRef.current = setInterval(() => {
           count += (100 / MS_TRANSFER_TO_CHAT) * 100;
           setProgress(count);
           // console.log(doc_id);
           if (count >= 100) {
             clearInterval(transferTimeoutRef.current);
+            clearInterval(local2);
+            count = 0;
+            console.log('pushing to chat 2');
             history.push('/chat', {
               state: {
                 match_id: doc_id,
@@ -582,7 +585,7 @@ export default function Home() {
               },
             });
           }
-        }, 100);
+        }, 100));
 
         setId(doc_id);
         setMatch('Found match! ' + doc_id);
@@ -778,12 +781,15 @@ export default function Home() {
 
                 var count = 0;
                 setProgress(count);
-                transferTimeoutRef.current = setInterval(() => {
+                var local1 = (transferTimeoutRef.current = setInterval(() => {
                   count += (100 / MS_TRANSFER_TO_CHAT) * 100;
                   setProgress(count);
                   // console.log(docSnapshot.data().match);
                   if (count >= 100) {
                     clearInterval(transferTimeoutRef.current);
+                    clearInterval(local1);
+                    count = 0;
+                    console.log('pushing to chat 1');
                     history.push('/chat', {
                       state: {
                         match_id: change.doc.data().match,
@@ -791,7 +797,7 @@ export default function Home() {
                       },
                     });
                   }
-                }, 100);
+                }, 100));
 
                 // setId(docSnapshot.data().match);
                 setId(change.doc.data().match);
@@ -990,7 +996,7 @@ export default function Home() {
             }
           </Alert>
         )}
-        {!inActiveChat && match && match === 'Not searching.' && (
+        {/* {!inActiveChat && match && match === 'Not searching.' && (
           <Alert severity="warning">{match}</Alert>
         )}
         {!inActiveChat && match && match === 'Searching.' && (
@@ -999,7 +1005,7 @@ export default function Home() {
         {!inActiveChat &&
           match &&
           match !== 'Not searching.' &&
-          match !== 'Searching.' && <Alert severity="success">{match}</Alert>}
+          match !== 'Searching.' && <Alert severity="success">{match}</Alert>} */}
         {/* <Container>
           <strong>Email:</strong> {currentUser.email}
           <br></br>
@@ -1040,26 +1046,55 @@ export default function Home() {
         </Button> */}
         <Modal
           style={{
-            width: 420,
-            height: 420,
+            width: '90%',
+            maxWidth: 620,
+            maxHeight: 620,
+            height: '90%',
+
             marginRight: 'auto',
             marginLeft: 'auto',
             marginTop: 'auto',
             marginBottom: 'auto',
           }}
           open={sopen}
-          onClose={handleSearchClose}>
-          <img
+          // onClose={handleSearchClose}
+        >
+          <div
+            className="text-center p-3"
             style={{
-              width: 420,
-              height: 420,
-              marginRight: 'auto',
-              marginLeft: 'auto',
-            }}
-            className="img-fluid"
-            alt="gifload"
-            src="DimeAssets/searchcoin.gif"
-          />
+              border: '2px solid grey',
+              backgroundColor: 'rgba(0,0,0,0.5)',
+            }}>
+            {!inActiveChat && match && match === 'Not searching.' && (
+              <Alert severity="warning">{match}</Alert>
+            )}
+            {!inActiveChat && match && match === 'Searching.' && (
+              <Alert severity="info">{match}</Alert>
+            )}
+            {!inActiveChat &&
+              match &&
+              match !== 'Not searching.' &&
+              match !== 'Searching.' && (
+                <Alert severity="success">{match}</Alert>
+              )}
+            <img
+              style={{
+                width: 420,
+                height: 'auto',
+
+                marginRight: 'auto',
+                marginLeft: 'auto',
+              }}
+              className="img-fluid"
+              alt="gifload"
+              src="DimeAssets/searchcoin.gif"
+            />
+            <button
+              onClick={handleSearchClose}
+              className="btn btn-outline-light">
+              Stop Searching
+            </button>
+          </div>
         </Modal>
       </main>
 
