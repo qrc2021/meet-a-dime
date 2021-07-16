@@ -7,7 +7,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useHistory, useLocation } from 'react-router-dom';
 // import { io } from 'socket.io-client';
 import axios from 'axios';
-// import firebase from 'firebase/app';
+import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
 import moment from 'moment';
@@ -138,6 +138,7 @@ export default function After() {
   const [pageType, setPageType] = useState('');
   const [match_exitMessage, setExitMessage] = useState('');
   const [match_phoneNumber, setPhoneNumber] = useState('');
+  const firestore = firebase.firestore();
 
   useLocation();
   // Gets the passed in match id from the link in the home page
@@ -239,22 +240,60 @@ export default function After() {
       fetchMatchOnMatchMade();
     }
 
-    // This gets the match data.
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    console.log(currentUser.getIdToken());
+    localStorage.removeItem('chatExpiry');
+    document.body.style.backgroundColor = 'white';
 
-  //   async function handleLogout() {
-  //     try {
-  //       // Push the state to login that we need to purge the old user searches.
-  //       await logout();
-  //       localStorage.removeItem('user_data');
-  //       history.push('/login', {
-  //         state: { fromHome: true, oldID: currentUser.uid },
-  //       });
-  //       window.location.reload();
-  //     } catch {
-  //       setError('Failed to log out');
-  //     }
-  //   }
+    // Clear the docs on the after screen as well.
+    async function purgeOld() {
+      try {
+        // If I am "document host", clear the match field first.
+        try {
+          await firestore
+            .collection('searching')
+            .doc(currentUser.uid)
+            .update({ match: '' });
+          console.log('cleared old match before delete');
+        } catch (error) {
+          console.log('tried to clear match before delete, but failed');
+          console.log('most of the time this is ok');
+          // this is okay because this most likely wont exist on each load.
+        }
+
+        // Delete the document (if exists) if I am a "document host".
+        await firestore.collection('searching').doc(currentUser.uid).delete();
+
+        // The final mechanism for clearing. This is if I was a previous
+        // "document joiner" or "filling in" the existing doc.
+        // I will search all docs where my id is the match field, and clear it.
+        // This will signal to those listening to that field that I am
+        // no longer available.
+        firestore
+          .collection('searching')
+          .where('match', '==', currentUser.uid)
+          .get()
+          .then((querySnapshot) => {
+            querySnapshot.forEach((doc) => {
+              try {
+                firestore
+                  .collection('searching')
+                  .doc(doc.id)
+                  .update({ match: '' });
+              } catch (error) {
+                console.log('doc match clear error on start');
+              }
+            });
+          })
+          .catch((error) => {
+            console.log('Error getting documents: ', error);
+          });
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    // call the function that was just defined here.
+    purgeOld();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   function redirectToHome() {
     history.push('/');
