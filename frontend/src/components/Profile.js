@@ -172,6 +172,7 @@ export default function Profile() {
   const history = useHistory();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [showPicUploader, setShowPicUploader] = useState(false);
 
   // Redirect users if they are not verified.
@@ -290,15 +291,16 @@ export default function Profile() {
         var photo = doc.data().photo;
         var ageRangeMax = doc.data().ageRangeMax;
         var ageRangeMin = doc.data().ageRangeMin;
-        document.getElementById('birth').innerHTML = userBirth;
+       // document.getElementById('birth').innerHTML = userBirth;
         // document.getElementById('first').innerHTML = userFirstName;
         // document.getElementById('last').innerHTML = userLastName;
         setLastName(userLastName);
         setFirstName(userFirstName);
-        document.getElementById('phone').innerHTML = userPhone;
-        document.getElementById('exit').innerHTML = userExitMessage;
-        document.getElementById('sex').innerHTML = userSex;
-        document.getElementById('orientation').innerHTML = userOrientation;
+        setPhoneNumber(userPhone);
+       // document.getElementById('phone').innerHTML = userPhone;
+       // document.getElementById('exit').innerHTML = userExitMessage;
+       // document.getElementById('sex').innerHTML = userSex;
+       // document.getElementById('orientation').innerHTML = userOrientation;
         setMyPhoto(photo);
         setSwitching(false);
 
@@ -406,8 +408,8 @@ export default function Profile() {
               alt="My Profile Pic"
               hoverColor="pink"
               style={{
-                marginBottom: '15px',
-                marginTop: '5px',
+                
+                marginTop: '5px'
               }}
             />
           ) : (
@@ -421,17 +423,19 @@ export default function Profile() {
               alt="Default Pic"
               hoverColor="pink"
               style={{
-                marginBottom: '15px',
-                marginTop: '5px',
+                marginTop: '5px'
               }}
             />
           )}
           <Grid container justifyContent="center" alignItems="center">
-            <h2 className="text-center mb-4" style={{ color: '#DCEAFF' }}>
+            <h2 className="text-center mb-3" style={{ color: '#E64398' }}>
               {firstName + ' ' + lastName}
             </h2>
           </Grid>
 
+          <h2 className="text-center mb-3" style={{ color: '#E64398' }}>
+              {phoneNumber}
+          </h2>
           <input
             onChange={() => {
               if (
@@ -511,25 +515,7 @@ export default function Profile() {
           </Link>
         </Grid>
       </main>
-      <Container>
-        <span id="first"> </span>
-        <span id="last" />
-        <br></br>
-        <strong>Birthday:</strong> <span id="birth"></span>
-        <br></br>
-        <strong>Email:</strong> {currentUser.email}
-        <br></br>
-        <strong>Phone Number:</strong> <span id="phone"></span>
-        <br></br>
-        <strong>Exit Message:</strong> <span id="exit"></span>
-        <br></br>
-        <strong>Sex:</strong> <span id="sex"></span>
-        <br></br>
-        <strong>Sexual Orientation:</strong> <span id="orientation"></span>
-        <br></br>
-        <strong>User ID:</strong> {currentUser.uid}
-        <br></br>
-      </Container>
+     
 
       <Drawer
         className={classes.drawer}

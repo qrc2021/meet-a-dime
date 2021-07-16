@@ -32,6 +32,8 @@ import ReportIcon from '@material-ui/icons/Report';
 
 var bp = require('../Path.js');
 const firestore = firebase.firestore();
+const EXPIRE_IN_MINUTES = 0.5; // 10 minutes
+const modalExpire = 10000; // 30 seconds in MS
 
 // Drawer
 const drawerWidth = 300;
@@ -146,8 +148,6 @@ export default function Chat() {
   const extendedTimeoutRef = useRef();
   const socketRef = useRef();
 
-  const EXPIRE_IN_MINUTES = 10; // 10 minutes
-  const modalExpire = 10000; // 30 seconds in MS
   const [room, setRoom] = useState('');
   //const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -178,7 +178,6 @@ export default function Chat() {
   var timeout_5 = null;
 
   var verifyFail = false;
-
 
   // In case the user navigates here directly by accident.
   if (
@@ -235,7 +234,7 @@ export default function Chat() {
   }
 
   function noMatch() {
-    if (verifyFail == true){
+    if (verifyFail == true) {
       if (timeoutRef1.current !== undefined) clearTimeout(timeoutRef1.current);
       if (timeoutRef2.current !== undefined) clearTimeout(timeoutRef2.current);
       clearChatData();
@@ -250,7 +249,9 @@ export default function Chat() {
           .collection('users')
           .doc(match_id)
           .update({
-            FailMatch: firebase.firestore.FieldValue.arrayUnion(currentUser.uid),
+            FailMatch: firebase.firestore.FieldValue.arrayUnion(
+              currentUser.uid
+            ),
           });
         socket.emit('leave-room', currentUser.uid, room);
         console.log('LEFT MY ROOM TOO');
@@ -259,8 +260,7 @@ export default function Chat() {
           state: { match_id: match_id, type: 'user_didnt_go_well' },
         });
       }, 0);
-    }
-    else{
+    } else {
       verifyFail = true;
       ShowHide('initialModal');
       ShowHide('verifyFailMessage');
@@ -304,14 +304,10 @@ export default function Chat() {
     console.log('Left room silently');
   }
 
-  function ShowHide(divId)
-  {
-    if(document.getElementById(divId).style.display == 'none')
-    {
-      document.getElementById(divId).style.display='block';
-    }
-    else
-    {
+  function ShowHide(divId) {
+    if (document.getElementById(divId).style.display == 'none') {
+      document.getElementById(divId).style.display = 'block';
+    } else {
       document.getElementById(divId).style.display = 'none';
     }
   }
@@ -322,9 +318,9 @@ export default function Chat() {
     //document.getElementById('sleepyImage').style.display = 'none';
     ShowHide('heartEyesImage');
     ShowHide('sleepyImage');
-    if(document.getElementById('initialModal').style.display = 'block')
+    if ((document.getElementById('initialModal').style.display = 'block'))
       ShowHide('initialModal');
-    if(document.getElementById('verifyFailMessage').style.display = 'block')
+    if ((document.getElementById('verifyFailMessage').style.display = 'block'))
       ShowHide('verifyFailMessage');
     ShowHide('waitingForMatch');
     ShowHide('coinWaiting');
@@ -353,7 +349,7 @@ export default function Chat() {
           ),
         });
     }
-   
+
     // If a user clicks a match dime, stop the timeouts.
     if (timeoutRef1.current !== undefined) clearTimeout(timeoutRef1.current);
     if (timeoutRef2.current !== undefined) clearTimeout(timeoutRef2.current);
@@ -517,18 +513,18 @@ export default function Chat() {
             You did the time! Do you want the Dime?
           </h4>
           <h5
-            id = "initialModal"
+            id="initialModal"
             style={{
               color: '#ffffff',
               fontWeight: 'normal',
               textAlign: 'center',
               display: 'block',
             }}>
-            Please select Tails to Match or Heads to Pass. 
-            If you pass, you will no longer be able to find this dime!
+            Please select Tails to Match or Heads to Pass. If you pass, you will
+            no longer be able to find this dime!
           </h5>
           <h5
-            id = "waitingForMatch"
+            id="waitingForMatch"
             style={{
               color: '#ffffff',
               fontWeight: 'normal',
@@ -538,40 +534,41 @@ export default function Chat() {
             Waiting for your Match!
           </h5>
           <h5
-            id = "verifyFailMessage"
+            id="verifyFailMessage"
             style={{
               color: '#ffffff',
               fontWeight: 'normal',
               textAlign: 'center',
               display: 'none',
             }}>
-            Are you sure? If you pass, you will no longer be able to find this dime!
-            Please click Heads to Pass.
+            Are you sure? If you pass, you will no longer be able to find this
+            dime! Please click Heads to Pass.
           </h5>
         </Modal.Body>
         <Modal.Footer className="mx-auto">
           <Image
             style={{ height: '200px', width: '200px', cursor: 'pointer' }}
             src="DimeAssets/hearteyes.png"
-            id = "heartEyesImage"
+            id="heartEyesImage"
             onClick={pendingMatch}
             alt="Tails"
           />
           <Image
             style={{ height: '200px', width: '200px', cursor: 'pointer' }}
             src="DimeAssets/sleepycoin.png"
-            id = "sleepyImage"
+            id="sleepyImage"
             onClick={noMatch}
             alt="Heads"
           />
-            <Image
-            style={{ 
-              height: '200px', 
-              width: '200px', 
-              cursor: 'pointer', 
-              display: 'none', }}
+          <Image
+            style={{
+              height: '200px',
+              width: '200px',
+              cursor: 'pointer',
+              display: 'none',
+            }}
             src="DimeAssets/coinWaiting.gif"
-            id = "coinWaiting"
+            id="coinWaiting"
             alt="Waiting..."
           />
         </Modal.Footer>
