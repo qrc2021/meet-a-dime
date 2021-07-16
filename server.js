@@ -15,9 +15,9 @@ admin.initializeApp({
 });
 
 async function decodeIDToken(req, res, next) {
-  console.log(req.headers);
-  console.log("space");
-  console.log(req.headers.authorization);
+  // console.log(req.headers);
+  // console.log("space");
+  // console.log(req.headers.authorization);
   if (
     req &&
     req.headers &&
