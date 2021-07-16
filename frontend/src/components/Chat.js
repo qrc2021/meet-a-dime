@@ -34,7 +34,7 @@ import ReportIcon from '@material-ui/icons/Report';
 
 var bp = require('../Path.js');
 const firestore = firebase.firestore();
-const EXPIRE_IN_MINUTES = 0.5; // 10 minutes
+const EXPIRE_IN_MINUTES = 3; // 10 minutes
 const modalExpire = 10000; // 30 seconds in MS
 
 // Drawer
@@ -141,15 +141,14 @@ export default function Chat() {
     setOpen(false);
   };
 
-
   const [modalOpen, setModalOpen] = React.useState(false);
 
   const handleModalOpen = () => {
-      setModalOpen(true);
+    setModalOpen(true);
   };
 
   const handleModalClose = () => {
-      setModalOpen(false);
+    setModalOpen(false);
   };
 
   const [switching, setSwitching] = useState(false);
@@ -246,11 +245,44 @@ export default function Chat() {
     }
   }
 
+  async function checkSearchingDoc(socketInstance) {
+    console.log('Checking searching doc');
+    var myDoc = await firestore
+      .collection('searching')
+      .doc(currentUser.uid)
+      .get();
+    if (myDoc.exists && myDoc.data().match !== '') return true;
+    else {
+      var matchDoc = await firestore
+        .collection('searching')
+        .doc(match_id)
+        .get();
+      if (matchDoc.exists && matchDoc.data().match !== '') return true;
+      else {
+        // Doc doesnt exists..
+        localStorage.removeItem('inActiveChat');
+        localStorage.removeItem('activeSocket');
+        socketInstance.emit('leave-room-silently', currentUser.uid, room);
+        if (timeoutRef1.current !== undefined)
+          clearTimeout(timeoutRef1.current);
+        if (timeoutRef2.current !== undefined)
+          clearTimeout(timeoutRef2.current);
+        if (extendedTimeoutRef.current !== undefined)
+          clearTimeout(extendedTimeoutRef.current);
+        clearChatData();
+        history.push('/after', {
+          state: { match_id: match_id, type: 'error' },
+        });
+      }
+    }
+  }
+
   function noMatch() {
     if (verifyFail == true) {
       if (timeoutRef1.current !== undefined) clearTimeout(timeoutRef1.current);
       if (timeoutRef2.current !== undefined) clearTimeout(timeoutRef2.current);
       clearChatData();
+
       setTimeout(async () => {
         await firestore
           .collection('users')
@@ -370,7 +402,7 @@ export default function Chat() {
     // This extended timeout waits for an answer.
     var extended_timeout = setTimeout(() => {
       socketRef.current.emit('leave-room-silently', currentUser.uid, room);
-      observer.current();
+      if (observer.current !== null) observer.current();
       history.push('/after', {
         state: { match_id: match_id, type: 'extended_timeout' },
       });
@@ -411,6 +443,7 @@ export default function Chat() {
         console.log('match said yes!!');
         clearTimeout(extended_timeout);
         clearChatData();
+
         leavePageWith('match_made');
       } else {
         // Nothing yet, lets wait for a change to the matchTail.
@@ -426,9 +459,10 @@ export default function Chat() {
               // THEY SAID YES !! (but after)
               setSuccessMatches();
               console.log('other person (the match) said yes after');
-              observer.current();
+              if (observer.current !== null) observer.current();
               clearTimeout(extended_timeout);
               clearChatData();
+
               leavePageWith('match_made');
             }
             if (
@@ -438,9 +472,10 @@ export default function Chat() {
             ) {
               // The other person timed out..
               console.log('other person (the match) timed out');
-              observer.current();
+              if (observer.current !== null) observer.current();
               clearTimeout(extended_timeout);
               clearChatData();
+
               leavePageWith('match_timedout');
             }
           });
@@ -461,6 +496,7 @@ export default function Chat() {
         console.log('seeker said yes!!');
         clearTimeout(extended_timeout);
         clearChatData();
+
         leavePageWith('match_made');
       } else {
         // I need to passively listen for a document change.
@@ -476,9 +512,10 @@ export default function Chat() {
               // THEY SAID YES !! (but after)
               setSuccessMatches();
               console.log('other person (the seeker) said yes after');
-              observer.current();
+              if (observer.current !== null) observer.current();
               clearTimeout(extended_timeout);
               clearChatData();
+
               leavePageWith('match_made');
             }
             if (
@@ -488,9 +525,10 @@ export default function Chat() {
             ) {
               // The other person timed out..
               console.log('other person (the seeker) timed out');
-              observer.current();
+              if (observer.current !== null) observer.current();
               clearTimeout(extended_timeout);
               clearChatData();
+
               leavePageWith('match_timedout');
             }
           });
@@ -615,6 +653,7 @@ export default function Chat() {
     // This gets the match data.
     fetchMatchInfo();
     const sock = io(bp.buildPath(''), { forceNew: true });
+    var roomInUseEffect = '';
     sock.auth = { id };
     sock.connect();
     sock.on('connect', () => {
@@ -640,6 +679,7 @@ export default function Chat() {
       }
 
       var current = Date.now();
+      checkSearchingDoc(sock);
       if (current >= localStorage.getItem('chatExpiry')) {
         // The chat is over, logic for after chat goes here.
         clearInterval(checkLoop);
@@ -655,6 +695,7 @@ export default function Chat() {
     }, 2000);
 
     var current_time = Date.now();
+    checkSearchingDoc(sock);
     if (current_time >= localStorage.getItem('chatExpiry')) {
       //Modal match vs non-match
       // The chat is over, logic for after chat goes here.
@@ -683,6 +724,14 @@ export default function Chat() {
         if (message === 'joined') {
           console.log('callback called, joining room now.');
           setRoom(new_room);
+          roomInUseEffect = new_room;
+          localStorage.setItem(
+            'inActiveChat',
+            JSON.stringify({ status: 'true', id_match: match_id })
+          );
+          // // localStorage.setItem('activeSocket', JSON.stringify(sock));
+          // console.log(sock);
+          // console.log(socket);
           displayMessage('Joined the room! Introduce yourself :)', 'system');
         }
       }
@@ -705,6 +754,7 @@ export default function Chat() {
       //match left & setting the pair as no match
       displayMessage('Your match left the chat. Switching..', 'system');
       clearChatData();
+
       setTimeout(async () => {
         await firestore
           .collection('users')
@@ -741,6 +791,14 @@ export default function Chat() {
         console.log('LEFT MY ROOM');
       }, 0);
     });
+    return () => {
+      console.log('Cleanup in Chat.js.');
+
+      if (roomInUseEffect !== '' && sock !== undefined && sock !== null) {
+        sock.emit('leave-room-silently', currentUser.uid, room);
+        console.log('SOCKET: Left the room silently.');
+      }
+    };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   //restore previous messages if the localStorage array indicates that some key was used
@@ -801,6 +859,8 @@ export default function Chat() {
   function clearChatData() {
     var temp = 1701;
     console.log('Cleared chat data.');
+    localStorage.removeItem('inActiveChat');
+    localStorage.removeItem('activeSocket');
     while (localStorage.getItem(JSON.stringify(temp)) !== null) {
       localStorage.removeItem(JSON.stringify(temp));
       temp += 7;
@@ -1001,81 +1061,79 @@ export default function Chat() {
       </h3>
       {error && <Alert severity="error">{error}</Alert>}
 
-     
-          
-     
-      <Grid container direction="column" justifyContent="center" alignItems="center">
-
-             
-              {match_photo !== '' ? (
-                  <ReactRoundedImage
-                      imageHeight="300"
-                      imageWidth="300"
-                      image={match_photo}
-                      id="photo"
-                      roundedSize="13"
-                      borderRadius="150"
-                      alt="My Profile Pic"
-                      hoverColor="pink"
-                      onClick={handleModalOpen}
-                      style={{
-                          cursor: 'pointer',
-                          marginTop: '5px'
-                      }}
-                  />
-              ) : (
-                      <ReactRoundedImage
-                          className="img-fluid"
-                          image="DimeAssets/coinsignup.png"
-                          height="300px"
-                          width="300px"
-                          roundedSize="13"
-                          borderRadius="150"
-                          alt="Default Pic"
-                          hoverColor="pink"
-                          onClick={handleModalOpen}
-                          style={{
-                              cursor: 'pointer',
-                              marginTop: '5px'
-                          }}
-                      />
-                  )
-              }
-              <Modal
-                  style={{
-                      marginRight: 'auto',
-                      marginLeft: 'auto',
-                      marginTop: '50%',
-                      marginBottom: 'auto',
-                  }}
-                  open={modalOpen}
-                  onClose={handleModalClose}>
-                  <h2 className="text-center mb-3" style={{ color: '#E64398' }}>
-                      {match_name}
-                  </h2>
-                  <h2 className="text-center mb-3" style={{ color: '#E64398' }}>
-                      {match_age}
-                  </h2>
-                  <h2 className="text-center mb-3" style={{ color: '#E64398' }}>
-                      {match_sex}
-                  </h2>
-              </Modal>
-              {/*       <Button
+      <Grid
+        container
+        direction="column"
+        justifyContent="center"
+        alignItems="center">
+        {match_photo !== '' ? (
+          <ReactRoundedImage
+            imageHeight="300"
+            imageWidth="300"
+            image={match_photo}
+            id="photo"
+            roundedSize="13"
+            borderRadius="150"
+            alt="My Profile Pic"
+            hoverColor="pink"
+            onClick={handleModalOpen}
+            style={{
+              cursor: 'pointer',
+              marginTop: '5px',
+            }}
+          />
+        ) : (
+          <ReactRoundedImage
+            className="img-fluid"
+            image="DimeAssets/coinsignup.png"
+            height="300px"
+            width="300px"
+            roundedSize="13"
+            borderRadius="150"
+            alt="Default Pic"
+            hoverColor="pink"
+            onClick={handleModalOpen}
+            style={{
+              cursor: 'pointer',
+              marginTop: '5px',
+            }}
+          />
+        )}
+        <Modal
+          style={{
+            marginRight: 'auto',
+            marginLeft: 'auto',
+            marginTop: '50%',
+            marginBottom: 'auto',
+          }}
+          open={modalOpen}
+          onClose={handleModalClose}>
+          <h2 className="text-center mb-3" style={{ color: '#E64398' }}>
+            {match_name}
+          </h2>
+          <h2 className="text-center mb-3" style={{ color: '#E64398' }}>
+            {match_age}
+          </h2>
+          <h2 className="text-center mb-3" style={{ color: '#E64398' }}>
+            {match_sex}
+          </h2>
+        </Modal>
+        {/*       <Button
                   className="btn-chat mx-3"
                   onClick={handleModalOpen}>
                   Info
           </Button>     */}
-              <h2 className="text-center mb-3" style={{ color: '#E64398' }} >
-                  {match_name}
-              </h2>
-              <h2 className="text-center mb-3" style={{ color: '#E64398' }}>
-                  {match_age}
-              </h2>
-              <h2 className="text-center mb-3" style={{ color: '#E64398' }}>
-                  {match_sex}
-              </h2>
+        <h2 className="text-center mb-3" style={{ color: '#E64398' }}>
+          {match_name}
+        </h2>
+        <h2 className="text-center mb-3" style={{ color: '#E64398' }}>
+          {match_age}
+        </h2>
+        <h2 className="text-center mb-3" style={{ color: '#E64398' }}>
+          {match_sex}
+        </h2>
       </Grid>
-      
+
       <React.Fragment>
         <Container>
           <div id="message-container" className=""></div>

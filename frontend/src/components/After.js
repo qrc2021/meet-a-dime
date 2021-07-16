@@ -370,6 +370,9 @@ export default function After() {
       {pageType && pageType === 'timeout' && (
         <Alert severity="info">{'Timeout'}</Alert>
       )}
+      {pageType && pageType === 'error' && (
+        <Alert severity="error">{'Something went wrong.'}</Alert>
+      )}
       {pageType && pageType === 'extended_timeout' && (
         <Alert severity="info">
           {'Timeout extended (i said yes, they did not)'}

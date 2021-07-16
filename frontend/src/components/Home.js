@@ -157,6 +157,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [myPhoto, setMyPhoto] = useState('');
   const [progress, setProgress] = useState(-1);
+  const [inActiveChat, setInActiveChat] = useState(false);
   // const [transitioning, setTransitioning] = useState(false);
   const [name, setName] = useState('');
   // the firebase firestore instance, used to query, add, delete, edit from DB.
@@ -223,8 +224,7 @@ export default function Home() {
   // The matching algorithm/mechanism is described after the useEffect, in
   // the search function.
   useEffect(() => {
-    console.log(currentUser.getIdToken());
-    localStorage.removeItem('chatExpiry');
+    // console.log(currentUser.getIdToken());
     document.body.style.backgroundColor = 'white';
 
     async function getIntialUserPhoto() {
@@ -252,6 +252,18 @@ export default function Home() {
     }
 
     async function purgeOld() {
+      // If I'm in an active chat, lets not remove the old searching docs.
+      if (localStorage.getItem('inActiveChat') !== null) {
+        if (
+          JSON.parse(localStorage.getItem('inActiveChat')).status === 'true'
+        ) {
+          setLockout(true);
+          setInActiveChat(true);
+          return;
+        }
+      } else {
+        localStorage.removeItem('chatExpiry');
+      }
       // Lock the search button until these tasks are complete.
       setLockout(true);
       console.log('I SHOULD ONLY PRINT ONCE PER PAGE LOAD');
@@ -954,15 +966,40 @@ export default function Home() {
           </Form.Group>
         </Row>
         {error && <Alert severity="error">{error}</Alert>}
-        {match && match === 'Not searching.' && (
+        {inActiveChat && (
+          <Alert variant="filled" severity="info">
+            You are in a chat!{' '}
+            {
+              <a
+                href="#"
+                style={{ color: 'white' }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  console.log('RETURN');
+
+                  history.push('/chat', {
+                    state: {
+                      match_id: JSON.parse(localStorage.getItem('inActiveChat'))
+                        .id_match,
+                      timeout_5: timeout5.current,
+                    },
+                  });
+                }}>
+                Return to chat.
+              </a>
+            }
+          </Alert>
+        )}
+        {!inActiveChat && match && match === 'Not searching.' && (
           <Alert severity="warning">{match}</Alert>
         )}
-        {match && match === 'Searching.' && (
+        {!inActiveChat && match && match === 'Searching.' && (
           <Alert severity="info">{match}</Alert>
         )}
-        {match && match !== 'Not searching.' && match !== 'Searching.' && (
-          <Alert severity="success">{match}</Alert>
-        )}
+        {!inActiveChat &&
+          match &&
+          match !== 'Not searching.' &&
+          match !== 'Searching.' && <Alert severity="success">{match}</Alert>}
         {/* <Container>
           <strong>Email:</strong> {currentUser.email}
           <br></br>
