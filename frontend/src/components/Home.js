@@ -963,44 +963,6 @@ export default function Home() {
         {match && match !== 'Not searching.' && match !== 'Searching.' && (
           <Alert severity="success">{match}</Alert>
         )}
-        {/* <Container>
-          <strong>Email:</strong> {currentUser.email}
-          <br></br>
-          <strong>User ID:</strong> {currentUser.uid}
-          <br></br>
-          
-          <strong>Photo:</strong>
-          <br></br>
-          {myPhoto !== '' ? (
-            <img height="100px" width="100px" src={myPhoto} id="photo"></img>
-          ) : (
-            <></>
-          )}
-          <br></br>
-          <strong>Verified email: </strong>
-          {currentUser.emailVerified ? 'verified' : 'not verified'}
-        </Container> */}
-        {/* <Link
-          to={{
-            pathname: id_of_match === 'none' ? '/' : '/chat',
-            state: {
-              match_id: id_of_match,
-              timeout_5: timeout5,
-            },
-          }}>
-          {id_of_match === 'none'
-            ? 'No match yet.'
-            : 'Go to chat page with data'}
-        </Link> */}
-        <br></br>
-        <br></br>
-        {/* <Button
-          variant="outlined"
-          color="primary"
-          disabled={lockout}
-          onClick={searching}>
-          Search for Match
-        </Button> */}
         <Modal
           style={{
             width: 420,
