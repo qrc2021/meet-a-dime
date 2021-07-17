@@ -372,7 +372,7 @@ export default function UpdateProfile() {
     <>
       <Card>
         <Card.Body>
-          <h2 className="text-center mb-3">Update Profile</h2>
+          <h1 className="header text-center mb-3">Update Profile</h1>
           {error && <Alert variant="danger">{error}</Alert>}
           {passChange && <Alert variant="success">{passChange}</Alert>}
           <Container>
@@ -538,7 +538,7 @@ export default function UpdateProfile() {
               <Button disabled={loading} className="w-100 mt-2" type="submit">
                 Save Changes
               </Button>
-              <Button className="w-100 mt-2" onClick={handleDelete}>
+              <Button className="btn-abandon w-100 mt-2" onClick={handleDelete}>
                 Delete Account
               </Button>
             </Form>

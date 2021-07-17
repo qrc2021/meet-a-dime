@@ -6,6 +6,11 @@ body {
   background-color: #ffffff;
 }
 
+.header {
+  font-weight: bold;
+  color: #e64398;
+}
+
 .btn-primary {
   font-weight: bold;
   font-size: 24px;
@@ -49,32 +54,21 @@ body {
   background-color: #e64398 !important;
   border-radius: 30px;
   border-color: #e64398 !important;
+  white-space: nowrap;
 }
 
 .btn-chat:hover {
-  font-weight: bold;
-  font-size: 23px;
-  color: white;
   background-color: #ca3984 !important;
-  border-radius: 30px;
   border-color: #ca3984 !important;
 }
 
-.btn-abandon {
-  font-weight: bold;
-  font-size: 23px;
-  color: white;
+.abandon {
   background-color: #da3636 !important;
-  border-radius: 30px;
   border-color: #da3636 !important;
 }
 
-.btn-abandon:hover {
-  font-weight: bold;
-  font-size: 23px;
-  color: white;
+.abandon:hover {
   background-color: #bb2b2b !important;
-  border-radius: 30px;
   border-color: #bb2b2b !important;
 }
 
@@ -99,4 +93,152 @@ body {
   text-align: left;
   min-width: 250px;
   display: flex;
+}
+
+.talk-bubble {
+  margin: 40px;
+  display: inline-block;
+  position: relative;
+  width: 200px;
+  height: auto;
+  background-color: lightyellow;
+}
+
+.tri-right.btm-left:after {
+  content: ' ';
+  position: absolute;
+  width: 0;
+  height: 0;
+  left: 0px;
+  right: auto;
+  top: auto;
+  bottom: -20px;
+  border: 22px solid;
+  border-color: transparent transparent transparent lightyellow;
+}
+
+.round {
+  border-radius: 30px;
+  -webkit-border-radius: 30px;
+  -moz-border-radius: 30px;
+}
+
+p {
+  max-width: 500px;
+  margin-bottom: 12px;
+  line-height: 24px;
+  padding: 10px 20px;
+  border-radius: 25px;
+  position: relative;
+  color: white;
+  text-align: center;
+}
+
+.message {
+  display: flex;
+  align-items: center;
+}
+
+.sent {
+  flex-direction: row-reverse;
+}
+
+.sent p {
+  color: white;
+  background: #e64398;
+  align-self: flex-end;
+}
+.received p {
+  background: #e5e5ea;
+  color: black;
+}
+.system p {
+  color: grey;
+  text-align: center;
+  margin: auto;
+}
+.message .system {
+  text-align: center;
+}
+
+.chat-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin: 2px 5px;
+}
+
+.footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  color: white;
+}
+
+#signUpDimeImage {
+  max-width: 400px;
+  width: 60%;
+  margin: auto;
+  display: block;
+}
+
+@media only screen and (min-width: 600px) and (max-width: 960px) {
+  #signUpDimeImage {
+    width: 40%;
+  }
+}
+
+@media only screen and (min-width: 960px) {
+  #signUpDimeImage {
+    max-width: none;
+    width: 100%;
+  }
+}
+
+.header-logo-signup {
+  width: 300px;
+  height: 100%;
+}
+@media only screen and (max-width: 350px) {
+  .header-logo-signup {
+    width: 200px;
+  }
+}
+
+.header-logo {
+  width: 250px;
+  height: 100%;
+}
+@media only screen and (max-width: 420px) {
+  .header-logo {
+    width: 100%;
+    max-width: 200px;
+  }
+}
+@media only screen and (max-width: 500px) {
+  .btn-chat {
+    font-size: 18px;
+    margin: 0 !important;
+  }
+  .abandon {
+    font-size: 18px;
+    margin: 0 !important;
+  }
+}
+@media only screen and (max-width: 420px) {
+  .btn-chat {
+    font-size: 15px;
+  }
+  .abandon {
+    font-size: 15px;
+  }
+}
+@media only screen and (max-width: 340px) {
+  .btn-chat {
+    font-size: 12px;
+  }
+  .abandon {
+    font-size: 10px;
+  }
 }

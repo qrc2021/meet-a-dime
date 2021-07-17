@@ -1,5 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Navbar, Container, Form, Modal, Image, Button } from 'react-bootstrap';
+import {
+  Navbar,
+  Container,
+  Form,
+  Modal,
+  Image,
+  Button,
+  InputGroup,
+  FormControl,
+} from 'react-bootstrap';
+import ReactRoundedImage from 'react-rounded-image';
+import Grid from '@material-ui/core/Grid';
 import { useAuth } from '../contexts/AuthContext';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Alert } from '@material-ui/lab';
@@ -32,12 +43,13 @@ import ReportIcon from '@material-ui/icons/Report';
 
 var bp = require('../Path.js');
 const firestore = firebase.firestore();
-const EXPIRE_IN_MINUTES = 0.5; // 10 minutes
+const EXPIRE_IN_MINUTES = 3; // 10 minutes
 const modalExpire = 10000; // 30 seconds in MS
 
 // Drawer
 const drawerWidth = 300;
-
+// Users sending messages
+var isSentByCurrentUser = false;
 const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
@@ -124,7 +136,10 @@ export default function Chat() {
     {
       text: 'Report Chat',
       icon: <ReportIcon style={{ color: 'white' }} />,
-      onClick: handleReport,
+      // onClick: handleReport,
+      onClick: () => {
+        doubleCheck(handleReport, 'report');
+      },
     },
   ];
 
@@ -137,6 +152,16 @@ export default function Chat() {
 
   const handleDrawerClose = () => {
     setOpen(false);
+  };
+
+  const [modalOpen, setModalOpen] = React.useState(false);
+
+  const handleModalOpen = () => {
+    setModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setModalOpen(false);
   };
 
   const [switching, setSwitching] = useState(false);
@@ -162,6 +187,10 @@ export default function Chat() {
   const [match_name, setMatchName] = useState('user');
   const [match_sex, setMatchSex] = useState('');
   const [match_photo, setMatchPhoto] = useState('');
+  const [my_photo, setMyPhoto] = useState('');
+
+  const matchPhotoRef = useRef('');
+  const myPhotoRef = useRef('');
   // console.log(socket);
   useLocation();
   // Gets the passed in match id from the link in the home page
@@ -228,8 +257,43 @@ export default function Chat() {
       setMatchName(response.data.firstName);
       setMatchSex(response.data.sex);
       setMatchPhoto(response.data.photo);
+      matchPhotoRef.current = response.data.photo;
+      myPhotoRef.current = response.data.photo;
     } catch (error) {
       console.log(error);
+    }
+  }
+
+  async function checkSearchingDoc(socketInstance) {
+    console.log('Checking searching doc');
+    var myDoc = await firestore
+      .collection('searching')
+      .doc(currentUser.uid)
+      .get();
+    if (myDoc.exists && myDoc.data().match !== '') return true;
+    else {
+      var matchDoc = await firestore
+        .collection('searching')
+        .doc(match_id)
+        .get();
+      if (matchDoc.exists && matchDoc.data().match !== '') return true;
+      else {
+        // Doc doesnt exists..
+        localStorage.removeItem('inActiveChat');
+        localStorage.removeItem('activeSocket');
+        socketInstance.emit('leave-room-silently', currentUser.uid, room);
+        if (timeoutRef1.current !== undefined)
+          clearTimeout(timeoutRef1.current);
+        if (timeoutRef2.current !== undefined)
+          clearTimeout(timeoutRef2.current);
+        if (extendedTimeoutRef.current !== undefined)
+          clearTimeout(extendedTimeoutRef.current);
+        clearChatData();
+        console.log('pushing to after');
+        history.push('/after', {
+          state: { match_id: match_id, type: 'error' },
+        });
+      }
     }
   }
 
@@ -238,6 +302,7 @@ export default function Chat() {
       if (timeoutRef1.current !== undefined) clearTimeout(timeoutRef1.current);
       if (timeoutRef2.current !== undefined) clearTimeout(timeoutRef2.current);
       clearChatData();
+
       setTimeout(async () => {
         await firestore
           .collection('users')
@@ -272,29 +337,34 @@ export default function Chat() {
     var match = 'none';
     clearChatData();
 
-    var docRef = firestore.collection('searching').doc(currentUser.uid);
-    var doc = await docRef.get();
-    if (doc.exists) {
-      seeker = currentUser.uid;
-      match = match_id;
-    } else {
-      seeker = match_id;
-      match = currentUser.uid;
+    try {
+      var docRef = firestore.collection('searching').doc(currentUser.uid);
+      var doc = await docRef.get();
+      if (doc.exists) {
+        seeker = currentUser.uid;
+        match = match_id;
+      } else {
+        seeker = match_id;
+        match = currentUser.uid;
+      }
+
+      if (currentUser.uid === seeker) {
+        await firestore.collection('searching').doc(currentUser.uid).update({
+          seekerTail: 'timeout',
+        });
+        console.log('I am the seeker, I set my value TIMEOUT.');
+      }
+
+      if (currentUser.uid === match) {
+        await firestore.collection('searching').doc(match_id).update({
+          matchTail: 'timeout',
+        });
+        console.log('I am the match, I set my value TIMEOUT.');
+      }
+    } catch (error) {
+      console.log(error);
     }
 
-    if (currentUser.uid === seeker) {
-      await firestore.collection('searching').doc(currentUser.uid).update({
-        seekerTail: 'timeout',
-      });
-      console.log('I am the seeker, I set my value TIMEOUT.');
-    }
-
-    if (currentUser.uid === match) {
-      await firestore.collection('searching').doc(match_id).update({
-        matchTail: 'timeout',
-      });
-      console.log('I am the match, I set my value TIMEOUT.');
-    }
     socketRef.current.emit('leave-room-silently', currentUser.uid, room);
 
     history.push('/after', {
@@ -357,7 +427,7 @@ export default function Chat() {
     // This extended timeout waits for an answer.
     var extended_timeout = setTimeout(() => {
       socketRef.current.emit('leave-room-silently', currentUser.uid, room);
-      observer.current();
+      if (observer.current !== null) observer.current();
       history.push('/after', {
         state: { match_id: match_id, type: 'extended_timeout' },
       });
@@ -398,6 +468,7 @@ export default function Chat() {
         console.log('match said yes!!');
         clearTimeout(extended_timeout);
         clearChatData();
+
         leavePageWith('match_made');
       } else {
         // Nothing yet, lets wait for a change to the matchTail.
@@ -413,9 +484,10 @@ export default function Chat() {
               // THEY SAID YES !! (but after)
               setSuccessMatches();
               console.log('other person (the match) said yes after');
-              observer.current();
+              if (observer.current !== null) observer.current();
               clearTimeout(extended_timeout);
               clearChatData();
+
               leavePageWith('match_made');
             }
             if (
@@ -425,9 +497,10 @@ export default function Chat() {
             ) {
               // The other person timed out..
               console.log('other person (the match) timed out');
-              observer.current();
+              if (observer.current !== null) observer.current();
               clearTimeout(extended_timeout);
               clearChatData();
+
               leavePageWith('match_timedout');
             }
           });
@@ -448,6 +521,7 @@ export default function Chat() {
         console.log('seeker said yes!!');
         clearTimeout(extended_timeout);
         clearChatData();
+
         leavePageWith('match_made');
       } else {
         // I need to passively listen for a document change.
@@ -463,9 +537,10 @@ export default function Chat() {
               // THEY SAID YES !! (but after)
               setSuccessMatches();
               console.log('other person (the seeker) said yes after');
-              observer.current();
+              if (observer.current !== null) observer.current();
               clearTimeout(extended_timeout);
               clearChatData();
+
               leavePageWith('match_made');
             }
             if (
@@ -475,9 +550,10 @@ export default function Chat() {
             ) {
               // The other person timed out..
               console.log('other person (the seeker) timed out');
-              observer.current();
+              if (observer.current !== null) observer.current();
               clearTimeout(extended_timeout);
               clearChatData();
+
               leavePageWith('match_timedout');
             }
           });
@@ -492,14 +568,6 @@ export default function Chat() {
         size="md"
         aria-labelledby="contained-modal-title-vcenter"
         centered>
-        <Modal.Header>
-          <Modal.Title id="contained-modal-title-vcenter">
-            <Image
-              style={{ height: '100%', width: '250px', cursor: 'pointer' }}
-              src="DimeAssets/headerlogo.png"
-            />
-          </Modal.Title>
-        </Modal.Header>
         <Modal.Body
           style={{
             backgroundColor: '#e64398',
@@ -583,7 +651,7 @@ export default function Chat() {
     // This is a timeout that carried over from the last page. It deletes
     // the doc in the background.
     clearTimeout(timeout_5);
-
+    setMyPhoto(JSON.parse(localStorage.getItem('user_data')).photo);
     // In case the user navigates here directly by accident.
     if (
       history.location &&
@@ -600,8 +668,13 @@ export default function Chat() {
     }
 
     // This gets the match data.
-    fetchMatchInfo();
+    fetchMatchInfo().then(() => {
+      if (localStorage.getItem('1701') !== null) {
+        restorePreviousMessages();
+      }
+    });
     const sock = io(bp.buildPath(''), { forceNew: true });
+    var roomInUseEffect = '';
     sock.auth = { id };
     sock.connect();
     sock.on('connect', () => {
@@ -609,10 +682,6 @@ export default function Chat() {
         `Email: "${currentUser.email}" \n With User ID: "${currentUser.uid}" connected with socket id: "${sock.id}"`
       );
     });
-
-    if (localStorage.getItem('1701') !== null) {
-      restorePreviousMessages();
-    }
 
     if (localStorage.getItem('chatExpiry') === null) {
       var exp = Date.now() + EXPIRE_IN_MINUTES * 60000;
@@ -627,6 +696,7 @@ export default function Chat() {
       }
 
       var current = Date.now();
+      checkSearchingDoc(sock);
       if (current >= localStorage.getItem('chatExpiry')) {
         // The chat is over, logic for after chat goes here.
         clearInterval(checkLoop);
@@ -642,6 +712,7 @@ export default function Chat() {
     }, 2000);
 
     var current_time = Date.now();
+    checkSearchingDoc(sock);
     if (current_time >= localStorage.getItem('chatExpiry')) {
       //Modal match vs non-match
       // The chat is over, logic for after chat goes here.
@@ -670,6 +741,14 @@ export default function Chat() {
         if (message === 'joined') {
           console.log('callback called, joining room now.');
           setRoom(new_room);
+          roomInUseEffect = new_room;
+          localStorage.setItem(
+            'inActiveChat',
+            JSON.stringify({ status: 'true', id_match: match_id })
+          );
+          // // localStorage.setItem('activeSocket', JSON.stringify(sock));
+          // console.log(sock);
+          // console.log(socket);
           displayMessage('Joined the room! Introduce yourself :)', 'system');
         }
       }
@@ -692,6 +771,7 @@ export default function Chat() {
       //match left & setting the pair as no match
       displayMessage('Your match left the chat. Switching..', 'system');
       clearChatData();
+
       setTimeout(async () => {
         await firestore
           .collection('users')
@@ -728,6 +808,14 @@ export default function Chat() {
         console.log('LEFT MY ROOM');
       }, 0);
     });
+    return () => {
+      console.log('Cleanup in Chat.js.');
+
+      if (roomInUseEffect !== '' && sock !== undefined && sock !== null) {
+        sock.emit('leave-room-silently', currentUser.uid, room);
+        console.log('SOCKET: Left the room silently.');
+      }
+    };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   //restore previous messages if the localStorage array indicates that some key was used
@@ -745,6 +833,17 @@ export default function Chat() {
       temp += 7;
     }
     localStorageKey.current = temp;
+  }
+
+  function doubleCheck(f, identifier) {
+    var text = 'Are you sure you want to do this?';
+    if (identifier === 'report')
+      text += ' Reporting will not alert the other user.';
+
+    if (window.confirm(text)) {
+      f();
+      return true;
+    } else return false;
   }
 
   function handleSubmit(e) {
@@ -773,14 +872,39 @@ export default function Chat() {
       var suffix = '';
       if (mode === 'received') {
         suffix = ' (them)';
+        // const div = document.createElement('div');
+        // div.textContent = message + suffix;
+        // document.getElementById('message-recv').append(div);
       } else if (mode === 'sent') {
         suffix = ' (you)';
+        // const div = document.createElement('div');
+        // div.textContent = message + suffix;
+        // document.getElementById('message-sent').append(div);
+        // isSentByCurrentUser = true;
       } else if (mode === 'system') {
         suffix = ' [[sys msg, remove suffix later]]';
+        // const div = document.createElement('div');
+        // div.textContent = message + suffix;
+        // document.getElementById('message-container').append(div);
       }
       const div = document.createElement('div');
-      div.textContent = message + suffix;
+      const p = document.createElement('p');
+      const image = document.createElement('img');
+
+      if (mode === 'recieved') image.src = matchPhotoRef.current;
+      else image.src = myPhotoRef.current;
+      console.log(image.src);
+      image.classList.add('chat-image');
+      div.classList.add('message');
+      div.classList.add(mode);
+      p.textContent = message;
+      if (mode !== 'system') div.appendChild(image);
+      div.appendChild(p);
+
       document.getElementById('message-container').append(div);
+      document
+        .getElementById('scrollReference')
+        .scrollIntoView({ behavior: 'smooth' });
     }
   }
 
@@ -788,6 +912,8 @@ export default function Chat() {
   function clearChatData() {
     var temp = 1701;
     console.log('Cleared chat data.');
+    localStorage.removeItem('inActiveChat');
+    localStorage.removeItem('activeSocket');
     while (localStorage.getItem(JSON.stringify(temp)) !== null) {
       localStorage.removeItem(JSON.stringify(temp));
       temp += 7;
@@ -954,9 +1080,7 @@ export default function Chat() {
                 <img
                   style={{ cursor: 'pointer' }}
                   src="/DimeAssets/headerlogo.png"
-                  width="250px"
-                  height="100%"
-                  className="d-inline-block align-top"
+                  className="d-inline-block align-top header-logo"
                   alt="logo"
                   href="home"
                   onClick={redirectToHome}
@@ -964,7 +1088,7 @@ export default function Chat() {
               </Navbar.Brand>
             </Navbar>
           </Typography>
-          <Button className="btn-abandon mx-3" onClick={redirectToAfter}>
+          <Button className="btn-chat abandon mx-3" onClick={redirectToAfter}>
             Abandon Chat
           </Button>
           <IconButton
@@ -982,61 +1106,114 @@ export default function Chat() {
           </div>
         )}
       </AppBar>
-      <h2 className="text-center mb-4 mt-4 pt-4">Chat</h2>
       <h3 className="text-center mb-4">
         (going home will make the users lose the match). for now they can still
         research for eachother tho
       </h3>
       {error && <Alert severity="error">{error}</Alert>}
-      <Container>
-        <strong>Email:</strong> {currentUser.email}
-        <br></br>
-        <strong>User ID:</strong> {currentUser.uid}
-        <br></br>
-        <strong>MATCH:</strong> {match_id}
-        <br></br>
-        <strong>their age:</strong> {match_age}
-        <br></br>
-        <strong>their name:</strong> {match_name}
-        <br></br>
-        <strong>their sex:</strong> {match_sex}
-        <br></br>
-        <strong>their photo:</strong>
-        <br></br>
+
+      <Grid
+        container
+        direction="column"
+        justifyContent="center"
+        alignItems="center">
         {match_photo !== '' ? (
-          <img
-            height="100px"
-            width="100px"
-            src={match_photo}
-            id="matchPhoto"
-            alt="Profile pic of match"></img>
+          <ReactRoundedImage
+            imageHeight="150"
+            imageWidth="150"
+            image={match_photo}
+            id="photo"
+            roundedSize="13"
+            borderRadius="150"
+            alt="My Profile Pic"
+            hoverColor="pink"
+            onClick={handleModalOpen}
+            style={{
+              cursor: 'pointer',
+              marginTop: '5px',
+            }}
+          />
         ) : (
-          <></>
+          <ReactRoundedImage
+            className="img-fluid"
+            image="DimeAssets/coinsignup.png"
+            height="300px"
+            width="300px"
+            roundedSize="13"
+            borderRadius="150"
+            alt="Default Pic"
+            hoverColor="pink"
+            onClick={handleModalOpen}
+            style={{
+              cursor: 'pointer',
+              marginTop: '5px',
+            }}
+          />
         )}
-        <hr></hr>
-      </Container>
+        <Modal
+          style={{
+            marginRight: 'auto',
+            marginLeft: 'auto',
+            marginTop: '50%',
+            marginBottom: 'auto',
+          }}
+          open={modalOpen}
+          onClose={handleModalClose}>
+          <h2 className="text-center mb-3" style={{ color: '#E64398' }}>
+            {match_name}
+          </h2>
+          <h2 className="text-center mb-3" style={{ color: '#E64398' }}>
+            {match_age}
+          </h2>
+          <h2 className="text-center mb-3" style={{ color: '#E64398' }}>
+            {match_sex}
+          </h2>
+        </Modal>
+        {/*       <Button
+                  className="btn-chat mx-3"
+                  onClick={handleModalOpen}>
+                  Info
+          </Button>     */}
+        <h2 className="text-center mb-3" style={{ color: '#E64398' }}>
+          {match_name}
+        </h2>
+        <h2 className="text-center mb-3" style={{ color: '#E64398' }}>
+          {match_age}
+        </h2>
+        <h2 className="text-center mb-3" style={{ color: '#E64398' }}>
+          {match_sex}
+        </h2>
+      </Grid>
+
       <React.Fragment>
         <Container>
           <div id="message-container" className=""></div>
-          <hr></hr>
-          {!afterChat && (
-            <Form onSubmit={handleSubmit}>
-              <Form.Label>Message</Form.Label>
-              <Form.Control
-                type="text"
-                id="message_input"
-                autoComplete="off"
-                ref={messageRef}></Form.Control>
-              <Button
-                disabled={room === '' || afterChat ? true : false}
-                type="submit"
-                id="send-button">
-                Send
-              </Button>
-              <br></br>
-              {/* <h3>Our room id: {room}</h3> */}
-            </Form>
-          )}
+          <div style={{ height: '50px' }} id="scrollReference"></div>
+
+          <div className="footer">
+            {!afterChat && (
+              <Container>
+                <Form onSubmit={handleSubmit}>
+                  <InputGroup>
+                    <FormControl
+                      placeholder="Say something nice..."
+                      aria-label="Message"
+                      type="text"
+                      id="message_input"
+                      autoComplete="off"
+                      ref={messageRef}
+                    />
+                    <Button
+                      disabled={room === '' || afterChat ? true : false}
+                      type="submit"
+                      id="send-button">
+                      Send
+                    </Button>
+                  </InputGroup>
+                </Form>
+              </Container>
+            )}
+          </div>
         </Container>
         {/* <Button
           className={!afterChat ? 'btn btn-danger' : 'btn btn-primary'}

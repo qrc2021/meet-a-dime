@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 // import { Button, Alert, Container } from 'react-bootstrap';
 import { Navbar, Button, Form, Col, Row } from 'react-bootstrap';
 import { Alert } from '@material-ui/lab';
+import Snackbar from '@material-ui/core/Snackbar';
+import MuiAlert from '@material-ui/lab/Alert';
 // import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
 // import PhotoCamera from '@material-ui/icons/PhotoCamera';
 // import Container from '@material-ui/core/Container';
@@ -157,7 +159,8 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [myPhoto, setMyPhoto] = useState('');
   const [progress, setProgress] = useState(-1);
-  // const [transitioning, setTransitioning] = useState(false);
+  const [inActiveChat, setInActiveChat] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [name, setName] = useState('');
   // the firebase firestore instance, used to query, add, delete, edit from DB.
   const firestore = firebase.firestore();
@@ -223,8 +226,7 @@ export default function Home() {
   // The matching algorithm/mechanism is described after the useEffect, in
   // the search function.
   useEffect(() => {
-    console.log(currentUser.getIdToken());
-    localStorage.removeItem('chatExpiry');
+    // console.log(currentUser.getIdToken());
     document.body.style.backgroundColor = 'white';
 
     async function getIntialUserPhoto() {
@@ -252,6 +254,18 @@ export default function Home() {
     }
 
     async function purgeOld() {
+      // If I'm in an active chat, lets not remove the old searching docs.
+      if (localStorage.getItem('inActiveChat') !== null) {
+        if (
+          JSON.parse(localStorage.getItem('inActiveChat')).status === 'true'
+        ) {
+          setLockout(true);
+          setInActiveChat(true);
+          return;
+        }
+      } else {
+        localStorage.removeItem('chatExpiry');
+      }
       // Lock the search button until these tasks are complete.
       setLockout(true);
       console.log('I SHOULD ONLY PRINT ONCE PER PAGE LOAD');
@@ -557,12 +571,15 @@ export default function Home() {
 
         var count = 0;
         setProgress(count);
-        transferTimeoutRef.current = setInterval(() => {
+        var local2 = (transferTimeoutRef.current = setInterval(() => {
           count += (100 / MS_TRANSFER_TO_CHAT) * 100;
           setProgress(count);
           // console.log(doc_id);
           if (count >= 100) {
             clearInterval(transferTimeoutRef.current);
+            clearInterval(local2);
+            count = 0;
+            console.log('pushing to chat 2');
             history.push('/chat', {
               state: {
                 match_id: doc_id,
@@ -570,10 +587,11 @@ export default function Home() {
               },
             });
           }
-        }, 100);
+        }, 100));
 
         setId(doc_id);
         setMatch('Found match! ' + doc_id);
+        setSnackbarOpen(true);
         // Clear the searching timeout.
         // clearTimeout(timeOut);
         clearAllTimeouts();
@@ -766,12 +784,15 @@ export default function Home() {
 
                 var count = 0;
                 setProgress(count);
-                transferTimeoutRef.current = setInterval(() => {
+                var local1 = (transferTimeoutRef.current = setInterval(() => {
                   count += (100 / MS_TRANSFER_TO_CHAT) * 100;
                   setProgress(count);
                   // console.log(docSnapshot.data().match);
                   if (count >= 100) {
                     clearInterval(transferTimeoutRef.current);
+                    clearInterval(local1);
+                    count = 0;
+                    console.log('pushing to chat 1');
                     history.push('/chat', {
                       state: {
                         match_id: change.doc.data().match,
@@ -779,11 +800,12 @@ export default function Home() {
                       },
                     });
                   }
-                }, 100);
+                }, 100));
 
                 // setId(docSnapshot.data().match);
                 setId(change.doc.data().match);
                 setMatch('Found match! ' + change.doc.data().match);
+                setSnackbarOpen(true);
                 // clearTimeout(timeOut);
                 clearAllTimeouts();
               } else if (
@@ -892,9 +914,7 @@ export default function Home() {
               <Navbar.Brand>
                 <img
                   src="/DimeAssets/headerlogo.png"
-                  width="250px"
-                  height="100%"
-                  className="d-inline-block align-top"
+                  className="d-inline-block align-top header-logo"
                   alt="logo"
                   style={{ cursor: 'pointer' }}
                 />
@@ -954,37 +974,97 @@ export default function Home() {
           </Form.Group>
         </Row>
         {error && <Alert severity="error">{error}</Alert>}
-        {match && match === 'Not searching.' && (
-          <Alert severity="warning">{match}</Alert>
+        {inActiveChat && (
+          <Alert variant="filled" severity="info">
+            You are in a chat!{' '}
+            {
+              <a
+                href="#"
+                style={{ color: 'white' }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  console.log('RETURN');
+
+                  history.push('/chat', {
+                    state: {
+                      match_id: JSON.parse(localStorage.getItem('inActiveChat'))
+                        .id_match,
+                      timeout_5: timeout5.current,
+                    },
+                  });
+                }}>
+                Return to chat.
+              </a>
+            }
+          </Alert>
         )}
-        {match && match === 'Searching.' && (
-          <Alert severity="info">{match}</Alert>
-        )}
-        {match && match !== 'Not searching.' && match !== 'Searching.' && (
-          <Alert severity="success">{match}</Alert>
-        )}
+
         <Modal
           style={{
-            width: 420,
-            height: 420,
+            width: '90%',
+            maxWidth: 620,
+            maxHeight: 620,
+            height: '90%',
+
             marginRight: 'auto',
             marginLeft: 'auto',
             marginTop: 'auto',
             marginBottom: 'auto',
           }}
           open={sopen}
-          onClose={handleSearchClose}>
-          <img
+          // onClose={handleSearchClose}
+        >
+          <div
+            className="text-center p-3"
             style={{
-              width: 420,
-              height: 420,
-              marginRight: 'auto',
-              marginLeft: 'auto',
-            }}
-            className="img-fluid"
-            alt="gifload"
-            src="DimeAssets/searchcoin.gif"
-          />
+              // border: '2px solid grey',
+              borderRadius: '50px',
+              padding: '10px',
+              backgroundColor: 'rgba(0,0,0,0.5)',
+            }}>
+            {/* {!inActiveChat && match && match === 'Not searching.' && (
+              <Alert
+                style={{ width: '80%', maxWidth: '400px', margin: 'auto' }}
+                severity="warning">
+                {match}
+              </Alert>
+            )}
+            {!inActiveChat && match && match === 'Searching.' && (
+              <Alert
+                style={{ width: '80%', maxWidth: '400px', margin: 'auto' }}
+                severity="info">
+                {match}
+              </Alert>
+            )}
+            {!inActiveChat &&
+              match &&
+              match !== 'Not searching.' &&
+              match !== 'Searching.' && (
+                <Alert
+                  style={{ width: '80%', maxWidth: '400px', margin: 'auto' }}
+                  severity="success">
+                  {match}
+                </Alert>
+              )} */}
+            <img
+              style={{
+                width: 420,
+                height: 'auto',
+
+                marginRight: 'auto',
+                marginLeft: 'auto',
+              }}
+              className="img-fluid"
+              alt="gifload"
+              src="DimeAssets/searchcoin.gif"
+            />
+            <button
+              style={{ display: 'block', margin: 'auto' }}
+              onClick={handleSearchClose}
+              className="btn btn-outline-light">
+              Stop Searching
+            </button>
+          </div>
         </Modal>
       </main>
 
@@ -1023,6 +1103,32 @@ export default function Home() {
           })}
         </List>
       </Drawer>
+      <Snackbar
+        open={
+          snackbarOpen &&
+          !inActiveChat &&
+          match &&
+          match !== 'Not searching.' &&
+          match !== 'Searching.'
+        }
+        autoHideDuration={6000}
+        onClose={(event, reason) => {
+          if (reason === 'clickaway') {
+            return;
+          }
+          setSnackbarOpen(false);
+        }}>
+        <Alert
+          onClose={(event, reason) => {
+            if (reason === 'clickaway') {
+              return;
+            }
+            setSnackbarOpen(false);
+          }}
+          severity="success">
+          Found a match! (placeholder);
+        </Alert>
+      </Snackbar>
       {progress !== -1 && (
         <div
           style={{

@@ -396,7 +396,8 @@ export default function Profile() {
           container
           direction="column"
           justifyContent="flex-start"
-          alignItems="center">
+          alignItems="center"
+          className="mt-4">
           {myPhoto !== '' ? (
             <ReactRoundedImage
               imageHeight="300"

@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Form, Button, Navbar } from 'react-bootstrap';
+import { Form, Button, Navbar, Row, Col } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
 import { Alert } from '@material-ui/lab';
 import Grid from '@material-ui/core/Grid';
@@ -218,23 +218,27 @@ export default function SignUp() {
         <Navbar.Brand href="login">
           <img
             src="/DimeAssets/headerlogo.png"
-            width="300px"
-            height="100%"
-            className="d-inline-block align-top"
+            className="d-inline-block align-top header-logo-signup"
             alt="Dimelogo"
           />
         </Navbar.Brand>
       </Navbar>
 
-      <Grid container spacing={1}>
-        <Grid item xs={5}>
+      <Grid
+        container
+        direction="row"
+        justifyContent="space-evenly"
+        alignItems="flex-start"
+        spacing={1}>
+        <Grid item xs={10} sm={10} md={5} lg={5} xl={5}>
           <img
+            id="signUpDimeImage"
             className="img-fluid"
             alt="signup"
             src="DimeAssets/coinsignup.png"
           />
         </Grid>
-        <Grid item xs={5}>
+        <Grid item xs={10} sm={10} md={5} lg={5} xl={5}>
           {/* <Card.Body> */}
           <h2 className="text-center mb-3" style={{ color: '#929292' }}>
             Create an Account
@@ -268,7 +272,10 @@ export default function SignUp() {
               errors,
             }) => (
               <Form noValidate onSubmit={handleSubmit}>
-                <Form.Group controlId="validationFormik01" id="firstName">
+                <Form.Group
+                  controlId="validationFormik01"
+                  id="firstName"
+                  className="mb-2">
                   <Form.Control
                     type="text"
                     ref={firstRef}
@@ -283,7 +290,7 @@ export default function SignUp() {
                     {errors.firstName}
                   </Form.Control.Feedback>
                 </Form.Group>
-                <Form.Group id="lastName">
+                <Form.Group id="lastName" className="mb-2">
                   <Form.Control
                     type="text"
                     value={values.lastName}
@@ -301,7 +308,7 @@ export default function SignUp() {
                     Your last name will stay private
                   </Form.Text>
                 </Form.Group>
-                <Form.Group id="email">
+                <Form.Group id="email" className="mb-2">
                   <Form.Control
                     type="email"
                     ref={emailRef}
@@ -317,7 +324,7 @@ export default function SignUp() {
                     We will never share your email with anyone.
                   </Form.Text>
                 </Form.Group>
-                <Form.Group id="password">
+                <Form.Group id="password" className="mb-2">
                   <Form.Control
                     type="password"
                     ref={passwordRef}
@@ -332,7 +339,7 @@ export default function SignUp() {
                     {errors.password}
                   </Form.Control.Feedback>
                 </Form.Group>
-                <Form.Group id="password-confirm">
+                <Form.Group id="password-confirm" className="mb-2">
                   <Form.Control
                     type="password"
                     ref={passwordConfirmRef}
@@ -347,8 +354,8 @@ export default function SignUp() {
                     {errors.passwordVerify}
                   </Form.Control.Feedback>
                 </Form.Group>
-                <Form.Label className="text-muted">Phone Number</Form.Label>
-                <Form.Group id="phoneGroup">
+
+                <Form.Group id="phoneGroup" className="mb-2">
                   <Form.Control
                     type="tel"
                     value={values.phone}
@@ -366,8 +373,7 @@ export default function SignUp() {
                     Phone number is invalid.
                   </Form.Control.Feedback>
                 </Form.Group>
-                <Form.Group id="dob">
-                  <Form.Label className="text-muted">Date of Birth</Form.Label>
+                <Form.Group id="dob" className="mb-2">
                   <Form.Control
                     type="date"
                     // value={dateState}
@@ -391,11 +397,8 @@ export default function SignUp() {
                   <Form.Control.Feedback type="invalid">
                     You must be 18 years or older to use Meet a Dime.
                   </Form.Control.Feedback>
-                  <Form.Text className="text-muted">
-                    You must be 18+ years.
-                  </Form.Text>
                 </Form.Group>
-                <Form.Row id="sex">
+                <Form.Row id="sex" className="mb-2">
                   <Form.Control
                     as="select"
                     // value={optionsState}
@@ -417,7 +420,7 @@ export default function SignUp() {
                     {errors.sex || 'You must choose a sex.'}
                   </Form.Control.Feedback>
                 </Form.Row>
-                <Form.Row id="sexualOrientation">
+                <Form.Row id="sexualOrientation" className="mb-2">
                   <Form.Control
                     as="select"
                     // value={orientationState}
@@ -433,8 +436,8 @@ export default function SignUp() {
                       (errors.sexOrientation || values.sexOrientation === '0')
                     }>
                     <option value="0">Choose your sexual orientation...</option>
-                    <option value="1">Heterosexual</option>
-                    <option value="2">Homosexual</option>
+                    <option value="1">Straight</option>
+                    <option value="2">Gay/Lesbian</option>
                     <option value="3">Bisexual</option>
                     <option value="4">Other</option>
                   </Form.Control>
