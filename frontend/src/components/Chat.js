@@ -34,7 +34,7 @@ import ReportIcon from '@material-ui/icons/Report';
 
 var bp = require('../Path.js');
 const firestore = firebase.firestore();
-const EXPIRE_IN_MINUTES = 3; // 10 minutes
+const EXPIRE_IN_MINUTES = 0.2; // 10 minutes
 const modalExpire = 10000; // 30 seconds in MS
 
 // Drawer
@@ -175,6 +175,10 @@ export default function Chat() {
   const [match_name, setMatchName] = useState('user');
   const [match_sex, setMatchSex] = useState('');
   const [match_photo, setMatchPhoto] = useState('');
+  const [my_photo, setMyPhoto] = useState('');
+
+  const matchPhotoRef = useRef('');
+  const myPhotoRef = useRef('');
   // console.log(socket);
   useLocation();
   // Gets the passed in match id from the link in the home page
@@ -241,6 +245,8 @@ export default function Chat() {
       setMatchName(response.data.firstName);
       setMatchSex(response.data.sex);
       setMatchPhoto(response.data.photo);
+      matchPhotoRef.current = response.data.photo;
+      myPhotoRef.current = response.data.photo;
     } catch (error) {
       console.log(error);
     }
@@ -319,29 +325,34 @@ export default function Chat() {
     var match = 'none';
     clearChatData();
 
-    var docRef = firestore.collection('searching').doc(currentUser.uid);
-    var doc = await docRef.get();
-    if (doc.exists) {
-      seeker = currentUser.uid;
-      match = match_id;
-    } else {
-      seeker = match_id;
-      match = currentUser.uid;
+    try {
+      var docRef = firestore.collection('searching').doc(currentUser.uid);
+      var doc = await docRef.get();
+      if (doc.exists) {
+        seeker = currentUser.uid;
+        match = match_id;
+      } else {
+        seeker = match_id;
+        match = currentUser.uid;
+      }
+
+      if (currentUser.uid === seeker) {
+        await firestore.collection('searching').doc(currentUser.uid).update({
+          seekerTail: 'timeout',
+        });
+        console.log('I am the seeker, I set my value TIMEOUT.');
+      }
+
+      if (currentUser.uid === match) {
+        await firestore.collection('searching').doc(match_id).update({
+          matchTail: 'timeout',
+        });
+        console.log('I am the match, I set my value TIMEOUT.');
+      }
+    } catch (error) {
+      console.log(error);
     }
 
-    if (currentUser.uid === seeker) {
-      await firestore.collection('searching').doc(currentUser.uid).update({
-        seekerTail: 'timeout',
-      });
-      console.log('I am the seeker, I set my value TIMEOUT.');
-    }
-
-    if (currentUser.uid === match) {
-      await firestore.collection('searching').doc(match_id).update({
-        matchTail: 'timeout',
-      });
-      console.log('I am the match, I set my value TIMEOUT.');
-    }
     socketRef.current.emit('leave-room-silently', currentUser.uid, room);
 
     history.push('/after', {
@@ -545,14 +556,6 @@ export default function Chat() {
         size="md"
         aria-labelledby="contained-modal-title-vcenter"
         centered>
-        <Modal.Header>
-          <Modal.Title id="contained-modal-title-vcenter">
-            <Image
-              style={{ height: '100%', width: '250px', cursor: 'pointer' }}
-              src="DimeAssets/headerlogo.png"
-            />
-          </Modal.Title>
-        </Modal.Header>
         <Modal.Body
           style={{
             backgroundColor: '#e64398',
@@ -636,7 +639,7 @@ export default function Chat() {
     // This is a timeout that carried over from the last page. It deletes
     // the doc in the background.
     clearTimeout(timeout_5);
-
+    setMyPhoto(JSON.parse(localStorage.getItem('user_data')).photo);
     // In case the user navigates here directly by accident.
     if (
       history.location &&
@@ -653,7 +656,11 @@ export default function Chat() {
     }
 
     // This gets the match data.
-    fetchMatchInfo();
+    fetchMatchInfo().then(() => {
+      if (localStorage.getItem('1701') !== null) {
+        restorePreviousMessages();
+      }
+    });
     const sock = io(bp.buildPath(''), { forceNew: true });
     var roomInUseEffect = '';
     sock.auth = { id };
@@ -663,10 +670,6 @@ export default function Chat() {
         `Email: "${currentUser.email}" \n With User ID: "${currentUser.uid}" connected with socket id: "${sock.id}"`
       );
     });
-
-    if (localStorage.getItem('1701') !== null) {
-      restorePreviousMessages();
-    }
 
     if (localStorage.getItem('chatExpiry') === null) {
       var exp = Date.now() + EXPIRE_IN_MINUTES * 60000;
@@ -863,10 +866,18 @@ export default function Chat() {
       }
       const div = document.createElement('div');
       const p = document.createElement('p');
+      const image = document.createElement('img');
+
+      if (mode === 'recieved') image.src = matchPhotoRef.current;
+      else image.src = myPhotoRef.current;
+      console.log(image.src);
+      image.classList.add('chat-image');
       div.classList.add('message');
       div.classList.add(mode);
       p.textContent = message + suffix;
+      if (mode !== 'system') div.appendChild(image);
       div.appendChild(p);
+
       document.getElementById('message-container').append(div);
       document
         .getElementById('scrollReference')
