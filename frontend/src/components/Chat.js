@@ -657,17 +657,6 @@ export default function Chat() {
     clearTimeout(timeout_5);
     setMyPhoto(JSON.parse(localStorage.getItem('user_data')).photo);
 
-    window.ononline = (event) => {
-      console.log('You are now connected to the network.');
-      displayMessage('You are back online!', 'system');
-      setIsOffline(false);
-    };
-    window.onoffline = (event) => {
-      console.log('You are NOT connected to the network.');
-      displayMessage('You are offline!', 'system');
-      setIsOffline(true);
-    };
-
     // In case the user navigates here directly by accident.
     if (
       history.location &&
@@ -825,9 +814,43 @@ export default function Chat() {
         console.log('LEFT MY ROOM');
       }, 0);
     });
+    window.ononline = (event) => {
+      console.log('You are now connected to the network.');
+      displayMessage('You are back online!', 'system');
+      if (sock !== undefined && sock !== null)
+        sock.emit('leave-room-silently', currentUser.uid, room);
+      if (sock !== undefined && sock !== null)
+        sock.emit(
+          'join-room',
+          currentUser.uid.toString(),
+          new_room.toString(),
+          function (message) {
+            if (message === 'joined') {
+              console.log('callback called, joining room now.');
+              setRoom(new_room);
+              roomInUseEffect = new_room;
+              localStorage.setItem(
+                'inActiveChat',
+                JSON.stringify({ status: 'true', id_match: match_id })
+              );
+              // // localStorage.setItem('activeSocket', JSON.stringify(sock));
+              // console.log(sock);
+              // console.log(socket);
+              displayMessage('Reconnected to chat.', 'system');
+            }
+          }
+        );
+      setIsOffline(false);
+    };
+    window.onoffline = (event) => {
+      console.log('You are NOT connected to the network.');
+      displayMessage('You are offline!', 'system');
+      setIsOffline(true);
+    };
     return () => {
       console.log('Cleanup in Chat.js.');
-
+      window.ononline = null;
+      window.onoffline = null;
       if (roomInUseEffect !== '' && sock !== undefined && sock !== null) {
         sock.emit('leave-room-silently', currentUser.uid, room);
         console.log('SOCKET: Left the room silently.');
@@ -1221,9 +1244,7 @@ export default function Chat() {
                       ref={messageRef}
                     />
                     <Button
-                      disabled={
-                        isOffline || room === '' || afterChat ? true : false
-                      }
+                      disabled={room === '' || afterChat ? true : false}
                       type="submit"
                       id="send-button">
                       Send
