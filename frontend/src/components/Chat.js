@@ -136,7 +136,10 @@ export default function Chat() {
     {
       text: 'Report Chat',
       icon: <ReportIcon style={{ color: 'white' }} />,
-      onClick: handleReport,
+      // onClick: handleReport,
+      onClick: () => {
+        doubleCheck(handleReport, 'report');
+      },
     },
   ];
 
@@ -830,6 +833,17 @@ export default function Chat() {
       temp += 7;
     }
     localStorageKey.current = temp;
+  }
+
+  function doubleCheck(f, identifier) {
+    var text = 'Are you sure you want to do this?';
+    if (identifier === 'report')
+      text += ' Reporting will not alert the other user.';
+
+    if (window.confirm(text)) {
+      f();
+      return true;
+    } else return false;
   }
 
   function handleSubmit(e) {

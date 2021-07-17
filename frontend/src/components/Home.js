@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 // import { Button, Alert, Container } from 'react-bootstrap';
 import { Navbar, Button, Form, Col, Row } from 'react-bootstrap';
 import { Alert } from '@material-ui/lab';
+import Snackbar from '@material-ui/core/Snackbar';
+import MuiAlert from '@material-ui/lab/Alert';
 // import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
 // import PhotoCamera from '@material-ui/icons/PhotoCamera';
 // import Container from '@material-ui/core/Container';
@@ -158,7 +160,7 @@ export default function Home() {
   const [myPhoto, setMyPhoto] = useState('');
   const [progress, setProgress] = useState(-1);
   const [inActiveChat, setInActiveChat] = useState(false);
-  // const [transitioning, setTransitioning] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [name, setName] = useState('');
   // the firebase firestore instance, used to query, add, delete, edit from DB.
   const firestore = firebase.firestore();
@@ -589,6 +591,7 @@ export default function Home() {
 
         setId(doc_id);
         setMatch('Found match! ' + doc_id);
+        setSnackbarOpen(true);
         // Clear the searching timeout.
         // clearTimeout(timeOut);
         clearAllTimeouts();
@@ -802,6 +805,7 @@ export default function Home() {
                 // setId(docSnapshot.data().match);
                 setId(change.doc.data().match);
                 setMatch('Found match! ' + change.doc.data().match);
+                setSnackbarOpen(true);
                 // clearTimeout(timeOut);
                 clearAllTimeouts();
               } else if (
@@ -996,54 +1000,7 @@ export default function Home() {
             }
           </Alert>
         )}
-        {/* {!inActiveChat && match && match === 'Not searching.' && (
-          <Alert severity="warning">{match}</Alert>
-        )}
-        {!inActiveChat && match && match === 'Searching.' && (
-          <Alert severity="info">{match}</Alert>
-        )}
-        {!inActiveChat &&
-          match &&
-          match !== 'Not searching.' &&
-          match !== 'Searching.' && <Alert severity="success">{match}</Alert>} */}
-        {/* <Container>
-          <strong>Email:</strong> {currentUser.email}
-          <br></br>
-          <strong>User ID:</strong> {currentUser.uid}
-          <br></br>
-          
-          <strong>Photo:</strong>
-          <br></br>
-          {myPhoto !== '' ? (
-            <img height="100px" width="100px" src={myPhoto} id="photo"></img>
-          ) : (
-            <></>
-          )}
-          <br></br>
-          <strong>Verified email: </strong>
-          {currentUser.emailVerified ? 'verified' : 'not verified'}
-        </Container> */}
-        {/* <Link
-          to={{
-            pathname: id_of_match === 'none' ? '/' : '/chat',
-            state: {
-              match_id: id_of_match,
-              timeout_5: timeout5,
-            },
-          }}>
-          {id_of_match === 'none'
-            ? 'No match yet.'
-            : 'Go to chat page with data'}
-        </Link> */}
-        <br></br>
-        <br></br>
-        {/* <Button
-          variant="outlined"
-          color="primary"
-          disabled={lockout}
-          onClick={searching}>
-          Search for Match
-        </Button> */}
+
         <Modal
           style={{
             width: '90%',
@@ -1062,21 +1019,35 @@ export default function Home() {
           <div
             className="text-center p-3"
             style={{
-              border: '2px solid grey',
+              // border: '2px solid grey',
+              borderRadius: '50px',
+              padding: '10px',
               backgroundColor: 'rgba(0,0,0,0.5)',
             }}>
-            {!inActiveChat && match && match === 'Not searching.' && (
-              <Alert severity="warning">{match}</Alert>
+            {/* {!inActiveChat && match && match === 'Not searching.' && (
+              <Alert
+                style={{ width: '80%', maxWidth: '400px', margin: 'auto' }}
+                severity="warning">
+                {match}
+              </Alert>
             )}
             {!inActiveChat && match && match === 'Searching.' && (
-              <Alert severity="info">{match}</Alert>
+              <Alert
+                style={{ width: '80%', maxWidth: '400px', margin: 'auto' }}
+                severity="info">
+                {match}
+              </Alert>
             )}
             {!inActiveChat &&
               match &&
               match !== 'Not searching.' &&
               match !== 'Searching.' && (
-                <Alert severity="success">{match}</Alert>
-              )}
+                <Alert
+                  style={{ width: '80%', maxWidth: '400px', margin: 'auto' }}
+                  severity="success">
+                  {match}
+                </Alert>
+              )} */}
             <img
               style={{
                 width: 420,
@@ -1090,6 +1061,7 @@ export default function Home() {
               src="DimeAssets/searchcoin.gif"
             />
             <button
+              style={{ display: 'block', margin: 'auto' }}
               onClick={handleSearchClose}
               className="btn btn-outline-light">
               Stop Searching
@@ -1133,6 +1105,32 @@ export default function Home() {
           })}
         </List>
       </Drawer>
+      <Snackbar
+        open={
+          snackbarOpen &&
+          !inActiveChat &&
+          match &&
+          match !== 'Not searching.' &&
+          match !== 'Searching.'
+        }
+        autoHideDuration={6000}
+        onClose={(event, reason) => {
+          if (reason === 'clickaway') {
+            return;
+          }
+          setSnackbarOpen(false);
+        }}>
+        <Alert
+          onClose={(event, reason) => {
+            if (reason === 'clickaway') {
+              return;
+            }
+            setSnackbarOpen(false);
+          }}
+          severity="success">
+          Found a match! (placeholder);
+        </Alert>
+      </Snackbar>
       {progress !== -1 && (
         <div
           style={{
