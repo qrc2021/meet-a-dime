@@ -39,7 +39,8 @@ const modalExpire = 10000; // 30 seconds in MS
 
 // Drawer
 const drawerWidth = 300;
-
+// Users sending messages
+const isSentByCurrentUser = false;
 const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
@@ -844,14 +845,24 @@ export default function Chat() {
       var suffix = '';
       if (mode === 'received') {
         suffix = ' (them)';
+        const div = document.createElement('div');
+        div.textContent = message + suffix;
+        document.getElementById('message-recv').append(div);
       } else if (mode === 'sent') {
         suffix = ' (you)';
+        const div = document.createElement('div');
+        div.textContent = message + suffix;
+        document.getElementById('message-sent').append(div);
+        isSentByCurrentUser = true;
       } else if (mode === 'system') {
         suffix = ' [[sys msg, remove suffix later]]';
+        const div = document.createElement('div');
+        div.textContent = message + suffix;
+        document.getElementById('message-container').append(div);
       }
-      const div = document.createElement('div');
-      div.textContent = message + suffix;
-      document.getElementById('message-container').append(div);
+      // const div = document.createElement('div');
+      // div.textContent = message + suffix;
+      // document.getElementById('message-container').append(div);
     }
   }
 
@@ -1068,8 +1079,8 @@ export default function Chat() {
         alignItems="center">
         {match_photo !== '' ? (
           <ReactRoundedImage
-            imageHeight="300"
-            imageWidth="300"
+            imageHeight="150"
+            imageWidth="150"
             image={match_photo}
             id="photo"
             roundedSize="13"
@@ -1136,7 +1147,14 @@ export default function Chat() {
 
       <React.Fragment>
         <Container>
-          <div id="message-container" className=""></div>
+          <div id="message-container" className="">
+          </div>
+          <div id="message-recv" className=" justifyStart">
+            <div className=""></div>
+          </div>
+          <div id="message-sent" className="talk-bubble tri-right border round btm-left-in justifyEnd">
+            <div className=""></div>
+          </div>
           <hr></hr>
           {!afterChat && (
             <Form onSubmit={handleSubmit}>
