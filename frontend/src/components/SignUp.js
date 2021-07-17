@@ -218,7 +218,7 @@ export default function SignUp() {
         <Navbar.Brand href="login">
           <img
             src="/DimeAssets/headerlogo.png"
-            className="d-inline-block align-top header-logo"
+            className="d-inline-block align-top header-logo-signup"
             alt="Dimelogo"
           />
         </Navbar.Brand>

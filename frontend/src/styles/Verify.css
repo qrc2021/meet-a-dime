@@ -54,32 +54,21 @@ body {
   background-color: #e64398 !important;
   border-radius: 30px;
   border-color: #e64398 !important;
+  white-space: nowrap;
 }
 
 .btn-chat:hover {
-  font-weight: bold;
-  font-size: 23px;
-  color: white;
   background-color: #ca3984 !important;
-  border-radius: 30px;
   border-color: #ca3984 !important;
 }
 
-.btn-abandon {
-  font-weight: bold;
-  font-size: 23px;
-  color: white;
+.abandon {
   background-color: #da3636 !important;
-  border-radius: 30px;
   border-color: #da3636 !important;
 }
 
-.btn-abandon:hover {
-  font-weight: bold;
-  font-size: 23px;
-  color: white;
+.abandon:hover {
   background-color: #bb2b2b !important;
-  border-radius: 30px;
   border-color: #bb2b2b !important;
 }
 
@@ -207,12 +196,49 @@ p {
   }
 }
 
-.header-logo {
+.header-logo-signup {
   width: 300px;
   height: 100%;
 }
 @media only screen and (max-width: 350px) {
-  .header-logo {
+  .header-logo-signup {
     width: 200px;
+  }
+}
+
+.header-logo {
+  width: 250px;
+  height: 100%;
+}
+@media only screen and (max-width: 420px) {
+  .header-logo {
+    width: 100%;
+    max-width: 200px;
+  }
+}
+@media only screen and (max-width: 500px) {
+  .btn-chat {
+    font-size: 18px;
+    margin: 0 !important;
+  }
+  .abandon {
+    font-size: 18px;
+    margin: 0 !important;
+  }
+}
+@media only screen and (max-width: 420px) {
+  .btn-chat {
+    font-size: 15px;
+  }
+  .abandon {
+    font-size: 15px;
+  }
+}
+@media only screen and (max-width: 340px) {
+  .btn-chat {
+    font-size: 12px;
+  }
+  .abandon {
+    font-size: 10px;
   }
 }

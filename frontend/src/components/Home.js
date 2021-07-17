@@ -914,9 +914,7 @@ export default function Home() {
               <Navbar.Brand>
                 <img
                   src="/DimeAssets/headerlogo.png"
-                  width="250px"
-                  height="100%"
-                  className="d-inline-block align-top"
+                  className="d-inline-block align-top header-logo"
                   alt="logo"
                   style={{ cursor: 'pointer' }}
                 />

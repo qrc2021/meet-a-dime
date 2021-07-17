@@ -1080,9 +1080,7 @@ export default function Chat() {
                 <img
                   style={{ cursor: 'pointer' }}
                   src="/DimeAssets/headerlogo.png"
-                  width="250px"
-                  height="100%"
-                  className="d-inline-block align-top"
+                  className="d-inline-block align-top header-logo"
                   alt="logo"
                   href="home"
                   onClick={redirectToHome}
@@ -1090,7 +1088,7 @@ export default function Chat() {
               </Navbar.Brand>
             </Navbar>
           </Typography>
-          <Button className="btn-abandon mx-3" onClick={redirectToAfter}>
+          <Button className="btn-chat abandon mx-3" onClick={redirectToAfter}>
             Abandon Chat
           </Button>
           <IconButton
