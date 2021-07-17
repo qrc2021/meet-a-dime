@@ -242,3 +242,8 @@ p {
     font-size: 10px;
   }
 }
+
+#uploadButton {
+  background-color: #b39bc8;
+  color: 'white';
+}
