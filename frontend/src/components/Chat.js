@@ -34,7 +34,7 @@ import ReportIcon from '@material-ui/icons/Report';
 
 var bp = require('../Path.js');
 const firestore = firebase.firestore();
-const EXPIRE_IN_MINUTES = 0.2; // 10 minutes
+const EXPIRE_IN_MINUTES = 3; // 10 minutes
 const modalExpire = 10000; // 30 seconds in MS
 
 // Drawer
