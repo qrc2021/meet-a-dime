@@ -248,7 +248,7 @@ export default function SignUp() {
           <Formik
             validationSchema={schema}
             onSubmit={(values) => {
-              handleSubmitForm();
+              if (isLegal(values.dateOfBirth)) handleSubmitForm();
             }}
             initialValues={{
               firstName: '',

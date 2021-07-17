@@ -39,7 +39,7 @@ export default function Verify() {
       setLoading(true);
       //   await resetPassword(emailRef.current.value);
       await verify();
-      setMessage('Verify email is sent');
+      setMessage('Verification Email Sent');
       setPressed(true);
     } catch (error) {
       setError(error.message);
@@ -93,14 +93,14 @@ export default function Verify() {
             src="DimeAssets/envelope.png"
           />
           {error && <Alert severity="error">{error}</Alert>}
-          {message && <Alert severity="success">{message}</Alert>}
+          {/* {message && <Alert severity="success">{message}</Alert>} */}
           <Form onSubmit={handleSubmit}>
             <Button
               disabled={loading || pressed}
               variant="top"
               className="btn-primary w-100 mt-2 mb-3"
               type="submit">
-              Send Email Verification
+              {pressed ? message : 'Click to Send Email Verification'}
             </Button>
           </Form>
           <h3
@@ -110,7 +110,7 @@ export default function Verify() {
               fontSize: '30px',
               color: '#7E7E7E',
             }}>
-            Make sure to check your inbox to verify your email.
+            {pressed && 'Make sure to check your inbox to verify your email.'}
           </h3>
         </Card.Body>
       </Card>

@@ -112,7 +112,7 @@ export default function UpdateProfile() {
     ) {
       try {
         await firestore.collection('users').doc(currentUser.uid).delete();
-        deleteUser();
+        await deleteUser();
       } catch (error) {
         scrollToTop();
         return setError('Failed to delete account' + error);
