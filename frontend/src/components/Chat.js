@@ -191,6 +191,8 @@ export default function Chat() {
   const [match_photo, setMatchPhoto] = useState('');
   const [my_photo, setMyPhoto] = useState('');
 
+  const [isOffline, setIsOffline] = useState(false);
+
   const matchPhotoRef = useRef('');
   const myPhotoRef = useRef('');
   // console.log(socket);
@@ -654,6 +656,18 @@ export default function Chat() {
     // the doc in the background.
     clearTimeout(timeout_5);
     setMyPhoto(JSON.parse(localStorage.getItem('user_data')).photo);
+
+    window.ononline = (event) => {
+      console.log('You are now connected to the network.');
+      displayMessage('You are back online!', 'system');
+      setIsOffline(false);
+    };
+    window.onoffline = (event) => {
+      console.log('You are NOT connected to the network.');
+      displayMessage('You are offline!', 'system');
+      setIsOffline(true);
+    };
+
     // In case the user navigates here directly by accident.
     if (
       history.location &&
@@ -675,7 +689,8 @@ export default function Chat() {
         restorePreviousMessages();
       }
     });
-    const sock = io(bp.buildPath(''), { forceNew: true });
+    // const sock = io(bp.buildPath(''), { forceNew: true });
+    const sock = io(bp.buildPath(''));
     var roomInUseEffect = '';
     sock.auth = { id };
     sock.connect();
@@ -895,7 +910,7 @@ export default function Chat() {
 
       if (mode === 'recieved') image.src = matchPhotoRef.current;
       else image.src = myPhotoRef.current;
-      console.log(image.src);
+
       image.classList.add('chat-image');
       div.classList.add('message');
       div.classList.add(mode);
@@ -1206,7 +1221,9 @@ export default function Chat() {
                       ref={messageRef}
                     />
                     <Button
-                      disabled={room === '' || afterChat ? true : false}
+                      disabled={
+                        isOffline || room === '' || afterChat ? true : false
+                      }
                       type="submit"
                       id="send-button">
                       Send
