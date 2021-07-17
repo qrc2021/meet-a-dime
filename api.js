@@ -300,6 +300,47 @@ exports.setApp = function (app, admin) {
     res.status(200).json(ret);
   });
 
+  app.post("/api/getemailverified", async (req, res) => {
+    const user = req["currentUser"];
+    var obj = ({ uid: uid } = req.body);
+
+    if (!user) {
+      responseObj = { error: "You must be logged in." };
+
+      var ret = responseObj;
+      res.status(403).json(ret);
+      return;
+    }
+
+    if (obj.uid !== user.user_id) {
+      responseObj = { error: "Not authorized." };
+
+      var ret = responseObj;
+      res.status(403).json(ret);
+      return;
+    }
+
+    var err = "";
+    var response = "";
+    var responseObj = {};
+    try {
+      var user_doc = await admin.auth().getUser(obj.uid);
+      var user_obj = user_doc.toJSON();
+
+      var returning = { verified: user_obj.emailVerified };
+
+      res.status(200).json(returning);
+      return;
+    } catch (error) {
+      err = error.message;
+      responseObj = { error: err };
+    }
+
+    var ret = responseObj;
+    // console.log(responseObj);
+    res.status(200).json(ret);
+  });
+
   app.post("/api/newuser", async (req, res) => {
     const obj = ({
       email,
