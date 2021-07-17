@@ -269,7 +269,7 @@ export default function Prompts() {
     <>
       <Card>
         <Card.Body>
-          <h2 className="text-center mb-3">Conversation Starters</h2>
+          <h1 className="header text-center mb-3">Conversation Starters</h1>
           {error && <Alert variant="danger">{error}</Alert>}
 
           {loadedInForm && (

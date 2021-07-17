@@ -6,6 +6,11 @@ body {
   background-color: #ffffff;
 }
 
+.header {
+  font-weight: bold;
+  color: #e64398;
+}
+
 .btn-primary {
   font-weight: bold;
   font-size: 24px;
@@ -151,7 +156,7 @@ p {
 
 .sent p {
   color: white;
-  background: #0b93f6;
+  background: #e64398;
   align-self: flex-end;
 }
 .received p {
