@@ -679,7 +679,7 @@ export default function Chat() {
       }
     });
     // const sock = io(bp.buildPath(''), { forceNew: true });
-    const sock = io(bp.buildPath(''));
+    var sock = io(bp.buildPath(''));
     var roomInUseEffect = '';
     sock.auth = { id };
     sock.connect();
@@ -814,12 +814,82 @@ export default function Chat() {
         console.log('LEFT MY ROOM');
       }, 0);
     });
+
+    // All this is duplicate logic for new listeners when the
+    // user comes BACK online. this only fires when offline -> online.
     window.ononline = (event) => {
       console.log('You are now connected to the network.');
       displayMessage('You are back online!', 'system');
-      if (sock !== undefined && sock !== null)
+      if (window.location.pathname === '/chat') {
         sock.emit('leave-room-silently', currentUser.uid, room);
-      if (sock !== undefined && sock !== null)
+        sock = io(bp.buildPath(''));
+        roomInUseEffect = '';
+        sock.auth = { id };
+        sock.connect();
+        sock.on('connect', () => {
+          console.log(
+            `Email: "${currentUser.email}" \n With User ID: "${currentUser.uid}" connected with socket id: "${sock.id}"`
+          );
+        });
+        setSocket(sock);
+        socketRef.current = sock;
+        sock.on('message', (message, user) => {
+          if (user !== currentUser.uid) {
+            displayMessage(message, 'received');
+            localStorage.setItem(
+              JSON.stringify(localStorageKey.current),
+              'them'
+            );
+            localStorageKey.current += 7;
+            localStorage.setItem(
+              JSON.stringify(localStorageKey.current),
+              message
+            );
+            localStorageKey.current += 7;
+          }
+          console.log(user);
+        });
+        sock.on('abandoned', (message) => {
+          //match left & setting the pair as no match
+          displayMessage('Your match left the chat. Switching..', 'system');
+          clearChatData();
+
+          setTimeout(async () => {
+            await firestore
+              .collection('users')
+              .doc(currentUser.uid)
+              .update({
+                FailMatch: firebase.firestore.FieldValue.arrayUnion(match_id),
+              });
+            await firestore
+              .collection('users')
+              .doc(match_id)
+              .update({
+                FailMatch: firebase.firestore.FieldValue.arrayUnion(
+                  currentUser.uid
+                ),
+              });
+
+            console.log(refAfterChat.current);
+            if (!refAfterChat.current) {
+              history.push('/after', {
+                state: { match_id: match_id, type: 'match_abandoned' },
+              });
+            } else {
+              history.push('/after', {
+                state: { match_id: match_id, type: 'match_didnt_go_well' },
+              });
+            }
+            sock.emit('leave-room', currentUser.uid, room);
+            if (timeoutRef1.current !== undefined)
+              clearTimeout(timeoutRef1.current);
+            if (timeoutRef2.current !== undefined)
+              clearTimeout(timeoutRef2.current);
+            if (extendedTimeoutRef.current !== undefined)
+              clearTimeout(extendedTimeoutRef.current);
+            console.log('LEFT MY ROOM');
+          }, 0);
+        });
         sock.emit(
           'join-room',
           currentUser.uid.toString(),
@@ -840,11 +910,16 @@ export default function Chat() {
             }
           }
         );
+      }
       setIsOffline(false);
-    };
+    }; // END of window.ononline
+
     window.onoffline = (event) => {
       console.log('You are NOT connected to the network.');
-      displayMessage('You are offline!', 'system');
+      displayMessage(
+        'You are offline! Messages will send when you reconnect.',
+        'system'
+      );
       setIsOffline(true);
     };
     return () => {
