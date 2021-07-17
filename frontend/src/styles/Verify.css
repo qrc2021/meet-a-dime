@@ -178,3 +178,11 @@ p {
   border-radius: 50%;
   margin: 2px 5px;
 }
+
+.footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  color: white;
+}

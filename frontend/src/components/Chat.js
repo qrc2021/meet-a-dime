@@ -1,5 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Navbar, Container, Form, Modal, Image, Button } from 'react-bootstrap';
+import {
+  Navbar,
+  Container,
+  Form,
+  Modal,
+  Image,
+  Button,
+  InputGroup,
+  FormControl,
+} from 'react-bootstrap';
 import ReactRoundedImage from 'react-rounded-image';
 import Grid from '@material-ui/core/Grid';
 import { useAuth } from '../contexts/AuthContext';
@@ -874,7 +883,7 @@ export default function Chat() {
       image.classList.add('chat-image');
       div.classList.add('message');
       div.classList.add(mode);
-      p.textContent = message + suffix;
+      p.textContent = message;
       if (mode !== 'system') div.appendChild(image);
       div.appendChild(p);
 
@@ -1167,26 +1176,32 @@ export default function Chat() {
       <React.Fragment>
         <Container>
           <div id="message-container" className=""></div>
-          <div id="scrollReference"></div>
-          <hr></hr>
-          {!afterChat && (
-            <Form onSubmit={handleSubmit}>
-              <Form.Label>Message</Form.Label>
-              <Form.Control
-                type="text"
-                id="message_input"
-                autoComplete="off"
-                ref={messageRef}></Form.Control>
-              <Button
-                disabled={room === '' || afterChat ? true : false}
-                type="submit"
-                id="send-button">
-                Send
-              </Button>
-              <br></br>
-              {/* <h3>Our room id: {room}</h3> */}
-            </Form>
-          )}
+          <div style={{ height: '50px' }} id="scrollReference"></div>
+
+          <div className="footer">
+            {!afterChat && (
+              <Container>
+                <Form onSubmit={handleSubmit}>
+                  <InputGroup>
+                    <FormControl
+                      placeholder="Say something nice..."
+                      aria-label="Message"
+                      type="text"
+                      id="message_input"
+                      autoComplete="off"
+                      ref={messageRef}
+                    />
+                    <Button
+                      disabled={room === '' || afterChat ? true : false}
+                      type="submit"
+                      id="send-button">
+                      Send
+                    </Button>
+                  </InputGroup>
+                </Form>
+              </Container>
+            )}
+          </div>
         </Container>
         {/* <Button
           className={!afterChat ? 'btn btn-danger' : 'btn btn-primary'}
