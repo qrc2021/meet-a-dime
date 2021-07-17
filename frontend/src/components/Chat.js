@@ -40,7 +40,7 @@ const modalExpire = 10000; // 30 seconds in MS
 // Drawer
 const drawerWidth = 300;
 // Users sending messages
-const isSentByCurrentUser = false;
+var isSentByCurrentUser = false;
 const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
@@ -846,24 +846,31 @@ export default function Chat() {
       var suffix = '';
       if (mode === 'received') {
         suffix = ' (them)';
-        const div = document.createElement('div');
-        div.textContent = message + suffix;
-        document.getElementById('message-recv').append(div);
+        // const div = document.createElement('div');
+        // div.textContent = message + suffix;
+        // document.getElementById('message-recv').append(div);
       } else if (mode === 'sent') {
         suffix = ' (you)';
-        const div = document.createElement('div');
-        div.textContent = message + suffix;
-        document.getElementById('message-sent').append(div);
-        isSentByCurrentUser = true;
+        // const div = document.createElement('div');
+        // div.textContent = message + suffix;
+        // document.getElementById('message-sent').append(div);
+        // isSentByCurrentUser = true;
       } else if (mode === 'system') {
         suffix = ' [[sys msg, remove suffix later]]';
-        const div = document.createElement('div');
-        div.textContent = message + suffix;
-        document.getElementById('message-container').append(div);
+        // const div = document.createElement('div');
+        // div.textContent = message + suffix;
+        // document.getElementById('message-container').append(div);
       }
-      // const div = document.createElement('div');
-      // div.textContent = message + suffix;
-      // document.getElementById('message-container').append(div);
+      const div = document.createElement('div');
+      const p = document.createElement('p');
+      div.classList.add('message');
+      div.classList.add(mode);
+      p.textContent = message + suffix;
+      div.appendChild(p);
+      document.getElementById('message-container').append(div);
+      document
+        .getElementById('scrollReference')
+        .scrollIntoView({ behavior: 'smooth' });
     }
   }
 
@@ -1148,14 +1155,8 @@ export default function Chat() {
 
       <React.Fragment>
         <Container>
-          <div id="message-container" className="">
-          </div>
-          <div id="message-recv" className=" justifyStart">
-            <div className=""></div>
-          </div>
-          <div id="message-sent" className="talk-bubble tri-right border round btm-left-in justifyEnd">
-            <div className=""></div>
-          </div>
+          <div id="message-container" className=""></div>
+          <div id="scrollReference"></div>
           <hr></hr>
           {!afterChat && (
             <Form onSubmit={handleSubmit}>
