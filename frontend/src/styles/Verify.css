@@ -186,3 +186,33 @@ p {
   width: 100%;
   color: white;
 }
+
+#signUpDimeImage {
+  max-width: 400px;
+  width: 60%;
+  margin: auto;
+  display: block;
+}
+
+@media only screen and (min-width: 600px) and (max-width: 960px) {
+  #signUpDimeImage {
+    width: 40%;
+  }
+}
+
+@media only screen and (min-width: 960px) {
+  #signUpDimeImage {
+    max-width: none;
+    width: 100%;
+  }
+}
+
+.header-logo {
+  width: 300px;
+  height: 100%;
+}
+@media only screen and (max-width: 350px) {
+  .header-logo {
+    width: 200px;
+  }
+}
