@@ -7,6 +7,8 @@ import {
   Image,
   Button,
   InputGroup,
+  Row,
+  Col,
   FormControl,
 } from 'react-bootstrap';
 import ReactRoundedImage from 'react-rounded-image';
