@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 // import { Button, Alert, Container, Form } from 'react-bootstrap';
 import { Alert } from '@material-ui/lab';
 import Container from '@material-ui/core/Container';
+import Grid from '@material-ui/core/Grid';
+import ReactRoundedImage from 'react-rounded-image';
 // import Button from '@material-ui/core/Button';
 import { useAuth } from '../contexts/AuthContext';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -336,8 +338,14 @@ export default function After() {
           </IconButton>
         </Toolbar>
       </AppBar>
-      <h2 className="text-center mb-4 pt-4 mt-4">After Chat</h2>
-
+      <Grid
+          container
+          direction="column"
+          justifyContent="flex-end"
+          alignItems="center"
+          style={{
+              marginTop: '18%'
+          }}>
       {/* {error && <Alert severity="error">{error}</Alert>} */}
       {pageType && pageType === 'match_abandoned' && (
         <Alert severity="info">{'Your match left.'}</Alert>
@@ -385,36 +393,43 @@ export default function After() {
           }
         </Alert>
       )}
-      <Container>
-        <strong>Email:</strong> {currentUser.email}
-        <br></br>
-        <strong>User ID:</strong> {currentUser.uid}
-        <br></br>
-        <strong>MATCH:</strong> {match_id}
-        <br></br>
-        <strong>their age:</strong> {match_age}
-        <br></br>
-        <strong>their name:</strong> {match_name}
-        <br></br>
-        <strong>their sex:</strong> {match_sex}
-        <br></br>
-        <strong>their photo:</strong>
-        <br></br>
-        {match_photo !== '' ? (
-          <img
-            height="100px"
-            width="100px"
-            src={match_photo}
-            id="matchPhoto"
-            alt="Pic of match"></img>
-        ) : (
-          <></>
-        )}
-        <hr></hr>
-        {pageType === 'match_made' && <h3>Super temporary:</h3>}
-        {pageType === 'match_made' && <h3>their #: {match_phoneNumber}</h3>}
-        {pageType === 'match_made' && <h3>their msg: {match_exitMessage}</h3>}
-      </Container>
+     
+
+          {match_photo !== '' ? (
+              <ReactRoundedImage
+                  imageHeight="150"
+                  imageWidth="150"
+                  image={match_photo}
+                  id="photo"
+                  roundedSize="13"
+                  borderRadius="150"
+                  alt="My Profile Pic"
+                  hoverColor="pink"
+                  style={{
+                          marginTop: '25px'
+                      }}
+              />
+          ) : (
+                  <ReactRoundedImage
+                      className="img-fluid"
+                      image="DimeAssets/coinsignup.png"
+                      height="300px"
+                      width="300px"
+                      roundedSize="13"
+                      borderRadius="150"
+                      alt="Default Pic"
+                      hoverColor="pink"
+                      style={{
+                          marginTop: '25px'
+                      }}
+                  />)}
+          <h2 className="text-center mb-3" style={{ color: '#E64398' }}>
+              {match_name}
+          </h2>
+          {pageType === 'match_made' && <h3 style={{ color: '#E64398'}}>Congratulations!</h3>}
+          {pageType === 'match_made' && <h3 style={{ color: '#E64398' }}>{match_phoneNumber}</h3>}
+          {pageType === 'match_made' && <h3 style={{ color: '#E64398' }}>{match_exitMessage}</h3>}
+      </Grid>
       {/* <Button variant="contained" color="primary" onClick={redirectToHome}>
         Home
       </Button> */}

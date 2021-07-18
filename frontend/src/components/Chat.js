@@ -1221,17 +1221,18 @@ export default function Chat() {
           </div>
         )}
       </AppBar>
-      <h3 className="text-center mb-4">
-        (going home will make the users lose the match). for now they can still
-        research for eachother tho
-      </h3>
+      
       {error && <Alert severity="error">{error}</Alert>}
-
+     
       <Grid
         container
         direction="column"
-        justifyContent="center"
-        alignItems="center">
+        justifyContent="flex-end"
+        alignItems="center"
+        style={{
+            marginTop: '18%'
+        }}>
+             
         {match_photo !== '' ? (
           <ReactRoundedImage
             imageHeight="150"
@@ -1243,10 +1244,7 @@ export default function Chat() {
             alt="My Profile Pic"
             hoverColor="pink"
             onClick={handleModalOpen}
-            style={{
-              cursor: 'pointer',
-              marginTop: '5px',
-            }}
+          
           />
         ) : (
           <ReactRoundedImage
@@ -1259,10 +1257,7 @@ export default function Chat() {
             alt="Default Pic"
             hoverColor="pink"
             onClick={handleModalOpen}
-            style={{
-              cursor: 'pointer',
-              marginTop: '5px',
-            }}
+
           />
         )}
         <Modal
