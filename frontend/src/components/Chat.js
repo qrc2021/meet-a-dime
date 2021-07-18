@@ -262,14 +262,15 @@ export default function Chat() {
       setMatchSex(response.data.sex);
       setMatchPhoto(response.data.photo);
       matchPhotoRef.current = response.data.photo;
-      myPhotoRef.current = response.data.photo;
+      var my_profile_pic = JSON.parse(localStorage.getItem('user_data')).photo;
+      myPhotoRef.current = my_profile_pic;
     } catch (error) {
       console.log(error);
     }
   }
 
   async function checkSearchingDoc(socketInstance) {
-    console.log('Checking searching doc');
+    // console.log('Checking searching doc');
     var myDoc = await firestore
       .collection('searching')
       .doc(currentUser.uid)
@@ -337,6 +338,10 @@ export default function Chat() {
   }
 
   async function noMatchTimeout() {
+    if (window.location.pathname !== '/chat') {
+      console.log('tried to run no match timeout, but was not on chat page.');
+      return;
+    }
     var seeker = 'none';
     var match = 'none';
     clearChatData();
@@ -771,7 +776,7 @@ export default function Chat() {
         localStorage.setItem(JSON.stringify(localStorageKey.current), message);
         localStorageKey.current += 7;
       }
-      console.log(user);
+      // console.log(user);
     });
     sock.on('abandoned', (message) => {
       //match left & setting the pair as no match
@@ -1006,8 +1011,11 @@ export default function Chat() {
       const p = document.createElement('p');
       const image = document.createElement('img');
 
-      if (mode === 'recieved') image.src = matchPhotoRef.current;
-      else image.src = myPhotoRef.current;
+      if (mode === 'received') {
+        image.src = matchPhotoRef.current;
+      } else {
+        image.src = myPhotoRef.current;
+      }
 
       image.classList.add('chat-image');
       div.classList.add('message');
@@ -1221,18 +1229,17 @@ export default function Chat() {
           </div>
         )}
       </AppBar>
-      
+
       {error && <Alert severity="error">{error}</Alert>}
-     
+
       <Grid
         container
         direction="column"
         justifyContent="flex-end"
         alignItems="center"
         style={{
-            marginTop: '18%'
+          marginTop: '18%',
         }}>
-             
         {match_photo !== '' ? (
           <ReactRoundedImage
             imageHeight="150"
@@ -1244,7 +1251,6 @@ export default function Chat() {
             alt="My Profile Pic"
             hoverColor="pink"
             onClick={handleModalOpen}
-          
           />
         ) : (
           <ReactRoundedImage
@@ -1257,7 +1263,6 @@ export default function Chat() {
             alt="Default Pic"
             hoverColor="pink"
             onClick={handleModalOpen}
-
           />
         )}
         <Modal
