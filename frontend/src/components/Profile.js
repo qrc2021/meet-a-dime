@@ -258,6 +258,7 @@ export default function Profile() {
               setIsUploading('Done');
               setSuccess(true);
               setIsUploading(false);
+              localStorage.removeItem('user_data');
               setTimeout(() => {
                 // setPhotoStatus(false);
                 setSuccess(false);
