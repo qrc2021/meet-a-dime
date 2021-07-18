@@ -1,8 +1,8 @@
 import React, { useRef, useState, useEffect } from 'react';
 import Link from '@material-ui/core/Link';
 //import { View, Text, ScrollView, TextInput } from 'react-native';
-import { Card, Form, Button, CardDeck } from 'react-bootstrap';
-import Container from '@material-ui/core/Container';
+import { Card, Form, Button } from 'react-bootstrap';
+import Grid from '@material-ui/core/Grid';
 import { useHistory } from 'react-router-dom';
 import { Alert } from '@material-ui/lab';
 import { useAuth } from '../contexts/AuthContext';
@@ -132,31 +132,26 @@ export default function Login() {
   document.body.style.backgroundColor = '#dceaff';
   return (
     <>
-      <Container style={{ flex: '1' }}>
-        <CardDeck
-          style={{
-            display: 'flex',
-            flexflow: 'row wrap',
-            alignItems: 'center',
-            backgroundColor: '#DCEAFF',
-            marginTop: '50px'
-          }}>
+      <Grid container direction="row" justifyContent="space-evenly" alignItems="center">
+          <Grid item xs={10} sm={10} md={5} lg={5} xl={5}>
+       
           <Card.Img
             variant="top"
             src="DimeAssets/homelogo.png"
             style={{
-              maxWidth: '600px',
-              marginRight: 'auto',
-              marginLeft: 'auto',
-            }}
+                      marginLeft: 'auto',
+                      marginRight: 'auto'
+             }}
           />
+                  </Grid>
+        <Grid item xs={10} sm={10} md={5} lg={5} xl={5}>
 
           <Card
             varient="top"
             style={{
               minWidth: '300px',
-              marginRight: 'auto',
               maxWidth: '400px',
+              marginLeft: 'auto',
               borderRadius: '30px',
             }}>
             <Card.Body>
@@ -274,8 +269,8 @@ export default function Login() {
               </Button>
             </Card.Footer>
           </Card>
-        </CardDeck>
-      </Container>
+       </Grid>
+      </Grid>
     </>
   );
 }
