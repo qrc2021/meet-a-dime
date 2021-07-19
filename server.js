@@ -113,6 +113,12 @@ io.on("connection", (socket) => {
     io.in(room).emit("seen", messageID);
     callback();
   });
+
+  // Images!
+  socket.on("send-image-to-room", (user, room, message, messageID) => {
+    socket.to(room).emit("image", message, user, messageID);
+    console.log("recieved an image");
+  });
 });
 
 app.set("port", process.env.PORT || 5000);

@@ -134,6 +134,24 @@ p {
   text-align: center;
 }
 
+.chat-message-image {
+  border-radius: 5px;
+}
+.image-container {
+  margin-bottom: 12px;
+  line-height: 24px;
+  padding: 10px 15px;
+  border-radius: 25px;
+  position: relative;
+  background: #e64398;
+}
+.sent .image-container {
+  background: #e64398;
+}
+.received .image-container {
+  background: #e5e5ea;
+}
+
 .message {
   display: flex;
   align-items: center;
@@ -152,6 +170,7 @@ p {
   background: #e5e5ea;
   color: black;
 }
+
 .system p {
   color: grey;
   text-align: center;

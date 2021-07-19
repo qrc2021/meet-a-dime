@@ -4,7 +4,6 @@ import {
   Container,
   Form,
   Modal,
-  Image,
   Button,
   InputGroup,
   Row,
@@ -48,6 +47,7 @@ import ErrorIcon from '@material-ui/icons/Error';
 var bp = require('../Path.js');
 const firestore = firebase.firestore();
 const EXPIRE_IN_MINUTES = 5; // 10 minutes
+const MESSAGE_IMAGE_WIDTH = 200; // just a const for easy changing.
 const modalExpire = 10000; // 30 seconds in MS
 
 // Drawer
@@ -171,7 +171,8 @@ export default function Chat() {
   const [switching, setSwitching] = useState(false);
 
   const messageRef = useRef();
-
+  const photoButtonRef = useRef();
+  const photoAttachRef = useRef();
   const timeoutRef1 = useRef();
   const timeoutRef2 = useRef();
   const extendedTimeoutRef = useRef();
@@ -626,21 +627,21 @@ export default function Chat() {
           </h5>
         </Modal.Body>
         <Modal.Footer className="mx-auto">
-          <Image
+          <img
             style={{ height: '200px', width: '200px', cursor: 'pointer' }}
             src="DimeAssets/hearteyes.png"
             id="heartEyesImage"
             onClick={pendingMatch}
             alt="Tails"
           />
-          <Image
+          <img
             style={{ height: '200px', width: '200px', cursor: 'pointer' }}
             src="DimeAssets/sleepycoin.png"
             id="sleepyImage"
             onClick={noMatch}
             alt="Heads"
           />
-          <Image
+          <img
             style={{
               height: '200px',
               width: '200px',
@@ -790,6 +791,37 @@ export default function Chat() {
       }
       // console.log(user);
     });
+    sock.on('image', (message, user, message_ID) => {
+      if (user !== currentUser.uid) {
+        var image = new Image();
+        image.src = message;
+        image.onload = () => {
+          // console.log(image.width);
+          // console.log(image.height);
+          // console.log('Calculated new height.');
+          var image_scale = image.width / MESSAGE_IMAGE_WIDTH;
+          image.width = image.width / image_scale;
+          image.height = image.height / image_scale;
+          // console.log(image.width);
+          // console.log(image.height);
+
+          // Pass the result, the image height as well to get proper sizing.
+          displayImage(message, 'received', image.height);
+
+          sock.emit(
+            'seen-message',
+            currentUser.uid,
+            new_room,
+            message_ID,
+            function () {
+              // console.log('I sent to the room that I saw that message.');
+            }
+          );
+          image.onload = null;
+        };
+      }
+      // console.log(user);
+    });
 
     sock.on('seen', (messageID) => {
       if (document.getElementById(messageID) !== null)
@@ -878,6 +910,38 @@ export default function Chat() {
                 // console.log('I sent to the room that I saw that message.');
               }
             );
+          }
+          // console.log(user);
+        });
+
+        sock.on('image', (message, user, message_ID) => {
+          if (user !== currentUser.uid) {
+            var image = new Image();
+            image.src = message;
+            image.onload = () => {
+              // console.log(image.width);
+              // console.log(image.height);
+              // console.log('Calculated new height.');
+              var image_scale = image.width / MESSAGE_IMAGE_WIDTH;
+              image.width = image.width / image_scale;
+              image.height = image.height / image_scale;
+              // console.log(image.width);
+              // console.log(image.height);
+
+              // Pass the result, the image height as well to get proper sizing.
+              displayImage(message, 'received', image.height);
+
+              sock.emit(
+                'seen-message',
+                currentUser.uid,
+                new_room,
+                message_ID,
+                function () {
+                  // console.log('I sent to the room that I saw that message.');
+                }
+              );
+              image.onload = null;
+            };
           }
           // console.log(user);
         });
@@ -1004,6 +1068,47 @@ export default function Chat() {
     const message = messageRef.current.value;
     // const room_ = room;
 
+    if (photoAttachRef.current.files.length === 1) {
+      const reader = new FileReader();
+      console.log('new reader');
+      reader.readAsDataURL(photoAttachRef.current.files[0]);
+      reader.onloadend = function () {
+        // console.log(reader.result);
+        console.log('finished reading.');
+
+        var image = new Image();
+        image.src = reader.result;
+        image.onload = () => {
+          // console.log(image.width);
+          // console.log(image.height);
+          // console.log('changed..');
+          var image_scale = image.width / MESSAGE_IMAGE_WIDTH;
+          image.width = image.width / image_scale;
+          image.height = image.height / image_scale;
+          // console.log(image.width);
+          // console.log(image.height);
+          var image_id = Date().toString() + image.height.toString();
+          // Pass the result, the image height as well to get proper sizing.
+          displayImage(reader.result, 'sent', image.height, image_id);
+          // scrollReference;
+          socket.emit(
+            'send-image-to-room',
+            currentUser.uid,
+            room,
+            reader.result,
+            image_id
+            // function () {
+            //   console.log('recieved on server side.');
+            // }
+          );
+          photoAttachRef.current.value = null;
+          photoButtonRef.current.textContent = 'Photo';
+          image.onload = null;
+        };
+
+        reader.onloadend = null;
+      };
+    }
     if (message === '') return;
 
     var messageID = '';
@@ -1066,6 +1171,59 @@ export default function Chat() {
       }
     );
     messageRef.current.value = '';
+  }
+
+  function displayImage(message, mode, height, messageID) {
+    if (window.location.pathname === '/chat') {
+      var suffix = '';
+      if (mode === 'received') {
+        suffix = ' (them)';
+      } else if (mode === 'sent') {
+        suffix = ' (you)';
+      } else if (mode === 'system') {
+        suffix = ' [[sys msg, remove suffix later]]';
+      }
+      const div = document.createElement('div');
+      const image_container = document.createElement('div');
+      image_container.classList.add('image-container');
+      const img_message = document.createElement('img');
+
+      const subtext = document.createElement('code');
+      subtext.innerHTML =
+        ' <i class="fas fa-exclamation-triangle"></i> ' + 'undelivered&nbsp;';
+
+      subtext.setAttribute('id', messageID);
+      subtext.setAttribute('class', 'subtext-' + mode);
+
+      const image = document.createElement('img');
+      img_message.width = `${MESSAGE_IMAGE_WIDTH}`;
+      // img_message.height = '200';
+      if (mode === 'received') {
+        image.src = matchPhotoRef.current;
+      } else {
+        image.src = myPhotoRef.current;
+      }
+      image.classList.add('chat-image');
+      img_message.classList.add('chat-message-image');
+      div.classList.add('message');
+      div.classList.add(mode);
+
+      // p.textContent = message;
+      img_message.src = message;
+      if (mode !== 'system') div.appendChild(image);
+
+      image_container.appendChild(img_message);
+
+      div.appendChild(image_container);
+
+      document.getElementById('message-container').append(div);
+      if (mode === 'sent' && messageID !== '')
+        document.getElementById('message-container').append(subtext);
+      document.getElementById('scrollReference').style.height = height / 2 + 50;
+      document
+        .getElementById('scrollReference')
+        .scrollIntoView({ behavior: 'smooth' });
+    }
   }
 
   // Two modes added for some extra processing (like maybe classes or etc)
@@ -1405,7 +1563,29 @@ export default function Chat() {
             {!afterChat && (
               <Container>
                 <Form onSubmit={handleSubmit}>
+                  <input
+                    onChange={(e) => {
+                      console.log(photoAttachRef.current.files);
+                      if (photoAttachRef.current.files.length === 1) {
+                        photoButtonRef.current.textContent =
+                          photoAttachRef.current.files[0].name.substring(0, 5) +
+                          '..';
+                      }
+                    }}
+                    ref={photoAttachRef}
+                    accept="image/*"
+                    id="photoAttach"
+                    hidden
+                    type="file"
+                  />
                   <InputGroup>
+                    <Button
+                      ref={photoButtonRef}
+                      onClick={() => {
+                        document.getElementById('photoAttach').click();
+                      }}>
+                      Photo
+                    </Button>
                     <FormControl
                       placeholder="Say something nice..."
                       aria-label="Message"
