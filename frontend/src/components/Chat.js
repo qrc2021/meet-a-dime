@@ -1022,6 +1022,15 @@ export default function Chat() {
     }
     messageID = hash_str(message).toString();
 
+    // console.log('Delivered!', messageID);
+    displayMessage(message, 'sent', messageID, isOffline);
+    console.log(isOffline);
+    //send value of message to local storage
+    localStorage.setItem(JSON.stringify(localStorageKey.current), 'me');
+    localStorageKey.current += 7;
+    localStorage.setItem(JSON.stringify(localStorageKey.current), message);
+    localStorageKey.current += 7;
+
     // ARGS ARE: from, room, message
     socket.emit(
       'send-to-room',
@@ -1029,22 +1038,30 @@ export default function Chat() {
       room,
       message,
       messageID,
-      function () {
-        // console.log('Delivered!', messageID);
-        displayMessage(message, 'sent', messageID);
-
-        //send value of message to local storage
-        localStorage.setItem(JSON.stringify(localStorageKey.current), 'me');
-        localStorageKey.current += 7;
-        localStorage.setItem(JSON.stringify(localStorageKey.current), message);
-        localStorageKey.current += 7;
+      isOffline,
+      function (originally_sent_offline) {
+        // This function gets called when message reaches the server.
+        if (
+          originally_sent_offline &&
+          document.getElementById(messageID) !== null
+        ) {
+          // document.getElementById(messageID).remove();
+          document.getElementById(messageID).innerHTML = 'delivered!';
+        }
+        // // console.log('Delivered!', messageID);
+        // displayMessage(message, 'sent', messageID);
+        // //send value of message to local storage
+        // localStorage.setItem(JSON.stringify(localStorageKey.current), 'me');
+        // localStorageKey.current += 7;
+        // localStorage.setItem(JSON.stringify(localStorageKey.current), message);
+        // localStorageKey.current += 7;
       }
     );
     messageRef.current.value = '';
   }
 
   // Two modes added for some extra processing (like maybe classes or etc)
-  function displayMessage(message, mode, messageID = '') {
+  function displayMessage(message, mode, messageID = '', is_offline) {
     if (window.location.pathname === '/chat') {
       var suffix = '';
       if (mode === 'received') {
@@ -1071,6 +1088,10 @@ export default function Chat() {
       const subtext = document.createElement('code');
       subtext.innerHTML =
         ' <i class="fas fa-exclamation-triangle"></i> ' + 'undelivered&nbsp;';
+      if (is_offline) {
+        subtext.innerHTML =
+          ' <i class="fas fa-wifi"></i> ' + 'sent offline&nbsp;';
+      }
       subtext.setAttribute('id', messageID);
       subtext.setAttribute('class', 'subtext-' + mode);
 

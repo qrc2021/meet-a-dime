@@ -70,6 +70,7 @@ export default function Login() {
   }
   // This is to clear the old searching data when a user logouts.
   useEffect(() => {
+    localStorage.removeItem('user_data');
     const firestore = firebase.firestore();
     async function purgeOld() {
       // Lock the search button until these tasks are complete.
