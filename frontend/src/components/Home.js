@@ -24,9 +24,13 @@ import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
+import ChatIcon from '@material-ui/icons/Chat';
 import List from '@material-ui/core/List';
 import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
+import Zoom from '@material-ui/core/Zoom';
+import Fade from '@material-ui/core/Fade';
+import Collapse from '@material-ui/core/Collapse';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
@@ -38,6 +42,7 @@ import CreateIcon from '@material-ui/icons/Create';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 // import TextField from '@material-ui/core/TextField';
 import LinearProgress from '@material-ui/core/LinearProgress';
+import Tooltip from '@material-ui/core/Tooltip';
 
 // import Paper from '@material-ui/core/Paper';
 // import Grid from '@material-ui/core/Grid';
@@ -112,18 +117,6 @@ const useStyles = makeStyles((theme) => ({
 export default function Home() {
   // Drawer
   const classes = useStyles();
-  const itemsList = [
-    {
-      text: 'Edit Profile',
-      icon: <CreateIcon style={{ color: '#e64398' }} />,
-      onClick: redirectToProfile,
-    },
-    {
-      text: 'Logout',
-      icon: <ExitToAppIcon style={{ color: '#e64398' }} />,
-      onClick: handleLogout,
-    },
-  ];
 
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
@@ -140,7 +133,9 @@ export default function Home() {
   const [sopen, setOpenSearch] = React.useState(false);
 
   const handleSearchOpen = () => {
+    setTooltipOpen(false);
     setOpenSearch(true);
+    handleDrawerClose();
     searching();
   };
 
@@ -148,6 +143,28 @@ export default function Home() {
     killSearch();
     setOpenSearch(false);
   };
+
+  const itemsList = [
+    {
+      text: 'New Chat',
+      tooltip: 'Find a Dime!',
+      icon: <ChatIcon style={{ color: '#e64398' }} />,
+      onClick: handleSearchOpen,
+    },
+    {
+      tooltip: 'Change your preferences and upload a photo!',
+      text: 'Edit Profile',
+      icon: <CreateIcon style={{ color: '#e64398' }} />,
+      onClick: redirectToProfile,
+    },
+    {
+      tooltip: 'Ends your session.', // this is a bit of a stretch..
+      text: 'Logout',
+      icon: <ExitToAppIcon style={{ color: '#e64398' }} />,
+      onClick: handleLogout,
+    },
+  ];
+
   const observer = useRef(null);
   const transferTimeoutRef = useRef();
 
@@ -158,7 +175,7 @@ export default function Home() {
   const [lockout, setLockout] = useState(false);
   const [loading, setLoading] = useState(true);
   const [myPhoto, setMyPhoto] = useState('');
-  const [matchPhotos, setMatchPhotos] = useState('');  
+  const [matchPhotos, setMatchPhotos] = useState('');
   const [progress, setProgress] = useState(-1);
   const [inActiveChat, setInActiveChat] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -225,8 +242,8 @@ export default function Home() {
     phone: '',
     sex: '',
     exitMessage: '',
-  })
-  
+  });
+
   // useEffect occurs only once on page load.
   // This will clear any record of the user in the 'searching' collection
   // so that it not only resets the searching state, but
@@ -382,7 +399,6 @@ export default function Home() {
       console.log('issue in fetch data');
     }
   }
-  
 
   // This makes a POST request to the server listening at /api/getmatches
   // It returns the user's Success Match array.
@@ -400,14 +416,12 @@ export default function Home() {
       };
 
       var response = await axios(config);
-      var matchesArray = response.data
-
+      var matchesArray = response.data;
     } catch (error) {
       console.log(error);
       console.log('issue in fetch data');
     }
   }
-  
 
   // When the user logs out, call the observer to unsubscribe to changes.
   // and logout.
@@ -939,6 +953,8 @@ export default function Home() {
     }
   }
 
+  const [tooltipOpen, setTooltipOpen] = useState(false);
+
   // The actual JSX components. The top is the errors/match states,
   // conditionally rendered.
   return (
@@ -962,13 +978,26 @@ export default function Home() {
               </Navbar.Brand>
             </Navbar>
           </Typography>
-
-          <Button
-            className="btn-chat mx-3"
-            disabled={lockout}
-            onClick={handleSearchOpen}>
-            New Chat
-          </Button>
+          <Tooltip
+            open={tooltipOpen}
+            onOpen={() => {
+              setTooltipOpen(true);
+            }}
+            onClose={() => {
+              setTooltipOpen(false);
+            }}
+            TransitionComponent={Zoom}
+            title={'Find a Dime!'}>
+            <span>
+              <Button
+                hidden={open}
+                className="btn-chat mx-3"
+                disabled={lockout}
+                onClick={handleSearchOpen}>
+                New Chat
+              </Button>
+            </span>
+          </Tooltip>
           <IconButton
             color="default"
             aria-label="open drawer"
@@ -1039,7 +1068,6 @@ export default function Home() {
             }
           </Alert>
         )}
-
         <Modal
           style={{
             width: '90%',
@@ -1055,57 +1083,36 @@ export default function Home() {
           open={sopen}
           // onClose={handleSearchClose}
         >
-          <div
-            className="text-center p-3"
-            style={{
-              // border: '2px solid grey',
-              borderRadius: '50px',
-              padding: '10px',
-              backgroundColor: 'rgba(0,0,0,0.5)',
-            }}>
-            {/* {!inActiveChat && match && match === 'Not searching.' && (
-              <Alert
-                style={{ width: '80%', maxWidth: '400px', margin: 'auto' }}
-                severity="warning">
-                {match}
-              </Alert>
-            )}
-            {!inActiveChat && match && match === 'Searching.' && (
-              <Alert
-                style={{ width: '80%', maxWidth: '400px', margin: 'auto' }}
-                severity="info">
-                {match}
-              </Alert>
-            )}
-            {!inActiveChat &&
-              match &&
-              match !== 'Not searching.' &&
-              match !== 'Searching.' && (
-                <Alert
-                  style={{ width: '80%', maxWidth: '400px', margin: 'auto' }}
-                  severity="success">
-                  {match}
-                </Alert>
-              )} */}
-            <img
+          <Zoom in={sopen}>
+            <div
+              className="text-center p-3"
               style={{
-                width: 420,
-                height: 'auto',
+                // border: '2px solid grey',
+                borderRadius: '50px',
+                padding: '10px',
+                backgroundColor: 'rgba(0,0,0,0.5)',
+              }}>
+              <img
+                style={{
+                  width: 420,
+                  height: 'auto',
 
-                marginRight: 'auto',
-                marginLeft: 'auto',
-              }}
-              className="img-fluid"
-              alt="gifload"
-              src="DimeAssets/searchcoin.gif"
-            />
-            <button
-              style={{ display: 'block', margin: 'auto' }}
-              onClick={handleSearchClose}
-              className="btn btn-outline-light">
-              Stop Searching
-            </button>
-          </div>
+                  marginRight: 'auto',
+                  marginLeft: 'auto',
+                }}
+                className="img-fluid"
+                alt="gifload"
+                src="DimeAssets/searchcoin.gif"
+              />
+
+              <button
+                style={{ display: 'block', margin: 'auto' }}
+                onClick={handleSearchClose}
+                className="btn btn-outline-light">
+                Stop Searching
+              </button>
+            </div>
+          </Zoom>
         </Modal>
       </main>
 
@@ -1131,14 +1138,19 @@ export default function Home() {
         <Divider style={{ background: '#e64398' }} />
         <List>
           {itemsList.map((item, index) => {
-            const { text, icon, onClick } = item;
+            const { text, icon, tooltip, onClick } = item;
             return (
               <ListItem button key={text} onClick={onClick}>
                 {icon && <ListItemIcon>{icon}</ListItemIcon>}
-                <ListItemText
-                  classes={{ primary: classes.listItemText }}
-                  primary={text}
-                />
+                <Tooltip
+                  placement="left"
+                  TransitionComponent={Zoom}
+                  title={tooltip}>
+                  <ListItemText
+                    classes={{ primary: classes.listItemText }}
+                    primary={text}
+                  />
+                </Tooltip>
               </ListItem>
             );
           })}
@@ -1201,6 +1213,8 @@ export default function Home() {
           <LinearProgress variant="determinate" value={progress} />
         </div>
       )}
+      {/* To cache the search coin gif! */}
+      <img hidden src="DimeAssets/searchcoin.gif" />
     </React.Fragment>
   );
 }

@@ -45,6 +45,8 @@ import HomeIcon from '@material-ui/icons/Home';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import ReportIcon from '@material-ui/icons/Report';
 import ErrorIcon from '@material-ui/icons/Error';
+import AddPhotoAlternateIcon from '@material-ui/icons/AddPhotoAlternate';
+import SendIcon from '@material-ui/icons/Send';
 
 var bp = require('../Path.js');
 const firestore = firebase.firestore();
@@ -735,7 +737,7 @@ export default function Chat() {
           noMatchTimeout();
         }, modalExpire);
       }
-    }, 2000);
+    }, 5000);
 
     var current_time = Date.now();
     checkSearchingDoc(sock);
@@ -1609,14 +1611,22 @@ export default function Chat() {
                     hidden
                     type="file"
                   />
+
                   <InputGroup>
-                    <Button
-                      ref={photoButtonRef}
-                      onClick={() => {
-                        document.getElementById('photoAttach').click();
-                      }}>
-                      Photo
-                    </Button>
+                    <Tooltip
+                      TransitionComponent={Zoom}
+                      title={'Send an image!'}>
+                      <Button
+                        ref={photoButtonRef}
+                        onClick={() => {
+                          document.getElementById('photoAttach').click();
+                        }}>
+                        <AddPhotoAlternateIcon
+                          style={{
+                            marginBottom: '5px',
+                          }}></AddPhotoAlternateIcon>
+                      </Button>
+                    </Tooltip>
                     <FormControl
                       placeholder="Say hi! 👋"
                       aria-label="Message"
@@ -1629,7 +1639,11 @@ export default function Chat() {
                       disabled={room === '' || afterChat ? true : false}
                       type="submit"
                       id="send-button">
-                      Send
+                      Send{' '}
+                      <SendIcon
+                        style={{
+                          marginBottom: '5px',
+                        }}></SendIcon>
                     </Button>
                   </InputGroup>
                 </Form>
@@ -1684,22 +1698,22 @@ export default function Chat() {
                 : classes.listItemText;
 
             return (
-              <Tooltip
-                placement="left"
-                TransitionComponent={Zoom}
-                title={tooltip}>
-                <ListItem
-                  button
-                  key={text}
-                  onClick={onClick}
-                  style={redBGifReport}>
-                  {icon && <ListItemIcon>{icon}</ListItemIcon>}
+              <ListItem
+                button
+                key={text}
+                onClick={onClick}
+                style={redBGifReport}>
+                {icon && <ListItemIcon>{icon}</ListItemIcon>}
+                <Tooltip
+                  placement="left"
+                  TransitionComponent={Zoom}
+                  title={tooltip}>
                   <ListItemText
                     classes={{ primary: classToUse }}
                     primary={text}
                   />
-                </ListItem>
-              </Tooltip>
+                </Tooltip>
+              </ListItem>
             );
           })}
         </List>
