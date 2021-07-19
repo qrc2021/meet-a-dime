@@ -158,6 +158,7 @@ export default function Home() {
   const [lockout, setLockout] = useState(false);
   const [loading, setLoading] = useState(true);
   const [myPhoto, setMyPhoto] = useState('');
+  const [matchPhotos, setMatchPhotos] = useState('');  
   const [progress, setProgress] = useState(-1);
   const [inActiveChat, setInActiveChat] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -217,6 +218,15 @@ export default function Home() {
     ageRangeMax: '',
   });
 
+  const matchInfoRef = useRef({
+    firstName: '',
+    lastName: '',
+    photo: '',
+    phone: '',
+    sex: '',
+    exitMessage: '',
+  })
+  
   // useEffect occurs only once on page load.
   // This will clear any record of the user in the 'searching' collection
   // so that it not only resets the searching state, but
@@ -372,6 +382,32 @@ export default function Home() {
       console.log('issue in fetch data');
     }
   }
+  
+
+  // This makes a POST request to the server listening at /api/getmatches
+  // It returns the user's Success Match array.
+  async function fetchSuccessMatch() {
+    try {
+      const token = currentUser;
+      var config = {
+        method: 'post',
+        url: bp.buildPath('api/get'),
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        data: { uid: currentUser.uid },
+      };
+
+      var response = await axios(config);
+      var matchesArray = response.data
+
+    } catch (error) {
+      console.log(error);
+      console.log('issue in fetch data');
+    }
+  }
+  
 
   // When the user logs out, call the observer to unsubscribe to changes.
   // and logout.
