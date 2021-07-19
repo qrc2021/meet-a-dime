@@ -22,6 +22,7 @@ import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
 import moment from 'moment';
+import Zoom from '@material-ui/core/Zoom';
 import IconButton from '@material-ui/core/IconButton';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import imageCompression from 'browser-image-compression';
@@ -33,6 +34,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import List from '@material-ui/core/List';
 import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
+import Tooltip from '@material-ui/core/Tooltip';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
@@ -128,17 +130,20 @@ export default function Chat() {
   const itemsList = [
     {
       text: 'Home',
+      tooltip: 'This will abandon your match!',
       icon: <HomeIcon style={{ color: '#e64398' }} />,
       onClick: redirectToHome,
     },
 
     {
       text: 'Logout',
+      tooltip: 'This will abandon your match!',
       icon: <ExitToAppIcon style={{ color: '#e64398' }} />,
       onClick: handleLogout,
     },
     {
       text: 'Report Chat',
+      tooltip: 'Privately report the other user.',
       icon: <ReportIcon style={{ color: 'white' }} />,
       // onClick: handleReport,
       onClick: () => {
@@ -770,7 +775,12 @@ export default function Chat() {
           // // localStorage.setItem('activeSocket', JSON.stringify(sock));
           // console.log(sock);
           // console.log(socket);
-          displayMessage('Joined the room! Introduce yourself :)', 'system');
+          const emojis = ['❤️', '🥰', '😇'];
+          var random_emoji = emojis[Math.floor(Math.random() * 3)];
+          displayMessage(
+            'Joined the room. Good luck! ' + random_emoji,
+            'system'
+          );
         }
       }
     );
@@ -1137,7 +1147,7 @@ export default function Chat() {
         hash = (hash << 5) - hash + chr;
         hash |= 0; // Convert to 32bit integer
       }
-      return hash + Date().toString();
+      return hash + Date().toString() + Math.random(100).toString();
     }
     messageID = hash_str(message).toString();
 
@@ -1469,19 +1479,26 @@ export default function Chat() {
             <Navbar bg="transparent">
               <Navbar.Brand>
                 <img
-                  style={{ cursor: 'pointer' }}
+                  // style={{ cursor: 'pointer' }}
                   src="/DimeAssets/headerlogo.png"
                   className="d-inline-block align-top header-logo"
                   alt="logo"
                   href="home"
-                  onClick={redirectToHome}
+                  onClick={() => {}}
                 />
               </Navbar.Brand>
             </Navbar>
           </Typography>
-          <Button className="btn-chat abandon mx-3" onClick={redirectToAfter}>
-            Abandon Chat
-          </Button>
+          <Tooltip
+            TransitionComponent={Zoom}
+            title={'You will not be rematched!'}>
+            <Button
+              hidden={open}
+              className="btn-chat abandon mx-3"
+              onClick={redirectToAfter}>
+              Abandon Chat
+            </Button>
+          </Tooltip>
           <IconButton
             color="default"
             aria-label="open drawer"
@@ -1506,7 +1523,7 @@ export default function Chat() {
         justifyContent="flex-end"
         alignItems="center"
         style={{
-          marginTop: '18%',
+          marginTop: '100px',
         }}>
         {match_photo !== '' ? (
           <ReactRoundedImage
@@ -1571,7 +1588,7 @@ export default function Chat() {
       <React.Fragment>
         <Container>
           <div id="message-container" className=""></div>
-          <div style={{ height: '50px' }} id="scrollReference"></div>
+          <div style={{ height: '60px' }} id="scrollReference"></div>
 
           <div className="footer">
             {!afterChat && (
@@ -1601,7 +1618,7 @@ export default function Chat() {
                       Photo
                     </Button>
                     <FormControl
-                      placeholder="Say something nice..."
+                      placeholder="Say hi! 👋"
                       aria-label="Message"
                       type="text"
                       id="message_input"
@@ -1658,7 +1675,7 @@ export default function Chat() {
         <Divider style={{ background: '#e64398' }} />
         <List>
           {itemsList.map((item, index) => {
-            const { text, icon, onClick } = item;
+            const { text, icon, tooltip, onClick } = item;
             const redBGifReport =
               text === 'Report Chat' ? { backgroundColor: '#da3636' } : null;
             const classToUse =
@@ -1667,17 +1684,22 @@ export default function Chat() {
                 : classes.listItemText;
 
             return (
-              <ListItem
-                button
-                key={text}
-                onClick={onClick}
-                style={redBGifReport}>
-                {icon && <ListItemIcon>{icon}</ListItemIcon>}
-                <ListItemText
-                  classes={{ primary: classToUse }}
-                  primary={text}
-                />
-              </ListItem>
+              <Tooltip
+                placement="left"
+                TransitionComponent={Zoom}
+                title={tooltip}>
+                <ListItem
+                  button
+                  key={text}
+                  onClick={onClick}
+                  style={redBGifReport}>
+                  {icon && <ListItemIcon>{icon}</ListItemIcon>}
+                  <ListItemText
+                    classes={{ primary: classToUse }}
+                    primary={text}
+                  />
+                </ListItem>
+              </Tooltip>
             );
           })}
         </List>

@@ -207,7 +207,7 @@ p {
 .footer {
   position: fixed;
   left: 0;
-  bottom: 0;
+  bottom: 5px;
   width: 100%;
   color: white;
 }

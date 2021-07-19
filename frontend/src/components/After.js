@@ -339,96 +339,102 @@ export default function After() {
         </Toolbar>
       </AppBar>
       <Grid
-          container
-          direction="column"
-          justifyContent="flex-end"
-          alignItems="center"
-          style={{
-              marginTop: '18%'
-          }}>
-      {/* {error && <Alert severity="error">{error}</Alert>} */}
-      {pageType && pageType === 'match_abandoned' && (
-        <Alert severity="info">{'Your match left.'}</Alert>
-      )}
-      {pageType && pageType === 'user_abandoned' && (
-        <Alert severity="info">
-          {"Sorry it didn't go well. Keep flipping the coin!"}
-        </Alert>
-      )}
-      {pageType && pageType === 'match_didnt_go_well' && (
-        <Alert severity="info">
-          {
-            'The other user said it didnt go well (I AM PLACEHOLDER TEXT CHANGE ME LATER)'
-          }
-        </Alert>
-      )}
-      {pageType && pageType === 'user_didnt_go_well' && (
-        <Alert severity="info">
-          {
-            "Sorry it didn't go well :( Keep looking! (I AM PLACEHOLDER TEXT CHANGE ME LATER)"
-          }
-        </Alert>
-      )}
-      {pageType && pageType === 'match_timedout' && (
-        <Alert severity="info">{'Match timed out.'}</Alert>
-      )}
-      {pageType && pageType === 'match_made' && (
-        <Alert severity="info">{"You've matched with a Dime!"}</Alert>
-      )}
-      {pageType && pageType === 'timeout' && (
-        <Alert severity="info">{'Timeout'}</Alert>
-      )}
-      {pageType && pageType === 'error' && (
-        <Alert severity="error">{'Something went wrong.'}</Alert>
-      )}
-      {pageType && pageType === 'extended_timeout' && (
-        <Alert severity="info">
-          {'Timeout extended (i said yes, they did not)'}
-        </Alert>
-      )}
-      {pageType && pageType === 'user_reported' && (
-        <Alert severity="success">
-          {
-            'Other user was reported. This report is secret: the other user was not alerted.'
-          }
-        </Alert>
-      )}
-     
+        container
+        direction="column"
+        justifyContent="flex-end"
+        alignItems="center"
+        style={{
+          marginTop: '100px',
+        }}>
+        {/* {error && <Alert severity="error">{error}</Alert>} */}
+        {pageType && pageType === 'match_abandoned' && (
+          <Alert severity="info">{'Your match left.'}</Alert>
+        )}
+        {pageType && pageType === 'user_abandoned' && (
+          <Alert severity="info">
+            {"Sorry it didn't go well. Keep flipping the coin!"}
+          </Alert>
+        )}
+        {pageType && pageType === 'match_didnt_go_well' && (
+          <Alert severity="info">
+            {
+              'The other user said it didnt go well (I AM PLACEHOLDER TEXT CHANGE ME LATER)'
+            }
+          </Alert>
+        )}
+        {pageType && pageType === 'user_didnt_go_well' && (
+          <Alert severity="info">
+            {
+              "Sorry it didn't go well :( Keep looking! (I AM PLACEHOLDER TEXT CHANGE ME LATER)"
+            }
+          </Alert>
+        )}
+        {pageType && pageType === 'match_timedout' && (
+          <Alert severity="info">{'Match timed out.'}</Alert>
+        )}
+        {pageType && pageType === 'match_made' && (
+          <Alert severity="info">{"You've matched with a Dime!"}</Alert>
+        )}
+        {pageType && pageType === 'timeout' && (
+          <Alert severity="info">{'Timeout'}</Alert>
+        )}
+        {pageType && pageType === 'error' && (
+          <Alert severity="error">{'Something went wrong.'}</Alert>
+        )}
+        {pageType && pageType === 'extended_timeout' && (
+          <Alert severity="info">
+            {'Timeout extended (i said yes, they did not)'}
+          </Alert>
+        )}
+        {pageType && pageType === 'user_reported' && (
+          <Alert severity="success">
+            {
+              'Other user was reported. This report is secret: the other user was not alerted.'
+            }
+          </Alert>
+        )}
 
-          {match_photo !== '' ? (
-              <ReactRoundedImage
-                  imageHeight="150"
-                  imageWidth="150"
-                  image={match_photo}
-                  id="photo"
-                  roundedSize="13"
-                  borderRadius="150"
-                  alt="My Profile Pic"
-                  hoverColor="pink"
-                  style={{
-                          marginTop: '25px'
-                      }}
-              />
-          ) : (
-                  <ReactRoundedImage
-                      className="img-fluid"
-                      image="DimeAssets/coinsignup.png"
-                      height="300px"
-                      width="300px"
-                      roundedSize="13"
-                      borderRadius="150"
-                      alt="Default Pic"
-                      hoverColor="pink"
-                      style={{
-                          marginTop: '25px'
-                      }}
-                  />)}
-          <h2 className="text-center mb-3" style={{ color: '#E64398' }}>
-              {match_name}
-          </h2>
-          {pageType === 'match_made' && <h3 style={{ color: '#E64398'}}>Congratulations!</h3>}
-          {pageType === 'match_made' && <h3 style={{ color: '#E64398' }}>{match_phoneNumber}</h3>}
-          {pageType === 'match_made' && <h3 style={{ color: '#E64398' }}>{match_exitMessage}</h3>}
+        {match_photo !== '' ? (
+          <ReactRoundedImage
+            imageHeight="150"
+            imageWidth="150"
+            image={match_photo}
+            id="photo"
+            roundedSize="13"
+            borderRadius="150"
+            alt="My Profile Pic"
+            hoverColor="pink"
+            style={{
+              marginTop: '25px',
+            }}
+          />
+        ) : (
+          <ReactRoundedImage
+            className="img-fluid"
+            image="DimeAssets/coinsignup.png"
+            height="300px"
+            width="300px"
+            roundedSize="13"
+            borderRadius="150"
+            alt="Default Pic"
+            hoverColor="pink"
+            style={{
+              marginTop: '25px',
+            }}
+          />
+        )}
+        <h2 className="text-center mb-3" style={{ color: '#E64398' }}>
+          {match_name}
+        </h2>
+        {pageType === 'match_made' && (
+          <h3 style={{ color: '#E64398' }}>Congratulations!</h3>
+        )}
+        {pageType === 'match_made' && (
+          <h3 style={{ color: '#E64398' }}>{match_phoneNumber}</h3>
+        )}
+        {pageType === 'match_made' && (
+          <h3 style={{ color: '#E64398' }}>{match_exitMessage}</h3>
+        )}
       </Grid>
       {/* <Button variant="contained" color="primary" onClick={redirectToHome}>
         Home
