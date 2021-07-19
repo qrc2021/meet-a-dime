@@ -24,7 +24,7 @@ import 'firebase/firestore';
 import moment from 'moment';
 import IconButton from '@material-ui/core/IconButton';
 import LinearProgress from '@material-ui/core/LinearProgress';
-
+import imageCompression from 'browser-image-compression';
 import clsx from 'clsx';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
@@ -47,7 +47,7 @@ import ErrorIcon from '@material-ui/icons/Error';
 var bp = require('../Path.js');
 const firestore = firebase.firestore();
 const EXPIRE_IN_MINUTES = 5; // 10 minutes
-const MESSAGE_IMAGE_WIDTH = 200; // just a const for easy changing.
+const MESSAGE_IMAGE_WIDTH = 250; // just a const for easy changing.
 const modalExpire = 10000; // 30 seconds in MS
 
 // Drawer
@@ -697,6 +697,12 @@ export default function Chat() {
         `Email: "${currentUser.email}" \n With User ID: "${currentUser.uid}" connected with socket id: "${sock.id}"`
       );
     });
+    sock.on('error', () => {
+      console.log('ERROR..');
+    });
+    sock.on('disconnect', () => {
+      console.log('DISCONNECT..');
+    });
 
     if (localStorage.getItem('chatExpiry') === null) {
       var exp = Date.now() + EXPIRE_IN_MINUTES * 60000;
@@ -791,6 +797,7 @@ export default function Chat() {
       }
       // console.log(user);
     });
+
     sock.on('image', (message, user, message_ID) => {
       if (user !== currentUser.uid) {
         var image = new Image();
@@ -1063,34 +1070,41 @@ export default function Chat() {
     } else return false;
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     const message = messageRef.current.value;
-    // const room_ = room;
 
     if (photoAttachRef.current.files.length === 1) {
       const reader = new FileReader();
       console.log('new reader');
-      reader.readAsDataURL(photoAttachRef.current.files[0]);
+      var the_image = photoAttachRef.current.files[0];
+      var compressed = the_image;
+      if (the_image.type === 'image/gif' && the_image.size < 500000) {
+      } else {
+        compressed = await imageCompression(the_image, {
+          maxSizeMB: 0.5,
+          maxIteration: 10,
+        });
+      }
+
+      reader.readAsDataURL(compressed);
+
       reader.onloadend = function () {
-        // console.log(reader.result);
         console.log('finished reading.');
 
         var image = new Image();
         image.src = reader.result;
+
         image.onload = () => {
-          // console.log(image.width);
-          // console.log(image.height);
-          // console.log('changed..');
           var image_scale = image.width / MESSAGE_IMAGE_WIDTH;
           image.width = image.width / image_scale;
           image.height = image.height / image_scale;
-          // console.log(image.width);
-          // console.log(image.height);
+
           var image_id = Date().toString() + image.height.toString();
           // Pass the result, the image height as well to get proper sizing.
           displayImage(reader.result, 'sent', image.height, image_id);
           // scrollReference;
+          console.log(reader.result.length);
           socket.emit(
             'send-image-to-room',
             currentUser.uid,
