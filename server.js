@@ -97,10 +97,21 @@ io.on("connection", (socket) => {
   });
 
   // Send a message to a particular room.
-  socket.on("send-to-room", (user, room, message) => {
-    socket.to(room).emit("message", message, user);
-    console.log();
-    console.log(message);
+  socket.on(
+    "send-to-room",
+    (user, room, message, messageID, isOffline, callback) => {
+      socket.to(room).emit("message", message, user, messageID);
+      // console.log();
+      // console.log(message, "with id", messageID);
+      callback(isOffline, message);
+    }
+  );
+
+  socket.on("seen-message", (user, room, messageID, callback) => {
+    console.log("seen event recieved");
+    console.log(room);
+    io.in(room).emit("seen", messageID);
+    callback();
   });
 });
 

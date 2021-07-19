@@ -168,6 +168,23 @@ p {
   margin: 2px 5px;
 }
 
+.subtext-received {
+  display: flex;
+  align-items: center;
+  position: relative;
+  top: -10px;
+  left: 10px;
+}
+
+.subtext-sent {
+  display: flex;
+  align-items: center;
+  flex-direction: row-reverse;
+  position: relative;
+  top: -10px;
+  right: 10px;
+}
+
 .footer {
   position: fixed;
   left: 0;
@@ -216,22 +233,22 @@ p {
     max-width: 200px;
   }
 }
-@media only screen and (max-width: 500px) {
+@media only screen and (max-width: 515px) {
   .btn-chat {
     font-size: 18px;
     margin: 0 !important;
   }
   .abandon {
-    font-size: 18px;
+    font-size: 15px;
     margin: 0 !important;
   }
 }
-@media only screen and (max-width: 420px) {
+@media only screen and (max-width: 425px) {
   .btn-chat {
     font-size: 15px;
   }
   .abandon {
-    font-size: 15px;
+    font-size: 13px;
   }
 }
 @media only screen and (max-width: 340px) {
@@ -241,4 +258,9 @@ p {
   .abandon {
     font-size: 10px;
   }
+}
+
+#uploadButton {
+  background-color: #b39bc8;
+  color: 'white';
 }

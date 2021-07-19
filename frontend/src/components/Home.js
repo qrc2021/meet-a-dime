@@ -162,6 +162,7 @@ export default function Home() {
   const [progress, setProgress] = useState(-1);
   const [inActiveChat, setInActiveChat] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [timeoutSnackbar, setTimeoutSnackbar] = useState(false);
   const [name, setName] = useState('');
   // the firebase firestore instance, used to query, add, delete, edit from DB.
   const firestore = firebase.firestore();
@@ -750,6 +751,7 @@ export default function Home() {
               if (change.type === 'added') {
                 console.log('added a doc');
                 timeout5.current = setTimeout(() => {
+                  setTimeoutSnackbar(true);
                   console.log('trying to run timeout 5 in ADD');
                   if (
                     window.location.pathname === '/' &&
@@ -759,6 +761,7 @@ export default function Home() {
                     setLockout(true);
                     setLoading(true);
                     setOpenSearch(false);
+
                     // Abandoning the search should involve me clearing the old doc
                     // that I posted up.
                     async function deleteOldRecordAfterAbandon() {
@@ -855,6 +858,7 @@ export default function Home() {
                 matchFound = false;
                 setId('none');
                 setMatch('Searching.');
+
                 setError('');
                 // setOpenSearch(false);
                 // clearTimeout(timeOut);
@@ -873,6 +877,7 @@ export default function Home() {
                     setLockout(true);
                     setLoading(true);
                     setOpenSearch(false);
+
                     // Abandoning the search should involve me clearing the old doc
                     // that I posted up.
                     async function deleteOldRecordAfterAbandon() {
@@ -1162,7 +1167,27 @@ export default function Home() {
             setSnackbarOpen(false);
           }}
           severity="success">
-          Found a match! (placeholder);
+          Found a match!
+        </Alert>
+      </Snackbar>
+      <Snackbar
+        open={timeoutSnackbar && match === 'Not searching.'}
+        autoHideDuration={4000}
+        onClose={(event, reason) => {
+          if (reason === 'clickaway') {
+            return;
+          }
+          setTimeoutSnackbar(false);
+        }}>
+        <Alert
+          onClose={(event, reason) => {
+            if (reason === 'clickaway') {
+              return;
+            }
+            setTimeoutSnackbar(false);
+          }}
+          severity="info">
+          Search timed out. Try again!
         </Alert>
       </Snackbar>
       {progress !== -1 && (

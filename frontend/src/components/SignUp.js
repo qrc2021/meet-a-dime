@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Form, Button, Navbar, Row, Col } from 'react-bootstrap';
+import { Form, Button, Navbar } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
 import { Alert } from '@material-ui/lab';
 import Grid from '@material-ui/core/Grid';
@@ -248,7 +248,7 @@ export default function SignUp() {
           <Formik
             validationSchema={schema}
             onSubmit={(values) => {
-              handleSubmitForm();
+              if (isLegal(values.dateOfBirth)) handleSubmitForm();
             }}
             initialValues={{
               firstName: '',
@@ -522,75 +522,4 @@ export default function SignUp() {
   );
 }
 
-//I'm gonna implement the questions over on the profile page in a different way: WILL ADDRESS 7/13
 
-/*<Form.Group id="question1Answer">
-    <Form.Label>
-        Question 1: What do you like to do for fun or to relax?
-            </Form.Label>
-    <Form.Control type="text" ref={answer1Ref} required />
-</Form.Group>
-    <Form.Group id="question2Answer">
-        <Form.Label>Question 2: What do you do for a living?</Form.Label>
-        <Form.Control type="text" ref={answer2Ref} required />
-    </Form.Group>
-    <Form.Group id="question3Answer">
-        <Form.Label>
-            Question 3: Would you say you are a romantic?
-            </Form.Label>
-        <Form.Control type="text" ref={answer3Ref} required />
-    </Form.Group>
-    <Form.Group id="question4Answer">
-        <Form.Label>
-            Question 4: Are you an optimist or a pessimist?
-            </Form.Label>
-        <Form.Control type="text" ref={answer4Ref} required />
-    </Form.Group>
-    <Form.Group id="question5Answer">
-        <Form.Label>
-            Question 5: What are you most passionate about?
-            </Form.Label>
-        <Form.Control type="text" ref={answer5Ref} required />
-    </Form.Group>
-    <Form.Group id="question6Answer">
-        <Form.Label>
-            Question 6: Do you like horoscopes? If so, what's your sign?
-            </Form.Label>
-        <Form.Control type="text" ref={answer6Ref} required />
-    </Form.Group>
-    <Form.Group id="question7Answer">
-        <Form.Label>
-            Question 7: What does an ideal date look like in your eyes?
-            </Form.Label>
-        <Form.Control type="text" ref={answer7Ref} required />
-    </Form.Group>
-    <Form.Group id="question8Answer">
-        <Form.Label>
-            Question 8: What does your ideal future look like?
-            </Form.Label>
-        <Form.Control type="text" ref={answer8Ref} required />
-    </Form.Group>
-    <Form.Group id="question9Answer">
-        <Form.Label>
-            Question 9: What is your favorite type of music?
-            </Form.Label>
-        <Form.Control type="text" ref={answer9Ref} required />
-    </Form.Group>
-    <Form.Group id="question10Answer">
-        <Form.Label>
-            Question 10: Do you have any pets? If you do, tell me about them!
-            </Form.Label>
-        <Form.Control type="text" ref={answer10Ref} required />
-    </Form.Group>
-    <Form.Group id="question11Answer">
-        <Form.Label>
-            Question 11: Do you have any sibilings? If so, how many?
-            </Form.Label>
-        <Form.Control type="text" ref={answer11Ref} required />
-    </Form.Group>
-    <Form.Group id="question12Answer">
-        <Form.Label>
-            Question 12: What is your favorite game to play?
-            </Form.Label>
-        <Form.Control type="text" ref={answer12Ref} required />
-    </Form.Group>*/

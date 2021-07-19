@@ -7,8 +7,11 @@ import {
   Image,
   Button,
   InputGroup,
+  Row,
+  Col,
   FormControl,
 } from 'react-bootstrap';
+import '../styles/fontawesome-free-5.15.3-web/css/all.css';
 import ReactRoundedImage from 'react-rounded-image';
 import Grid from '@material-ui/core/Grid';
 import { useAuth } from '../contexts/AuthContext';
@@ -40,10 +43,11 @@ import ListItemText from '@material-ui/core/ListItemText';
 import HomeIcon from '@material-ui/icons/Home';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import ReportIcon from '@material-ui/icons/Report';
+import ErrorIcon from '@material-ui/icons/Error';
 
 var bp = require('../Path.js');
 const firestore = firebase.firestore();
-const EXPIRE_IN_MINUTES = 3; // 10 minutes
+const EXPIRE_IN_MINUTES = 5; // 10 minutes
 const modalExpire = 10000; // 30 seconds in MS
 
 // Drawer
@@ -189,6 +193,8 @@ export default function Chat() {
   const [match_photo, setMatchPhoto] = useState('');
   const [my_photo, setMyPhoto] = useState('');
 
+  const [isOffline, setIsOffline] = useState(false);
+
   const matchPhotoRef = useRef('');
   const myPhotoRef = useRef('');
   // console.log(socket);
@@ -258,14 +264,15 @@ export default function Chat() {
       setMatchSex(response.data.sex);
       setMatchPhoto(response.data.photo);
       matchPhotoRef.current = response.data.photo;
-      myPhotoRef.current = response.data.photo;
+      var my_profile_pic = JSON.parse(localStorage.getItem('user_data')).photo;
+      myPhotoRef.current = my_profile_pic;
     } catch (error) {
       console.log(error);
     }
   }
 
   async function checkSearchingDoc(socketInstance) {
-    console.log('Checking searching doc');
+    // console.log('Checking searching doc');
     var myDoc = await firestore
       .collection('searching')
       .doc(currentUser.uid)
@@ -333,6 +340,10 @@ export default function Chat() {
   }
 
   async function noMatchTimeout() {
+    if (window.location.pathname !== '/chat') {
+      console.log('tried to run no match timeout, but was not on chat page.');
+      return;
+    }
     var seeker = 'none';
     var match = 'none';
     clearChatData();
@@ -427,6 +438,7 @@ export default function Chat() {
     // This extended timeout waits for an answer.
     var extended_timeout = setTimeout(() => {
       socketRef.current.emit('leave-room-silently', currentUser.uid, room);
+      clearChatData();
       if (observer.current !== null) observer.current();
       history.push('/after', {
         state: { match_id: match_id, type: 'extended_timeout' },
@@ -652,6 +664,7 @@ export default function Chat() {
     // the doc in the background.
     clearTimeout(timeout_5);
     setMyPhoto(JSON.parse(localStorage.getItem('user_data')).photo);
+
     // In case the user navigates here directly by accident.
     if (
       history.location &&
@@ -673,7 +686,8 @@ export default function Chat() {
         restorePreviousMessages();
       }
     });
-    const sock = io(bp.buildPath(''), { forceNew: true });
+    // const sock = io(bp.buildPath(''), { forceNew: true });
+    var sock = io(bp.buildPath(''));
     var roomInUseEffect = '';
     sock.auth = { id };
     sock.connect();
@@ -757,16 +771,31 @@ export default function Chat() {
     setSocket(sock);
     socketRef.current = sock;
     // Wait for incoming private messages.
-    sock.on('message', (message, user) => {
+    sock.on('message', (message, user, messageID) => {
       if (user !== currentUser.uid) {
         displayMessage(message, 'received');
         localStorage.setItem(JSON.stringify(localStorageKey.current), 'them');
         localStorageKey.current += 7;
         localStorage.setItem(JSON.stringify(localStorageKey.current), message);
         localStorageKey.current += 7;
+        sock.emit(
+          'seen-message',
+          currentUser.uid,
+          new_room,
+          messageID,
+          function () {
+            // console.log('I sent to the room that I saw that message.');
+          }
+        );
       }
-      console.log(user);
+      // console.log(user);
     });
+
+    sock.on('seen', (messageID) => {
+      if (document.getElementById(messageID) !== null)
+        document.getElementById(messageID).remove();
+    });
+
     sock.on('abandoned', (message) => {
       //match left & setting the pair as no match
       displayMessage('Your match left the chat. Switching..', 'system');
@@ -808,9 +837,133 @@ export default function Chat() {
         console.log('LEFT MY ROOM');
       }, 0);
     });
+
+    // All this is duplicate logic for new listeners when the
+    // user comes BACK online. this only fires when offline -> online.
+    window.ononline = (event) => {
+      console.log('You are now connected to the network.');
+      displayMessage('You are back online!', 'system');
+      if (window.location.pathname === '/chat') {
+        sock.emit('leave-room-silently', currentUser.uid, room);
+        sock = io(bp.buildPath(''));
+        roomInUseEffect = '';
+        sock.auth = { id };
+        sock.connect();
+        sock.on('connect', () => {
+          console.log(
+            `Email: "${currentUser.email}" \n With User ID: "${currentUser.uid}" connected with socket id: "${sock.id}"`
+          );
+        });
+        setSocket(sock);
+        socketRef.current = sock;
+        sock.on('message', (message, user, messageID) => {
+          if (user !== currentUser.uid) {
+            displayMessage(message, 'received');
+            localStorage.setItem(
+              JSON.stringify(localStorageKey.current),
+              'them'
+            );
+            localStorageKey.current += 7;
+            localStorage.setItem(
+              JSON.stringify(localStorageKey.current),
+              message
+            );
+            localStorageKey.current += 7;
+            sock.emit(
+              'seen-message',
+              currentUser.uid,
+              new_room,
+              messageID,
+              function () {
+                // console.log('I sent to the room that I saw that message.');
+              }
+            );
+          }
+          // console.log(user);
+        });
+
+        sock.on('seen', (messageID) => {
+          if (document.getElementById(messageID) !== null)
+            document.getElementById(messageID).remove();
+        });
+
+        sock.on('abandoned', (message) => {
+          //match left & setting the pair as no match
+          displayMessage('Your match left the chat. Switching..', 'system');
+          clearChatData();
+
+          setTimeout(async () => {
+            await firestore
+              .collection('users')
+              .doc(currentUser.uid)
+              .update({
+                FailMatch: firebase.firestore.FieldValue.arrayUnion(match_id),
+              });
+            await firestore
+              .collection('users')
+              .doc(match_id)
+              .update({
+                FailMatch: firebase.firestore.FieldValue.arrayUnion(
+                  currentUser.uid
+                ),
+              });
+
+            console.log(refAfterChat.current);
+            if (!refAfterChat.current) {
+              history.push('/after', {
+                state: { match_id: match_id, type: 'match_abandoned' },
+              });
+            } else {
+              history.push('/after', {
+                state: { match_id: match_id, type: 'match_didnt_go_well' },
+              });
+            }
+            sock.emit('leave-room', currentUser.uid, room);
+            if (timeoutRef1.current !== undefined)
+              clearTimeout(timeoutRef1.current);
+            if (timeoutRef2.current !== undefined)
+              clearTimeout(timeoutRef2.current);
+            if (extendedTimeoutRef.current !== undefined)
+              clearTimeout(extendedTimeoutRef.current);
+            console.log('LEFT MY ROOM');
+          }, 0);
+        });
+        sock.emit(
+          'join-room',
+          currentUser.uid.toString(),
+          new_room.toString(),
+          function (message) {
+            if (message === 'joined') {
+              console.log('callback called, joining room now.');
+              setRoom(new_room);
+              roomInUseEffect = new_room;
+              localStorage.setItem(
+                'inActiveChat',
+                JSON.stringify({ status: 'true', id_match: match_id })
+              );
+              // // localStorage.setItem('activeSocket', JSON.stringify(sock));
+              // console.log(sock);
+              // console.log(socket);
+              displayMessage('Reconnected to chat.', 'system');
+            }
+          }
+        );
+      }
+      setIsOffline(false);
+    }; // END of window.ononline
+
+    window.onoffline = (event) => {
+      console.log('You are NOT connected to the network.');
+      displayMessage(
+        'You are offline! Messages will try to send when you reconnect.',
+        'system'
+      );
+      setIsOffline(true);
+    };
     return () => {
       console.log('Cleanup in Chat.js.');
-
+      window.ononline = null;
+      window.onoffline = null;
       if (roomInUseEffect !== '' && sock !== undefined && sock !== null) {
         sock.emit('leave-room-silently', currentUser.uid, room);
         console.log('SOCKET: Left the room silently.');
@@ -853,21 +1006,70 @@ export default function Chat() {
 
     if (message === '') return;
 
-    displayMessage(message, 'sent');
+    var messageID = '';
 
-    //send value of message to local storage
-    localStorage.setItem(JSON.stringify(localStorageKey.current), 'me');
-    localStorageKey.current += 7;
-    localStorage.setItem(JSON.stringify(localStorageKey.current), message);
-    localStorageKey.current += 7;
+    function hash_str(str) {
+      var hash = 0,
+        i,
+        chr;
+      if (str.length === 0) return hash;
+      for (i = 0; i < str.length; i++) {
+        chr = str.charCodeAt(i);
+        hash = (hash << 5) - hash + chr;
+        hash |= 0; // Convert to 32bit integer
+      }
+      return hash + Date().toString();
+    }
+    messageID = hash_str(message).toString();
+
+    // console.log('Delivered!', messageID);
+    displayMessage(message, 'sent', messageID, isOffline);
+    console.log(isOffline);
+    //send value of message to local storage IF were online.
+    if (!isOffline) {
+      localStorage.setItem(JSON.stringify(localStorageKey.current), 'me');
+      localStorageKey.current += 7;
+      localStorage.setItem(JSON.stringify(localStorageKey.current), message);
+      localStorageKey.current += 7;
+    }
 
     // ARGS ARE: from, room, message
-    socket.emit('send-to-room', currentUser.uid, room, message);
+    socket.emit(
+      'send-to-room',
+      currentUser.uid,
+      room,
+      message,
+      messageID,
+      isOffline,
+      function (originally_sent_offline, message_sent) {
+        // This function gets called when message reaches the server.
+        if (
+          originally_sent_offline &&
+          document.getElementById(messageID) !== null
+        ) {
+          // This is not *actually* undelivered, but the
+          // seen event will end up deleting this message if the message
+          // gets delivered. So if this remains then it probably wasn't
+          // delivered.
+          document.getElementById(messageID).innerHTML =
+            ' <i class="fas fa-exclamation-triangle"></i> ' +
+            'undelivered&nbsp;';
+
+          localStorage.setItem(JSON.stringify(localStorageKey.current), 'me');
+          localStorageKey.current += 7;
+          localStorage.setItem(
+            JSON.stringify(localStorageKey.current),
+            message_sent
+          );
+          localStorageKey.current += 7;
+        }
+      }
+    );
     messageRef.current.value = '';
   }
 
   // Two modes added for some extra processing (like maybe classes or etc)
-  function displayMessage(message, mode) {
+  function displayMessage(message, mode, messageID = '', is_offline) {
     if (window.location.pathname === '/chat') {
       var suffix = '';
       if (mode === 'received') {
@@ -888,20 +1090,37 @@ export default function Chat() {
         // document.getElementById('message-container').append(div);
       }
       const div = document.createElement('div');
-      const p = document.createElement('p');
-      const image = document.createElement('img');
 
-      if (mode === 'recieved') image.src = matchPhotoRef.current;
-      else image.src = myPhotoRef.current;
-      console.log(image.src);
+      const p = document.createElement('p');
+
+      const subtext = document.createElement('code');
+      subtext.innerHTML =
+        ' <i class="fas fa-exclamation-triangle"></i> ' + 'undelivered&nbsp;';
+      if (is_offline) {
+        subtext.innerHTML =
+          ' <i class="fas fa-wifi"></i> ' + 'sent offline&nbsp;';
+      }
+      subtext.setAttribute('id', messageID);
+      subtext.setAttribute('class', 'subtext-' + mode);
+
+      const image = document.createElement('img');
+      if (mode === 'received') {
+        image.src = matchPhotoRef.current;
+      } else {
+        image.src = myPhotoRef.current;
+      }
       image.classList.add('chat-image');
+
       div.classList.add('message');
       div.classList.add(mode);
+
       p.textContent = message;
       if (mode !== 'system') div.appendChild(image);
       div.appendChild(p);
 
       document.getElementById('message-container').append(div);
+      if (mode === 'sent' && messageID !== '')
+        document.getElementById('message-container').append(subtext);
       document
         .getElementById('scrollReference')
         .scrollIntoView({ behavior: 'smooth' });
@@ -1106,17 +1325,17 @@ export default function Chat() {
           </div>
         )}
       </AppBar>
-      <h3 className="text-center mb-4">
-        (going home will make the users lose the match). for now they can still
-        research for eachother tho
-      </h3>
+
       {error && <Alert severity="error">{error}</Alert>}
 
       <Grid
         container
         direction="column"
-        justifyContent="center"
-        alignItems="center">
+        justifyContent="flex-end"
+        alignItems="center"
+        style={{
+          marginTop: '18%',
+        }}>
         {match_photo !== '' ? (
           <ReactRoundedImage
             imageHeight="150"
@@ -1128,10 +1347,6 @@ export default function Chat() {
             alt="My Profile Pic"
             hoverColor="pink"
             onClick={handleModalOpen}
-            style={{
-              cursor: 'pointer',
-              marginTop: '5px',
-            }}
           />
         ) : (
           <ReactRoundedImage
@@ -1144,10 +1359,6 @@ export default function Chat() {
             alt="Default Pic"
             hoverColor="pink"
             onClick={handleModalOpen}
-            style={{
-              cursor: 'pointer',
-              marginTop: '5px',
-            }}
           />
         )}
         <Modal

@@ -7,11 +7,13 @@ import { useAuth } from '../contexts/AuthContext';
 import { useHistory } from 'react-router-dom';
 import { Redirect } from 'react-router';
 import '../styles/Verify.css';
+import axios from 'axios';
+var bp = require('../Path.js');
 // import { auth } from '../firebase';
 
 export default function Verify() {
   // const emailRef = useRef();
-  const { logout, verify, currentUser } = useAuth();
+  const { logout, verify, currentUser, reload } = useAuth();
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -29,6 +31,44 @@ export default function Verify() {
     }
   }
 
+  async function startCheckLoop() {
+    var count = 0;
+    var intv = setInterval(async () => {
+      count++;
+      if (count >= 15) {
+        clearInterval(intv);
+        handleLogout();
+        return;
+      } else {
+        try {
+          const token = currentUser && (await currentUser.getIdToken());
+
+          var config = {
+            method: 'post',
+            url: bp.buildPath('api/getemailverified'),
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            data: { uid: currentUser.uid },
+          };
+          var response = await axios(config);
+          if (response.data.verified) {
+            clearInterval(intv);
+            count = 0;
+            await reload();
+            history.push('/');
+
+            return;
+          }
+        } catch (error) {
+          console.log(error);
+          console.log('issue in verify email fetch');
+        }
+      }
+    }, 2000);
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -37,10 +77,11 @@ export default function Verify() {
 
       setError('');
       setLoading(true);
-      //   await resetPassword(emailRef.current.value);
+
       await verify();
-      setMessage('Verify email is sent');
+      setMessage('Verification Email Sent');
       setPressed(true);
+      startCheckLoop();
     } catch (error) {
       setError(error.message);
     }
@@ -93,14 +134,14 @@ export default function Verify() {
             src="DimeAssets/envelope.png"
           />
           {error && <Alert severity="error">{error}</Alert>}
-          {message && <Alert severity="success">{message}</Alert>}
+          {/* {message && <Alert severity="success">{message}</Alert>} */}
           <Form onSubmit={handleSubmit}>
             <Button
               disabled={loading || pressed}
               variant="top"
               className="btn-primary w-100 mt-2 mb-3"
               type="submit">
-              Send Email Verification
+              {pressed ? message : 'Click to Send Email Verification'}
             </Button>
           </Form>
           <h3
@@ -110,7 +151,7 @@ export default function Verify() {
               fontSize: '30px',
               color: '#7E7E7E',
             }}>
-            Make sure to check your inbox to verify your email.
+            {pressed && 'Make sure to check your inbox to verify your email.'}
           </h3>
         </Card.Body>
       </Card>

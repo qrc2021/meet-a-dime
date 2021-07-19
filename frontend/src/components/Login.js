@@ -1,8 +1,8 @@
 import React, { useRef, useState, useEffect } from 'react';
 import Link from '@material-ui/core/Link';
 //import { View, Text, ScrollView, TextInput } from 'react-native';
-import { Card, Form, Button, CardDeck } from 'react-bootstrap';
-import Container from '@material-ui/core/Container';
+import { Card, Form, Button } from 'react-bootstrap';
+import Grid from '@material-ui/core/Grid';
 import { useHistory } from 'react-router-dom';
 import { Alert } from '@material-ui/lab';
 import { useAuth } from '../contexts/AuthContext';
@@ -12,8 +12,35 @@ import 'firebase/firestore';
 import { Formik } from 'formik';
 import * as yup from 'yup';
 
+function useWindowSize() {
+  // Initialize state with undefined width/height so server and client renders match
+  // Learn more here: https://joshwcomeau.com/react/the-perils-of-rehydration/
+  const [windowSize, setWindowSize] = useState({
+    width: undefined,
+    height: undefined,
+  });
+  useEffect(() => {
+    // Handler to call on window resize
+    function handleResize() {
+      // Set window width/height to state
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    }
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+    // Call handler right away so state gets updated with initial window size
+    handleResize();
+    // Remove event listener on cleanup
+    return () => window.removeEventListener('resize', handleResize);
+  }, []); // Empty array ensures that effect is only run on mount
+  return windowSize;
+}
+
 export default function Login() {
   const emailRef = useRef();
+  const size = useWindowSize();
   const passwordRef = useRef();
   const { login } = useAuth();
   const history = useHistory();
@@ -43,6 +70,7 @@ export default function Login() {
   }
   // This is to clear the old searching data when a user logouts.
   useEffect(() => {
+    localStorage.removeItem('user_data');
     const firestore = firebase.firestore();
     async function purgeOld() {
       // Lock the search button until these tasks are complete.
@@ -130,33 +158,43 @@ export default function Login() {
   }
 
   document.body.style.backgroundColor = '#dceaff';
+  // Column makes it stack and grow nice and evenly! But it only makes sense on small screens.
+  // If it were row the whole time, it would 'slide' over the other component until it
+  // didn't fit anymore.
+  var columnIfSmall = size.width <= 600 ? 'column' : 'row';
+  // Prevent infinite growth when the screen snaps into the sm view
+  var clampIfSmall = size.width <= 600 ? '400px' : '1000px';
+  // There is this weird 'middle ground' between 600 and ~1000 that are perfect for space-evenly,
+  // but when larger than that it spreads too far out. 'center' seems to fix this
+  var centerIfLarge =
+    size.width >= 600 && size.width <= 1000 ? 'space-evenly' : 'center';
   return (
     <>
-      <Container style={{ flex: '1' }}>
-        <CardDeck
-          style={{
-            display: 'flex',
-            flexflow: 'row wrap',
-            alignItems: 'center',
-            backgroundColor: '#DCEAFF',
-            marginTop: '50px'
-          }}>
+      <Grid
+        container
+        direction={columnIfSmall}
+        justifyContent={centerIfLarge}
+        alignItems="center">
+        <Grid item xs={10} sm={5} md={5} lg={5} xl={5}>
           <Card.Img
             variant="top"
             src="DimeAssets/homelogo.png"
             style={{
-              maxWidth: '600px',
-              marginRight: 'auto',
               marginLeft: 'auto',
+              maxWidth: clampIfSmall,
+              marginRight: 'auto',
             }}
           />
-
+        </Grid>
+        <Grid item xs={10} sm={5} md={5} lg={5} xl={5}>
           <Card
             varient="top"
             style={{
               minWidth: '300px',
-              marginRight: 'auto',
               maxWidth: '400px',
+              marginLeft: 'auto',
+              marginTop: '20px',
+
               borderRadius: '30px',
             }}>
             <Card.Body>
@@ -274,8 +312,8 @@ export default function Login() {
               </Button>
             </Card.Footer>
           </Card>
-        </CardDeck>
-      </Container>
+        </Grid>
+      </Grid>
     </>
   );
 }

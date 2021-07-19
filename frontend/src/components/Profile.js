@@ -20,9 +20,7 @@ import { Alert, AlertTitle } from '@material-ui/lab';
 import Fab from '@material-ui/core/Fab';
 import CheckIcon from '@material-ui/icons/Check';
 // import SaveIcon from '@material-ui/icons/Save';
-import Container from '@material-ui/core/Container';
 import Button from '@material-ui/core/Button';
-import Box from '@material-ui/core/Box';
 import clsx from 'clsx';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
@@ -117,9 +115,8 @@ const useStyles = makeStyles((theme) => ({
   fabProgress: {
     color: '#4caf50',
     position: 'absolute',
-    top: -6,
-    left: -6,
-    zIndex: 1,
+    top: -5.7,
+    right: -6,
   },
   buttonProgress: {
     color: '#4caf50',
@@ -261,10 +258,11 @@ export default function Profile() {
               setIsUploading('Done');
               setSuccess(true);
               setIsUploading(false);
+              localStorage.removeItem('user_data');
               setTimeout(() => {
                 // setPhotoStatus(false);
                 setSuccess(false);
-              }, 3000);
+              }, 5000);
             })
             .catch((error) => {
               console.log(error);
@@ -291,16 +289,16 @@ export default function Profile() {
         var photo = doc.data().photo;
         var ageRangeMax = doc.data().ageRangeMax;
         var ageRangeMin = doc.data().ageRangeMin;
-       // document.getElementById('birth').innerHTML = userBirth;
+        // document.getElementById('birth').innerHTML = userBirth;
         // document.getElementById('first').innerHTML = userFirstName;
         // document.getElementById('last').innerHTML = userLastName;
         setLastName(userLastName);
         setFirstName(userFirstName);
         setPhoneNumber(userPhone);
-       // document.getElementById('phone').innerHTML = userPhone;
-       // document.getElementById('exit').innerHTML = userExitMessage;
-       // document.getElementById('sex').innerHTML = userSex;
-       // document.getElementById('orientation').innerHTML = userOrientation;
+        // document.getElementById('phone').innerHTML = userPhone;
+        // document.getElementById('exit').innerHTML = userExitMessage;
+        // document.getElementById('sex').innerHTML = userSex;
+        // document.getElementById('orientation').innerHTML = userOrientation;
         setMyPhoto(photo);
         setSwitching(false);
 
@@ -409,8 +407,7 @@ export default function Profile() {
               alt="My Profile Pic"
               hoverColor="pink"
               style={{
-                
-                marginTop: '5px'
+                marginTop: '5px',
               }}
             />
           ) : (
@@ -424,7 +421,7 @@ export default function Profile() {
               alt="Default Pic"
               hoverColor="pink"
               style={{
-                marginTop: '5px'
+                marginTop: '5px',
               }}
             />
           )}
@@ -435,7 +432,7 @@ export default function Profile() {
           </Grid>
 
           <h2 className="text-center mb-3" style={{ color: '#E64398' }}>
-              {phoneNumber}
+            {phoneNumber}
           </h2>
           <input
             onChange={() => {
@@ -454,24 +451,28 @@ export default function Profile() {
           />
 
           {showPicUploader && (
-            <label htmlFor="photoUploadGroup">
-              <Button
-                className="btn btn-primary"
-                variant="contained"
-                style={{ color: 'white' }}
-                component="span"
-                startIcon={<AttachmentIcon />}>
-                Select
-              </Button>
-            </label>
-          )}
-
-          {showPicUploader && (
             <div className={classes.wrapper}>
+              {showPicUploader && (
+                <label htmlFor="photoUploadGroup">
+                  <Button
+                    variant="contained"
+                    id="uploadButton"
+                    style={{ color: 'white', marginRight: '10px' }}
+                    component="span"
+                    startIcon={<AttachmentIcon />}>
+                    {showPicUploader && selectedFile === ''
+                      ? 'Select'
+                      : selectedFile.length > 25
+                      ? selectedFile.substring(0, 25) + '...'
+                      : selectedFile}
+                  </Button>
+                </label>
+              )}
               <Fab
                 aria-label="save"
                 color="primary"
                 className={buttonClassname}
+                style={{ display: 'inline', backgroundColor: '#b39bc8' }}
                 onClick={() => {
                   if (selectedFile) processPhoto();
                 }}>
@@ -482,7 +483,8 @@ export default function Profile() {
               )}
             </div>
           )}
-          {showPicUploader && <Box my={1}>{selectedFile}</Box>}
+
+          {/* {showPicUploader && <Box my={1}>{selectedFile}</Box>} */}
 
           {error && (
             <Alert severity="error">
@@ -516,7 +518,6 @@ export default function Profile() {
           </Link>
         </Grid>
       </main>
-     
 
       <Drawer
         className={classes.drawer}
