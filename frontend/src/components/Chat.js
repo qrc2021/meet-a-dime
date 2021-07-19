@@ -11,6 +11,7 @@ import {
   Col,
   FormControl,
 } from 'react-bootstrap';
+import '../styles/fontawesome-free-5.15.3-web/css/all.css';
 import ReactRoundedImage from 'react-rounded-image';
 import Grid from '@material-ui/core/Grid';
 import { useAuth } from '../contexts/AuthContext';
@@ -42,10 +43,11 @@ import ListItemText from '@material-ui/core/ListItemText';
 import HomeIcon from '@material-ui/icons/Home';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import ReportIcon from '@material-ui/icons/Report';
+import ErrorIcon from '@material-ui/icons/Error';
 
 var bp = require('../Path.js');
 const firestore = firebase.firestore();
-const EXPIRE_IN_MINUTES = 3; // 10 minutes
+const EXPIRE_IN_MINUTES = 5; // 10 minutes
 const modalExpire = 10000; // 30 seconds in MS
 
 // Drawer
@@ -436,6 +438,7 @@ export default function Chat() {
     // This extended timeout waits for an answer.
     var extended_timeout = setTimeout(() => {
       socketRef.current.emit('leave-room-silently', currentUser.uid, room);
+      clearChatData();
       if (observer.current !== null) observer.current();
       history.push('/after', {
         state: { match_id: match_id, type: 'extended_timeout' },
@@ -768,16 +771,31 @@ export default function Chat() {
     setSocket(sock);
     socketRef.current = sock;
     // Wait for incoming private messages.
-    sock.on('message', (message, user) => {
+    sock.on('message', (message, user, messageID) => {
       if (user !== currentUser.uid) {
         displayMessage(message, 'received');
         localStorage.setItem(JSON.stringify(localStorageKey.current), 'them');
         localStorageKey.current += 7;
         localStorage.setItem(JSON.stringify(localStorageKey.current), message);
         localStorageKey.current += 7;
+        sock.emit(
+          'seen-message',
+          currentUser.uid,
+          new_room,
+          messageID,
+          function () {
+            // console.log('I sent to the room that I saw that message.');
+          }
+        );
       }
       // console.log(user);
     });
+
+    sock.on('seen', (messageID) => {
+      if (document.getElementById(messageID) !== null)
+        document.getElementById(messageID).remove();
+    });
+
     sock.on('abandoned', (message) => {
       //match left & setting the pair as no match
       displayMessage('Your match left the chat. Switching..', 'system');
@@ -838,7 +856,7 @@ export default function Chat() {
         });
         setSocket(sock);
         socketRef.current = sock;
-        sock.on('message', (message, user) => {
+        sock.on('message', (message, user, messageID) => {
           if (user !== currentUser.uid) {
             displayMessage(message, 'received');
             localStorage.setItem(
@@ -851,9 +869,24 @@ export default function Chat() {
               message
             );
             localStorageKey.current += 7;
+            sock.emit(
+              'seen-message',
+              currentUser.uid,
+              new_room,
+              messageID,
+              function () {
+                // console.log('I sent to the room that I saw that message.');
+              }
+            );
           }
-          console.log(user);
+          // console.log(user);
         });
+
+        sock.on('seen', (messageID) => {
+          if (document.getElementById(messageID) !== null)
+            document.getElementById(messageID).remove();
+        });
+
         sock.on('abandoned', (message) => {
           //match left & setting the pair as no match
           displayMessage('Your match left the chat. Switching..', 'system');
@@ -973,21 +1006,45 @@ export default function Chat() {
 
     if (message === '') return;
 
-    displayMessage(message, 'sent');
+    var messageID = '';
 
-    //send value of message to local storage
-    localStorage.setItem(JSON.stringify(localStorageKey.current), 'me');
-    localStorageKey.current += 7;
-    localStorage.setItem(JSON.stringify(localStorageKey.current), message);
-    localStorageKey.current += 7;
+    function hash_str(str) {
+      var hash = 0,
+        i,
+        chr;
+      if (str.length === 0) return hash;
+      for (i = 0; i < str.length; i++) {
+        chr = str.charCodeAt(i);
+        hash = (hash << 5) - hash + chr;
+        hash |= 0; // Convert to 32bit integer
+      }
+      return hash + Date().toString();
+    }
+    messageID = hash_str(message).toString();
 
     // ARGS ARE: from, room, message
-    socket.emit('send-to-room', currentUser.uid, room, message);
+    socket.emit(
+      'send-to-room',
+      currentUser.uid,
+      room,
+      message,
+      messageID,
+      function () {
+        // console.log('Delivered!', messageID);
+        displayMessage(message, 'sent', messageID);
+
+        //send value of message to local storage
+        localStorage.setItem(JSON.stringify(localStorageKey.current), 'me');
+        localStorageKey.current += 7;
+        localStorage.setItem(JSON.stringify(localStorageKey.current), message);
+        localStorageKey.current += 7;
+      }
+    );
     messageRef.current.value = '';
   }
 
   // Two modes added for some extra processing (like maybe classes or etc)
-  function displayMessage(message, mode) {
+  function displayMessage(message, mode, messageID = '') {
     if (window.location.pathname === '/chat') {
       var suffix = '';
       if (mode === 'received') {
@@ -1008,23 +1065,33 @@ export default function Chat() {
         // document.getElementById('message-container').append(div);
       }
       const div = document.createElement('div');
-      const p = document.createElement('p');
-      const image = document.createElement('img');
 
+      const p = document.createElement('p');
+
+      const subtext = document.createElement('code');
+      subtext.innerHTML =
+        ' <i class="fas fa-exclamation-triangle"></i> ' + 'undelivered&nbsp;';
+      subtext.setAttribute('id', messageID);
+      subtext.setAttribute('class', 'subtext-' + mode);
+
+      const image = document.createElement('img');
       if (mode === 'received') {
         image.src = matchPhotoRef.current;
       } else {
         image.src = myPhotoRef.current;
       }
-
       image.classList.add('chat-image');
+
       div.classList.add('message');
       div.classList.add(mode);
+
       p.textContent = message;
       if (mode !== 'system') div.appendChild(image);
       div.appendChild(p);
 
       document.getElementById('message-container').append(div);
+      if (mode === 'sent' && messageID !== '')
+        document.getElementById('message-container').append(subtext);
       document
         .getElementById('scrollReference')
         .scrollIntoView({ behavior: 'smooth' });

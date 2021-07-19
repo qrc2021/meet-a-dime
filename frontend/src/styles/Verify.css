@@ -168,6 +168,23 @@ p {
   margin: 2px 5px;
 }
 
+.subtext-received {
+  display: flex;
+  align-items: center;
+  position: relative;
+  top: -10px;
+  left: 10px;
+}
+
+.subtext-sent {
+  display: flex;
+  align-items: center;
+  flex-direction: row-reverse;
+  position: relative;
+  top: -10px;
+  right: 10px;
+}
+
 .footer {
   position: fixed;
   left: 0;
