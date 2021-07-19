@@ -955,7 +955,7 @@ export default function Chat() {
     window.onoffline = (event) => {
       console.log('You are NOT connected to the network.');
       displayMessage(
-        'You are offline! Messages will send when you reconnect.',
+        'You are offline! Messages will try to send when you reconnect.',
         'system'
       );
       setIsOffline(true);
@@ -1025,11 +1025,13 @@ export default function Chat() {
     // console.log('Delivered!', messageID);
     displayMessage(message, 'sent', messageID, isOffline);
     console.log(isOffline);
-    //send value of message to local storage
-    localStorage.setItem(JSON.stringify(localStorageKey.current), 'me');
-    localStorageKey.current += 7;
-    localStorage.setItem(JSON.stringify(localStorageKey.current), message);
-    localStorageKey.current += 7;
+    //send value of message to local storage IF were online.
+    if (!isOffline) {
+      localStorage.setItem(JSON.stringify(localStorageKey.current), 'me');
+      localStorageKey.current += 7;
+      localStorage.setItem(JSON.stringify(localStorageKey.current), message);
+      localStorageKey.current += 7;
+    }
 
     // ARGS ARE: from, room, message
     socket.emit(
@@ -1039,22 +1041,28 @@ export default function Chat() {
       message,
       messageID,
       isOffline,
-      function (originally_sent_offline) {
+      function (originally_sent_offline, message_sent) {
         // This function gets called when message reaches the server.
         if (
           originally_sent_offline &&
           document.getElementById(messageID) !== null
         ) {
-          // document.getElementById(messageID).remove();
-          document.getElementById(messageID).innerHTML = 'delivered!';
+          // This is not *actually* undelivered, but the
+          // seen event will end up deleting this message if the message
+          // gets delivered. So if this remains then it probably wasn't
+          // delivered.
+          document.getElementById(messageID).innerHTML =
+            ' <i class="fas fa-exclamation-triangle"></i> ' +
+            'undelivered&nbsp;';
+
+          localStorage.setItem(JSON.stringify(localStorageKey.current), 'me');
+          localStorageKey.current += 7;
+          localStorage.setItem(
+            JSON.stringify(localStorageKey.current),
+            message_sent
+          );
+          localStorageKey.current += 7;
         }
-        // // console.log('Delivered!', messageID);
-        // displayMessage(message, 'sent', messageID);
-        // //send value of message to local storage
-        // localStorage.setItem(JSON.stringify(localStorageKey.current), 'me');
-        // localStorageKey.current += 7;
-        // localStorage.setItem(JSON.stringify(localStorageKey.current), message);
-        // localStorageKey.current += 7;
       }
     );
     messageRef.current.value = '';

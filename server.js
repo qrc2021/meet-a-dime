@@ -103,7 +103,7 @@ io.on("connection", (socket) => {
       socket.to(room).emit("message", message, user, messageID);
       // console.log();
       // console.log(message, "with id", messageID);
-      callback(isOffline);
+      callback(isOffline, message);
     }
   );
 
