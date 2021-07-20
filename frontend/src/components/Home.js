@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 // import { Button, Alert, Container } from 'react-bootstrap';
-import { Navbar, Button, Form, Col, Row } from 'react-bootstrap';
+import { Navbar, Button, Form, Col, Row, Card } from 'react-bootstrap';
 import { Alert } from '@material-ui/lab';
 import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
@@ -165,6 +165,8 @@ export default function Home() {
     },
   ];
 
+  const [matchesArray, setMatchesArray] = useState([]);
+
   const observer = useRef(null);
   const transferTimeoutRef = useRef();
 
@@ -260,7 +262,7 @@ export default function Home() {
     async function getIntialUserPhoto() {
       try {
         const token = currentUser && (await currentUser.getIdToken());
-        console.log(token);
+        // console.log(token);
         var config = {
           method: 'post',
           url: bp.buildPath('api/getbasicuser'),
@@ -345,9 +347,12 @@ export default function Home() {
       setLockout(false);
       setLoading(false);
     }
-    // call the function that was just defined here.
+
+    // call the functions that were just defined here.
     purgeOld();
     getIntialUserPhoto();
+    fetchSuccessMatch();
+
     return () => {
       clearTimeout(timeout5.current);
       clearAllTimeouts();
@@ -404,10 +409,10 @@ export default function Home() {
   // It returns the user's Success Match array.
   async function fetchSuccessMatch() {
     try {
-      const token = currentUser;
+      const token = currentUser && (await currentUser.getIdToken());
       var config = {
         method: 'post',
-        url: bp.buildPath('api/get'),
+        url: bp.buildPath('api/getmatches'),
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
@@ -416,7 +421,8 @@ export default function Home() {
       };
 
       var response = await axios(config);
-      var matchesArray = response.data;
+      setMatchesArray(response.data);
+      console.log(response.data);
     } catch (error) {
       console.log(error);
       console.log('issue in fetch data');
@@ -557,7 +563,20 @@ export default function Home() {
     // Is there user preferences in the local storage?
     // If not, query the API and get the new data.
     if (localStorage.getItem('user_data') === null) {
-      console.log('1');
+      console.log('1: No data set, fetching now.');
+      await fetchData();
+      try {
+      } catch (error) {
+        setLockout(false);
+        console.log(error);
+      }
+    } else if (
+      JSON.parse(localStorage.getItem('user_data')).uid !== currentUser.uid
+    ) {
+      alert(
+        'You are still logged into another user! You may encounter problems.'
+      );
+      console.log('2: Data was leftover from some other user.');
       await fetchData();
       try {
       } catch (error) {
@@ -1043,6 +1062,48 @@ export default function Home() {
             </Col>
           </Form.Group>
         </Row>
+        {matchesArray && matchesArray.length !== 0 && (
+          <div
+            onWheel={(e) => {
+              if (e.deltaY > 0) {
+                document
+                  .getElementById('home-scrolling')
+                  .scrollBy(e.deltaY / 3, 0, 'smooth');
+              }
+              if (e.deltaY < 0) {
+                document
+                  .getElementById('home-scrolling')
+                  .scrollBy(e.deltaY / 3, 0, 'smooth');
+              }
+            }}
+            id="home-scrolling">
+            {matchesArray.map((vals, index) => {
+              // console.log(vals);
+              var age = moment().diff(vals.birth, 'years');
+              return (
+                <Card key={index} className="home-card">
+                  <Card.Img
+                    variant="top"
+                    src={vals.photo}
+                    className="card-image"
+                  />
+                  <Card.Body className="card-body">
+                    <Card.Title>
+                      {vals.firstName + ' ' + vals.lastName}
+                    </Card.Title>
+                    <Card.Title className="card-text">
+                      {age} • {vals.sex[0]}{' '}
+                      <span className="card-text-hidden">• {vals.phone}</span>
+                    </Card.Title>
+                  </Card.Body>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+        {matchesArray && matchesArray.length === 0 && (
+          <div id="no-previous-matches">No matches yet.. 😔</div>
+        )}
         {error && <Alert severity="error">{error}</Alert>}
         {inActiveChat && (
           <Alert variant="filled" severity="info">

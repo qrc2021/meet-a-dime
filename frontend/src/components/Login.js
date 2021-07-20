@@ -171,6 +171,9 @@ export default function Login() {
     size.width >= 600 && size.width <= 1000 ? 'space-evenly' : 'center';
 
   var marginVariable = size.width > 600 ? '20px' : (size.height - 430) / 2;
+  if (isNaN(marginVariable)) {
+    marginVariable = '20px'; // this happens on occasional logouts.
+  }
   return (
     <>
       <Grid

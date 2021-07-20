@@ -317,11 +317,14 @@ export default function Profile() {
             birth: userBirth,
             exitMessage: userExitMessage,
             firstName: userFirstName,
+            lastName: userLastName,
+            phone: userPhone,
             sex: userSex,
             sexOrientation: userOrientation,
             photo: photo,
             ageRangeMin: ageRangeMin,
             ageRangeMax: ageRangeMax,
+            uid: currentUser.uid,
           })
         );
       }

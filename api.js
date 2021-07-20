@@ -96,6 +96,7 @@ exports.setApp = function (app, admin) {
           photo: data.photo,
           ageRangeMin: data.ageRangeMin,
           ageRangeMax: data.ageRangeMax,
+          uid: obj.uid,
         };
       }
     } catch (error) {
