@@ -47,10 +47,11 @@ import ReportIcon from '@material-ui/icons/Report';
 import ErrorIcon from '@material-ui/icons/Error';
 import AddPhotoAlternateIcon from '@material-ui/icons/AddPhotoAlternate';
 import SendIcon from '@material-ui/icons/Send';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 var bp = require('../Path.js');
 const firestore = firebase.firestore();
-const EXPIRE_IN_MINUTES = 5; // 10 minutes
+const EXPIRE_IN_MINUTES = 4; // 10 minutes
 const MESSAGE_IMAGE_WIDTH = 250; // just a const for easy changing.
 const modalExpire = 10000; // 30 seconds in MS
 
@@ -180,6 +181,9 @@ export default function Chat() {
   const messageRef = useRef();
   const photoButtonRef = useRef();
   const photoAttachRef = useRef();
+  const [noPhoto, setNoPhoto] = useState(true);
+  const [photoName, setPhotoName] = useState('');
+  const [sendingPhoto, setSendingPhoto] = useState(false);
   const timeoutRef1 = useRef();
   const timeoutRef2 = useRef();
   const extendedTimeoutRef = useRef();
@@ -1084,9 +1088,11 @@ export default function Chat() {
 
   async function handleSubmit(e) {
     e.preventDefault();
+
     const message = messageRef.current.value;
 
     if (photoAttachRef.current.files.length === 1) {
+      setSendingPhoto(true);
       const reader = new FileReader();
       console.log('new reader');
       var the_image = photoAttachRef.current.files[0];
@@ -1128,8 +1134,11 @@ export default function Chat() {
             // }
           );
           photoAttachRef.current.value = null;
-          photoButtonRef.current.textContent = 'Photo';
+          photoButtonRef.current = 'Photo';
           image.onload = null;
+          setPhotoName('');
+          setSendingPhoto(false);
+          setNoPhoto(true);
         };
 
         reader.onloadend = null;
@@ -1600,9 +1609,15 @@ export default function Chat() {
                     onChange={(e) => {
                       console.log(photoAttachRef.current.files);
                       if (photoAttachRef.current.files.length === 1) {
-                        photoButtonRef.current.textContent =
-                          photoAttachRef.current.files[0].name.substring(0, 5) +
-                          '..';
+                        console.log('set no photo to false');
+                        setNoPhoto(false);
+                        setPhotoName(
+                          photoAttachRef.current.files[0].name.substring(0, 6) +
+                            '..'
+                        );
+                        // photoButtonRef.current.textContent =
+                        //   photoAttachRef.current.files[0].name.substring(0, 5) +
+                        //   '..';
                       }
                     }}
                     ref={photoAttachRef}
@@ -1622,9 +1637,13 @@ export default function Chat() {
                           document.getElementById('photoAttach').click();
                         }}>
                         <AddPhotoAlternateIcon
+                          hidden={!noPhoto}
                           style={{
                             marginBottom: '5px',
                           }}></AddPhotoAlternateIcon>
+                        <div style={{ fontSize: '16px' }} hidden={noPhoto}>
+                          {photoName}
+                        </div>
                       </Button>
                     </Tooltip>
                     <FormControl
@@ -1639,11 +1658,23 @@ export default function Chat() {
                       disabled={room === '' || afterChat ? true : false}
                       type="submit"
                       id="send-button">
-                      Send{' '}
-                      <SendIcon
-                        style={{
-                          marginBottom: '5px',
-                        }}></SendIcon>
+                      <div>
+                        Send{' '}
+                        <SendIcon
+                          hidden={sendingPhoto}
+                          style={{
+                            marginBottom: '5px',
+                          }}></SendIcon>
+                        <CircularProgress
+                          size="25px"
+                          style={{
+                            color: 'white',
+                            position: 'relative',
+                            bottom: '-3px',
+                          }}
+                          hidden={!sendingPhoto}
+                        />
+                      </div>
                     </Button>
                   </InputGroup>
                 </Form>

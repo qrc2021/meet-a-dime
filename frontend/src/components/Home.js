@@ -1086,6 +1086,30 @@ export default function Home() {
             </Form.Group>
           </Form>
         </Row>
+        {inActiveChat && (
+          <Alert variant="filled" severity="info">
+            You are in a chat!{' '}
+            {
+              <a
+                href="#"
+                style={{ color: 'white' }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  console.log('RETURN');
+
+                  history.push('/chat', {
+                    state: {
+                      match_id: JSON.parse(localStorage.getItem('inActiveChat'))
+                        .id_match,
+                      timeout_5: timeout5.current,
+                    },
+                  });
+                }}>
+                Return to chat.
+              </a>
+            }
+          </Alert>
+        )}
         {matchesArray && matchesArray.length !== 0 && (
           <div
             onDrag={(e) => console.log(e.clientX)}
@@ -1135,30 +1159,7 @@ export default function Home() {
           <div id="no-previous-matches">No results.</div>
         )}
         {error && <Alert severity="error">{error}</Alert>}
-        {inActiveChat && (
-          <Alert variant="filled" severity="info">
-            You are in a chat!{' '}
-            {
-              <a
-                href="#"
-                style={{ color: 'white' }}
-                onClick={(e) => {
-                  e.preventDefault();
-                  console.log('RETURN');
 
-                  history.push('/chat', {
-                    state: {
-                      match_id: JSON.parse(localStorage.getItem('inActiveChat'))
-                        .id_match,
-                      timeout_5: timeout5.current,
-                    },
-                  });
-                }}>
-                Return to chat.
-              </a>
-            }
-          </Alert>
-        )}
         <Modal
           style={{
             width: '90%',
