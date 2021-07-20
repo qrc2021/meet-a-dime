@@ -4,6 +4,7 @@ import { Navbar, Button, Form, Col, Row, Card } from 'react-bootstrap';
 import { Alert } from '@material-ui/lab';
 import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
+import Backdrop from '@material-ui/core/Backdrop';
 // import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart';
 // import PhotoCamera from '@material-ui/icons/PhotoCamera';
 // import Container from '@material-ui/core/Container';
@@ -32,6 +33,7 @@ import Zoom from '@material-ui/core/Zoom';
 import Fade from '@material-ui/core/Fade';
 import Collapse from '@material-ui/core/Collapse';
 import IconButton from '@material-ui/core/IconButton';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
@@ -54,6 +56,10 @@ const drawerWidth = 300;
 const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
+  },
+  backdrop: {
+    zIndex: theme.zIndex.drawer + 1,
+    color: '#fff',
   },
   appBar: {
     transition: theme.transitions.create(['margin', 'width'], {
@@ -182,6 +188,10 @@ export default function Home() {
   const [inActiveChat, setInActiveChat] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [timeoutSnackbar, setTimeoutSnackbar] = useState(false);
+  const [previousMatchesLoading, setPreviousMatchesLoading] = useState(false);
+  const matchSearchbarRef = useRef('');
+  const [searchMatchesOnce, setSearchMatchesOnce] = useState(false);
+
   const [name, setName] = useState('');
   // the firebase firestore instance, used to query, add, delete, edit from DB.
   const firestore = firebase.firestore();
@@ -351,7 +361,7 @@ export default function Home() {
     // call the functions that were just defined here.
     purgeOld();
     getIntialUserPhoto();
-    fetchSuccessMatch();
+    fetchSuccessMatch('', true);
 
     return () => {
       clearTimeout(timeout5.current);
@@ -407,8 +417,12 @@ export default function Home() {
 
   // This makes a POST request to the server listening at /api/getmatches
   // It returns the user's Success Match array.
-  async function fetchSuccessMatch() {
+  async function fetchSuccessMatch(query = '', initial = false) {
     try {
+      setPreviousMatchesLoading(true);
+      if (!initial) {
+        setSearchMatchesOnce(true);
+      }
       const token = currentUser && (await currentUser.getIdToken());
       var config = {
         method: 'post',
@@ -417,16 +431,17 @@ export default function Home() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        data: { uid: currentUser.uid },
+        data: { uid: currentUser.uid, query: query },
       };
 
       var response = await axios(config);
       setMatchesArray(response.data);
-      console.log(response.data);
+      // console.log(response.data);
     } catch (error) {
       console.log(error);
       console.log('issue in fetch data');
     }
+    setPreviousMatchesLoading(false);
   }
 
   // When the user logs out, call the observer to unsubscribe to changes.
@@ -1048,32 +1063,44 @@ export default function Home() {
         <br></br>
         {/* Fixing search bar */}
         <Row>
-          <Form.Group as={Row} controlId="formPlaintextPassword">
-            <Form.Label className="text-matches" column xs="3">
-              My Matches
-            </Form.Label>
-            <Col className="mx-1">
-              <Form.Control
-                className="text-search mt-2 mb-4"
-                type="search"
-                data-lpignore="true"
-                placeholder="Search for previous matches..."
-              />
-            </Col>
-          </Form.Group>
+          <Form
+            autoComplete="off"
+            onSubmit={(e) => {
+              e.preventDefault();
+              fetchSuccessMatch(matchSearchbarRef.current.value);
+            }}>
+            <Form.Group as={Row} controlId="formPlaintextPassword">
+              <Form.Label className="text-matches" column xs="3">
+                My Matches
+              </Form.Label>
+              <Col className="mx-1">
+                <Form.Control
+                  className="text-search mt-2 mb-4"
+                  autoComplete="off"
+                  type="search"
+                  data-lpignore="true"
+                  placeholder="Search for previous matches..."
+                  ref={matchSearchbarRef}
+                />
+              </Col>
+            </Form.Group>
+          </Form>
         </Row>
         {matchesArray && matchesArray.length !== 0 && (
           <div
+            onDrag={(e) => console.log(e.clientX)}
             onWheel={(e) => {
               if (e.deltaY > 0) {
                 document
                   .getElementById('home-scrolling')
                   .scrollBy(e.deltaY / 3, 0, 'smooth');
+                window.scrollBy(0, e.deltaY, 'smooth');
               }
               if (e.deltaY < 0) {
                 document
                   .getElementById('home-scrolling')
                   .scrollBy(e.deltaY / 3, 0, 'smooth');
+                window.scrollBy(0, e.deltaY, 'smooth');
               }
             }}
             id="home-scrolling">
@@ -1101,8 +1128,11 @@ export default function Home() {
             })}
           </div>
         )}
-        {matchesArray && matchesArray.length === 0 && (
+        {matchesArray && matchesArray.length === 0 && !searchMatchesOnce && (
           <div id="no-previous-matches">No matches yet.. 😔</div>
+        )}
+        {matchesArray && matchesArray.length === 0 && searchMatchesOnce && (
+          <div id="no-previous-matches">No results.</div>
         )}
         {error && <Alert severity="error">{error}</Alert>}
         {inActiveChat && (
@@ -1176,7 +1206,12 @@ export default function Home() {
           </Zoom>
         </Modal>
       </main>
-
+      <Backdrop
+        className={classes.backdrop}
+        open={previousMatchesLoading}
+        onClick={() => {}}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
       <Drawer
         className={classes.drawer}
         variant="persistent"
