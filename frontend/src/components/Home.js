@@ -135,6 +135,11 @@ export default function Home() {
     setOpen(false);
   };
 
+  function checkMouse() {
+    // console.log(mouseRef.current);
+    return mouseRef.current;
+  }
+
   //Search Modal Functions
   const [sopen, setOpenSearch] = React.useState(false);
 
@@ -190,6 +195,10 @@ export default function Home() {
   const [timeoutSnackbar, setTimeoutSnackbar] = useState(false);
   const [previousMatchesLoading, setPreviousMatchesLoading] = useState(false);
   const matchSearchbarRef = useRef('');
+  const scrollRef = useRef(null);
+  const [tooltipOpen, setTooltipOpen] = useState(false);
+  const [mouseOverDiv, setMouseOverDiv] = useState(false);
+  const mouseRef = useRef(false);
   const [searchMatchesOnce, setSearchMatchesOnce] = useState(false);
 
   const [name, setName] = useState('');
@@ -363,8 +372,34 @@ export default function Home() {
     getIntialUserPhoto();
     fetchSuccessMatch('', true);
 
+    function scrollHandler(e) {
+      if (checkMouse()) {
+        e.preventDefault();
+
+        if (
+          e.deltaY > 0 &&
+          document.getElementById('home-scrolling') !== null
+        ) {
+          document
+            .getElementById('home-scrolling')
+            .scrollBy(e.deltaY / 4, 0, 'smooth');
+        }
+        if (
+          e.deltaY < 0 &&
+          document.getElementById('home-scrolling') !== null
+        ) {
+          document
+            .getElementById('home-scrolling')
+            .scrollBy(e.deltaY / 4, 0, 'smooth');
+        }
+      }
+    }
+
+    window.addEventListener('wheel', scrollHandler, { passive: false });
+
     return () => {
       clearTimeout(timeout5.current);
+      window.removeEventListener('wheel', scrollHandler);
       clearAllTimeouts();
       console.log('LEAVING!');
       if (observer.current !== null) {
@@ -987,8 +1022,6 @@ export default function Home() {
     }
   }
 
-  const [tooltipOpen, setTooltipOpen] = useState(false);
-
   // The actual JSX components. The top is the errors/match states,
   // conditionally rendered.
   return (
@@ -1112,20 +1145,13 @@ export default function Home() {
         )}
         {matchesArray && matchesArray.length !== 0 && (
           <div
+            ref={scrollRef}
             onDrag={(e) => console.log(e.clientX)}
-            onWheel={(e) => {
-              if (e.deltaY > 0) {
-                document
-                  .getElementById('home-scrolling')
-                  .scrollBy(e.deltaY / 3, 0, 'smooth');
-                window.scrollBy(0, e.deltaY, 'smooth');
-              }
-              if (e.deltaY < 0) {
-                document
-                  .getElementById('home-scrolling')
-                  .scrollBy(e.deltaY / 3, 0, 'smooth');
-                window.scrollBy(0, e.deltaY, 'smooth');
-              }
+            onMouseEnter={(e) => {
+              mouseRef.current = true;
+            }}
+            onMouseLeave={(e) => {
+              mouseRef.current = false;
             }}
             id="home-scrolling">
             {matchesArray.map((vals, index) => {
