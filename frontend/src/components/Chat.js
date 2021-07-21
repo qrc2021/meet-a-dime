@@ -48,6 +48,7 @@ import ErrorIcon from '@material-ui/icons/Error';
 import AddPhotoAlternateIcon from '@material-ui/icons/AddPhotoAlternate';
 import SendIcon from '@material-ui/icons/Send';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import AccountBoxIcon from '@material-ui/icons/AccountBox';
 
 var bp = require('../Path.js');
 const firestore = firebase.firestore();
@@ -166,15 +167,15 @@ export default function Chat() {
     setOpen(false);
   };
 
-  const [modalOpen, setModalOpen] = React.useState(false);
+  // const [modalOpen, setModalOpen] = React.useState(false);
 
-  const handleModalOpen = () => {
-    setModalOpen(true);
-  };
+  // const handleModalOpen = () => {
+  //   setModalOpen(true);
+  // };
 
-  const handleModalClose = () => {
-    setModalOpen(false);
-  };
+  // const handleModalClose = () => {
+  //   setModalOpen(false);
+  // };
 
   const [switching, setSwitching] = useState(false);
 
@@ -1530,6 +1531,7 @@ export default function Chat() {
 
       <Grid
         container
+        className="match-photo-container"
         direction="column"
         justifyContent="flex-end"
         alignItems="center"
@@ -1541,12 +1543,11 @@ export default function Chat() {
             imageHeight="150"
             imageWidth="150"
             image={match_photo}
-            id="photo"
+            className="img-fluid"
             roundedSize="13"
             borderRadius="150"
             alt="My Profile Pic"
             hoverColor="pink"
-            onClick={handleModalOpen}
           />
         ) : (
           <ReactRoundedImage
@@ -1558,46 +1559,17 @@ export default function Chat() {
             borderRadius="150"
             alt="Default Pic"
             hoverColor="pink"
-            onClick={handleModalOpen}
           />
         )}
-        <Modal
-          style={{
-            marginRight: 'auto',
-            marginLeft: 'auto',
-            marginTop: '50%',
-            marginBottom: 'auto',
-          }}
-          open={modalOpen}
-          onClose={handleModalClose}>
-          <h2 className="text-center mb-3" style={{ color: '#E64398' }}>
-            {match_name}
-          </h2>
-          <h2 className="text-center mb-3" style={{ color: '#E64398' }}>
-            {match_age}
-          </h2>
-          <h2 className="text-center mb-3" style={{ color: '#E64398' }}>
-            {match_sex}
-          </h2>
-        </Modal>
-        {/*       <Button
-                  className="btn-chat mx-3"
-                  onClick={handleModalOpen}>
-                  Info
-          </Button>     */}
-        <h2 className="text-center mb-3" style={{ color: '#E64398' }}>
-          {match_name}
-        </h2>
-        <h2 className="text-center mb-3" style={{ color: '#E64398' }}>
-          {match_age}
-        </h2>
-        <h2 className="text-center mb-3" style={{ color: '#E64398' }}>
-          {match_sex}
-        </h2>
+
+        <span className="text-center mb-3 m" style={{ color: '#E64398' }}>
+          <AccountBoxIcon /> {match_name} • {match_age} • {match_sex}
+        </span>
       </Grid>
 
       <React.Fragment>
         <Container>
+          <hr></hr>
           <div id="message-container" className=""></div>
           <div style={{ height: '60px' }} id="scrollReference"></div>
 

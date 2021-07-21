@@ -1126,10 +1126,12 @@ export default function Home() {
               <a
                 href="#"
                 style={{ color: 'white' }}
-                onClick={(e) => {
+                onClick={async (e) => {
                   e.preventDefault();
                   console.log('RETURN');
-
+                  if (localStorage.getItem('user_data') === null) {
+                    await fetchData();
+                  }
                   history.push('/chat', {
                     state: {
                       match_id: JSON.parse(localStorage.getItem('inActiveChat'))

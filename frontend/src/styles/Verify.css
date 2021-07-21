@@ -350,3 +350,6 @@ p {
   white-space: -o-pre-wrap; /* Opera 7 */
   word-wrap: break-word;
 }
+.match-photo-container img {
+  object-fit: cover;
+}

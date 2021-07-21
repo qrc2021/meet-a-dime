@@ -349,6 +349,7 @@ export default function After() {
         direction="column"
         justifyContent="flex-end"
         alignItems="center"
+        className="match-photo-container"
         style={{
           marginTop: '100px',
         }}>

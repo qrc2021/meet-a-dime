@@ -401,7 +401,7 @@ export default function Profile() {
           direction="column"
           justifyContent="flex-start"
           alignItems="center"
-          className="mt-4">
+          className="mt-4 match-photo-container">
           {myPhoto !== '' ? (
             <ReactRoundedImage
               imageHeight="300"
