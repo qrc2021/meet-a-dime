@@ -221,13 +221,13 @@ p {
 
 @media only screen and (min-width: 600px) and (max-width: 960px) {
   #signUpDimeImage {
-    width: 40%;
+    width: 100%;
   }
 }
 
 @media only screen and (min-width: 960px) {
   #signUpDimeImage {
-    max-width: none;
+    max-width: 750px;
     width: 100%;
   }
 }
