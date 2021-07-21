@@ -315,6 +315,11 @@ p {
   background-color: #bad;
   object-fit: cover;
   transition: all 0.3s ease-out;
+  -webkit-user-drag: none;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
 }
 
 .card-text {
@@ -349,7 +354,26 @@ p {
   white-space: -pre-wrap; /* Opera <7 */
   white-space: -o-pre-wrap; /* Opera 7 */
   word-wrap: break-word;
+  margin-top: 10px;
 }
 .match-photo-container img {
   object-fit: cover;
+}
+.chat-match-info {
+  font-size: 26px;
+  margin-bottom: 5px !important;
+}
+
+@font-face {
+  font-family: 'FredokaOneTT';
+  src: url('FredokaOne-Regular.ttf') format('truetype');
+}
+.drawer-item span {
+  font-family: 'FredokaOneTT';
+  font-weight: normal !important;
+  /* font-size: 30px !important; */
+}
+.drawer-item svg {
+  font-size: 30px;
+  /* margin-top: 4px; */
 }

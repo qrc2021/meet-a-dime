@@ -99,7 +99,7 @@ const useStyles = makeStyles((theme) => ({
   },
   listItemText: {
     fontSize: '25px',
-    fontWeight: 'bold',
+
     color: '#E64398',
   },
   content: {
@@ -144,7 +144,7 @@ export default function Home() {
   const [sopen, setOpenSearch] = React.useState(false);
 
   const handleSearchOpen = () => {
-    setTooltipOpen(false);
+    // setTooltipOpen(false);
     setOpenSearch(true);
     handleDrawerClose();
     searching();
@@ -164,7 +164,7 @@ export default function Home() {
     },
     {
       tooltip: 'Change your preferences and upload a photo!',
-      text: 'Edit Profile',
+      text: 'Profile',
       icon: <CreateIcon style={{ color: '#e64398' }} />,
       onClick: redirectToProfile,
     },
@@ -196,7 +196,7 @@ export default function Home() {
   const [previousMatchesLoading, setPreviousMatchesLoading] = useState(false);
   const matchSearchbarRef = useRef('');
   const scrollRef = useRef(null);
-  const [tooltipOpen, setTooltipOpen] = useState(false);
+  // const [tooltipOpen, setTooltipOpen] = useState(false);
   const [mouseOverDiv, setMouseOverDiv] = useState(false);
   const mouseRef = useRef(false);
   const [searchMatchesOnce, setSearchMatchesOnce] = useState(false);
@@ -1045,26 +1045,17 @@ export default function Home() {
               </Navbar.Brand>
             </Navbar>
           </Typography>
-          <Tooltip
-            open={tooltipOpen}
-            onOpen={() => {
-              setTooltipOpen(true);
-            }}
-            onClose={() => {
-              setTooltipOpen(false);
-            }}
-            TransitionComponent={Zoom}
-            title={'Find a Dime!'}>
-            <span>
-              <Button
-                hidden={open}
-                className="btn-chat mx-3"
-                disabled={lockout}
-                onClick={handleSearchOpen}>
-                New Chat
-              </Button>
-            </span>
-          </Tooltip>
+
+          <span>
+            <Button
+              hidden={open}
+              className="btn-chat mx-3"
+              disabled={lockout}
+              onClick={handleSearchOpen}>
+              New Chat
+            </Button>
+          </span>
+
           <IconButton
             color="default"
             aria-label="open drawer"
@@ -1148,7 +1139,6 @@ export default function Home() {
         {matchesArray && matchesArray.length !== 0 && (
           <div
             ref={scrollRef}
-            onDrag={(e) => console.log(e.clientX)}
             onMouseEnter={(e) => {
               mouseRef.current = true;
             }}
@@ -1265,18 +1255,20 @@ export default function Home() {
           {itemsList.map((item, index) => {
             const { text, icon, tooltip, onClick } = item;
             return (
-              <ListItem button key={text} onClick={onClick}>
-                {icon && <ListItemIcon>{icon}</ListItemIcon>}
-                <Tooltip
-                  placement="left"
-                  TransitionComponent={Zoom}
-                  title={tooltip}>
+              <Tooltip
+                key={text}
+                placement="left"
+                TransitionComponent={Zoom}
+                title={tooltip}>
+                <ListItem className="drawer-item" button onClick={onClick}>
+                  {icon && <ListItemIcon>{icon}</ListItemIcon>}
+
                   <ListItemText
                     classes={{ primary: classes.listItemText }}
                     primary={text}
                   />
-                </Tooltip>
-              </ListItem>
+                </ListItem>
+              </Tooltip>
             );
           })}
         </List>
