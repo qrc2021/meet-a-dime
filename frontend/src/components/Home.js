@@ -40,11 +40,12 @@ import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import CreateIcon from '@material-ui/icons/Create';
+
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 // import TextField from '@material-ui/core/TextField';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import Tooltip from '@material-ui/core/Tooltip';
+import PersonIcon from '@material-ui/icons/Person';
 
 // import Paper from '@material-ui/core/Paper';
 // import Grid from '@material-ui/core/Grid';
@@ -165,7 +166,7 @@ export default function Home() {
     {
       tooltip: 'Change your preferences and upload a photo!',
       text: 'Profile',
-      icon: <CreateIcon style={{ color: '#e64398' }} />,
+      icon: <PersonIcon style={{ color: '#e64398' }} />,
       onClick: redirectToProfile,
     },
     {

@@ -40,7 +40,9 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import HomeIcon from '@material-ui/icons/Home';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
-
+import CreateIcon from '@material-ui/icons/Create';
+import QuestionAnswerIcon from '@material-ui/icons/QuestionAnswer';
+import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
 // Drawer
 const drawerWidth = 300;
 
@@ -463,7 +465,8 @@ export default function Profile() {
               marginBottom: showPicUploader ? '0px' : '15px',
             }}
             onClick={() => setShowPicUploader(!showPicUploader)}>
-            Change Profile Picture {showPicUploader && '(hide)'}
+            <PhotoCameraIcon style={{ marginBottom: '2px' }} /> Change Profile
+            Picture {showPicUploader && '(hide)'}
           </button>
           {showPicUploader && (
             <div className={classes.wrapper}>
@@ -518,7 +521,7 @@ export default function Profile() {
             style={{
               marginBottom: '15px',
             }}>
-            Update Profile
+            Update Profile <CreateIcon style={{ marginBottom: '5px' }} />
           </Link>
           <Link
             to="/prompts"
@@ -526,7 +529,8 @@ export default function Profile() {
             style={{
               marginBottom: '15px',
             }}>
-            Conversation Starters
+            <QuestionAnswerIcon style={{ marginBottom: '2px' }} /> Conversation
+            Starters
           </Link>
         </Grid>
       </main>

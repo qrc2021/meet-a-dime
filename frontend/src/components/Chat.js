@@ -54,7 +54,7 @@ import QuestionAnswerIcon from '@material-ui/icons/QuestionAnswer';
 
 var bp = require('../Path.js');
 const firestore = firebase.firestore();
-const EXPIRE_IN_MINUTES = 0.4; // 10 minutes
+const EXPIRE_IN_MINUTES = 4; // 10 minutes
 const MESSAGE_IMAGE_WIDTH = 250; // just a const for easy changing.
 const modalExpire = 10000; // 30 seconds in MS
 

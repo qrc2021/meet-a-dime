@@ -377,3 +377,10 @@ p {
   font-size: 30px;
   /* margin-top: 4px; */
 }
+
+#delete-button {
+  background-color: #bb2b2b !important;
+}
+#delete-button:hover {
+  background-color: #bd0f0f !important;
+}
