@@ -380,6 +380,7 @@ export default function Chat() {
           .doc(match_id)
           .update({ isChatting: 1 });
       }
+      console.log('Set is chatting.');
     } catch (error) {
       console.log(error);
     }
@@ -777,6 +778,7 @@ export default function Chat() {
     // This is a timeout that carried over from the last page. It deletes
     // the doc in the background.
     clearTimeout(timeout_5);
+
     try {
       setMyPhoto(JSON.parse(localStorage.getItem('user_data')).photo);
       setUserInitialized(
@@ -808,6 +810,7 @@ export default function Chat() {
 
     // This gets the match data.
     fetchMatchInfo().then(() => {
+      setIsChatting();
       if (localStorage.getItem('1701') !== null) {
         restorePreviousMessages();
       }
