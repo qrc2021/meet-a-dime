@@ -387,7 +387,7 @@ export default function Chat() {
   }
 
   async function checkSearchingDoc(socketInstance) {
-    // console.log('Checking searching doc');
+    console.log('Checking searching doc');
     var myDoc = await firestore
       .collection('searching')
       .doc(currentUser.uid)
