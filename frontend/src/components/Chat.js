@@ -846,7 +846,7 @@ export default function Chat() {
       }
 
       var current = Date.now();
-      if (count % 5) {
+      if (count % 5 == 0) {
         checkSearchingDoc(sock);
       }
       count++;
