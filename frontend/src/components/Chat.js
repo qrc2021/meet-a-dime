@@ -808,9 +808,10 @@ export default function Chat() {
       return;
     }
 
+    setIsChatting();
+
     // This gets the match data.
     fetchMatchInfo().then(() => {
-      setIsChatting();
       if (localStorage.getItem('1701') !== null) {
         restorePreviousMessages();
       }
