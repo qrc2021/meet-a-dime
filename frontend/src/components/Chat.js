@@ -838,7 +838,7 @@ export default function Chat() {
       localStorage.setItem('chatExpiry', exp);
       console.log('set to', exp);
     }
-
+    var count = 1;
     var checkLoop = setInterval(() => {
       if (window.location.pathname !== '/chat') {
         clearInterval(checkLoop);
@@ -846,7 +846,10 @@ export default function Chat() {
       }
 
       var current = Date.now();
-      checkSearchingDoc(sock);
+      if (count % 5) {
+        checkSearchingDoc(sock);
+      }
+      count++;
       if (current >= localStorage.getItem('chatExpiry')) {
         // The chat is over, logic for after chat goes here.
         clearInterval(checkLoop);
@@ -859,10 +862,10 @@ export default function Chat() {
           noMatchTimeout();
         }, modalExpire);
       }
-    }, 5000);
+    }, 2000);
 
     var current_time = Date.now();
-    checkSearchingDoc(sock);
+    // checkSearchingDoc(sock);
     if (current_time >= localStorage.getItem('chatExpiry')) {
       //Modal match vs non-match
       // The chat is over, logic for after chat goes here.
@@ -1173,6 +1176,7 @@ export default function Chat() {
       if (timeoutRef2.current !== undefined) clearTimeout(timeoutRef2.current);
       if (extendedTimeoutRef.current !== undefined)
         clearTimeout(extendedTimeoutRef.current);
+      if (observer.current !== null) observer.current();
       window.ononline = null;
       window.onoffline = null;
       if (roomInUseEffect !== '' && sock !== undefined && sock !== null) {
@@ -1446,6 +1450,7 @@ export default function Chat() {
 
   //erase chat log stored in local storage
   function clearChatData() {
+    if (observer.current !== null) observer.current();
     var temp = 1701;
     console.log('Cleared chat data.');
     localStorage.removeItem('inActiveChat');
