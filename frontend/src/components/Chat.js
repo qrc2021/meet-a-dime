@@ -54,9 +54,9 @@ import QuestionAnswerIcon from '@material-ui/icons/QuestionAnswer';
 
 var bp = require('../Path.js');
 const firestore = firebase.firestore();
-const EXPIRE_IN_MINUTES = 0.4; // 10 minutes
+const EXPIRE_IN_MINUTES = 1; // 10 minutes
 const MESSAGE_IMAGE_WIDTH = 250; // just a const for easy changing.
-const modalExpire = 10000; // 30 seconds in MS
+const modalExpire = 30000; // 30 seconds in MS
 
 // Drawer
 const drawerWidth = 300;
@@ -357,6 +357,29 @@ export default function Chat() {
         itemsList.current = temp;
       }
       myPhotoRef.current = my_profile_pic;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function setIsChatting() {
+    // console.log('Checking searching doc');
+    try {
+      var myDoc = await firestore
+        .collection('searching')
+        .doc(currentUser.uid)
+        .get();
+      if (myDoc.exists) {
+        await firestore
+          .collection('searching')
+          .doc(currentUser.uid)
+          .update({ isChatting: 1 });
+      } else {
+        await firestore
+          .collection('searching')
+          .doc(match_id)
+          .update({ isChatting: 1 });
+      }
     } catch (error) {
       console.log(error);
     }

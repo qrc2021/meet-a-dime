@@ -212,7 +212,7 @@ export default function Home() {
   const [match, setMatch] = useState('Not searching.');
   const [id_of_match, setId] = useState('none');
   // Search timeout in milliseconds
-  const MS_BEFORE_ABANDON_SEARCH = 10000;
+  const MS_BEFORE_ABANDON_SEARCH = 30000;
   const MS_TRANSFER_TO_CHAT = 3000;
   // Before match expires. they are separate just incase.
   // const MS_BEFORE_ABANDON_MATCH_DOCJOIN = 10000;
@@ -738,7 +738,8 @@ export default function Home() {
           myAge <= doc.data().search_age_end &&
           myAge >= doc.data().search_age_start &&
           doc.data().age >= userInfoRef.current.ageRangeMin &&
-          doc.data().age <= userInfoRef.current.ageRangeMax
+          doc.data().age <= userInfoRef.current.ageRangeMax &&
+          doc.data().isChatting === 0
         ) {
           fillMatch(doc.id);
         }
@@ -817,6 +818,7 @@ export default function Home() {
             join_socket_id: '',
             seekerTail: 'false',
             matchTail: 'false',
+            isChatting: 0,
           });
         // Just posted the new doc to the 'searching' collection.
         console.log('DOC CREATED');
