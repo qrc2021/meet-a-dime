@@ -6,41 +6,6 @@ exports.setApp = function (app, admin) {
     res.status(200).json(ret);
   });
 
-  app.post("/api/firetest", async (req, res) => {
-    const snapshot = await admin.firestore().collection("users").get();
-
-    let users = [];
-    snapshot.forEach((doc) => {
-      let id = doc.id;
-      let data = doc.data();
-
-      users.push({ id, ...data });
-    });
-
-    res.status(200).send(JSON.stringify(users));
-  });
-
-  app.post("/api/addmessage", async (req, res) => {
-    var obj = ({
-      text: formValue,
-      createdAt: createdAt,
-      uid: uid,
-      photoURL: photoURL,
-    } = req.body);
-
-    obj.createdAt = admin.firestore.FieldValue.serverTimestamp();
-    var err = "";
-
-    try {
-      const snapshot = await admin.firestore().collection("messages").add(obj);
-    } catch (error) {
-      err = error.message;
-    }
-
-    var ret = { error: err };
-    res.status(200).json(ret);
-  });
-
   app.post("/api/getuser", async (req, res) => {
     const user = req["currentUser"];
     console.log(user);

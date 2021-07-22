@@ -282,7 +282,7 @@ export default function Home() {
     async function getIntialUserPhoto() {
       try {
         const token = currentUser && (await currentUser.getIdToken());
-        // console.log(token);
+        console.log(token);
         var config = {
           method: 'post',
           url: bp.buildPath('api/getbasicuser'),
