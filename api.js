@@ -244,15 +244,19 @@ exports.setApp = function (app, admin) {
           .get();
 
         if (!match_data.exists) {
-          await admin
-            .firestore()
-            .collection("users")
-            .doc(user.user_uid)
-            .update({
-              SuccessMatch: firebase.firestore.FieldValue.arrayRemove(
-                matches_array[index]
-              ),
-            });
+          try {
+            await admin
+              .firestore()
+              .collection("users")
+              .doc(user.user_uid)
+              .update({
+                SuccessMatch: admin.firestore.FieldValue.arrayRemove(
+                  matches_array[index]
+                ),
+              });
+          } catch (error) {
+            console.log(error);
+          }
           continue;
         }
 
