@@ -243,6 +243,19 @@ exports.setApp = function (app, admin) {
           .doc(matches_array[index])
           .get();
 
+        if (!match_data.exists) {
+          await admin
+            .firestore()
+            .collection("users")
+            .doc(user.user_uid)
+            .update({
+              SuccessMatch: firebase.firestore.FieldValue.arrayRemove(
+                matches_array[index]
+              ),
+            });
+          continue;
+        }
+
         var obj = {
           firstName: match_data.data().firstName,
           photo: match_data.data().photo,
