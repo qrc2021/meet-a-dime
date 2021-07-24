@@ -732,6 +732,7 @@ export default function Home() {
         var myAge = moment().diff(userInfoRef.current.birth, 'years');
 
         if (
+          doc.id !== currentUser.uid &&
           doc.data().match === '' &&
           searchingSex.includes(doc.data().sex) &&
           doc.data().search_sex.includes(userInfoRef.current.sex) &&
