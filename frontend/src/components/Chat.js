@@ -742,14 +742,16 @@ export default function Chat() {
         </Modal.Body>
         <Modal.Footer className="mx-auto">
           <img
-            style={{ height: '200px', width: '200px', cursor: 'pointer' }}
+            // style={{ height: '200px', width: '200px', cursor: 'pointer' }}
+            className="chat-modal-images"
             src="DimeAssets/hearteyes.png"
             id="heartEyesImage"
             onClick={pendingMatch}
             alt="Tails"
           />
           <img
-            style={{ height: '200px', width: '200px', cursor: 'pointer' }}
+            // style={{ height: '200px', width: '200px', cursor: 'pointer' }}
+            className="chat-modal-images"
             src="DimeAssets/sleepycoin.png"
             id="sleepyImage"
             onClick={noMatch}
