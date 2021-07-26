@@ -1,26 +1,26 @@
-const { response } = require('express');
+const { response } = require("express");
 
 exports.setApp = function (app, admin) {
-  app.post('/api/test', async (req, res, next) => {
-    ret = { info: 'working!' };
+  app.post("/api/test", async (req, res, next) => {
+    ret = { info: "working!" };
     res.status(200).json(ret);
   });
 
-  app.post('/api/getuser', async (req, res) => {
-    const user = req['currentUser'];
+  app.post("/api/getuser", async (req, res) => {
+    const user = req["currentUser"];
     console.log(user);
     var obj = ({ uid: uid } = req.body);
 
     if (!user) {
-      responseObj = { error: 'You must be logged in.' };
+      responseObj = { error: "You must be logged in." };
 
       var ret = responseObj;
       res.status(403).json(ret);
       return;
     }
 
-    if (obj.uid === '') {
-      responseObj = { error: 'No user specified' };
+    if (obj.uid === "") {
+      responseObj = { error: "No user specified" };
 
       var ret = responseObj;
       res.status(204).json(ret);
@@ -28,25 +28,25 @@ exports.setApp = function (app, admin) {
     }
 
     if (obj.uid !== user.user_id) {
-      responseObj = { error: 'Not authorized.' };
+      responseObj = { error: "Not authorized." };
 
       var ret = responseObj;
       res.status(403).json(ret);
       return;
     }
 
-    console.log('fetched user details for ' + uid);
-    var err = '';
-    var response = '';
+    console.log("fetched user details for " + uid);
+    var err = "";
+    var response = "";
     var responseObj = {};
     try {
       const doc = await admin
         .firestore()
-        .collection('users')
+        .collection("users")
         .doc(obj.uid)
         .get();
       if (!doc.exists) {
-        err = 'No user';
+        err = "No user";
         responseObj = { error: err };
       } else {
         var data = doc.data();
@@ -74,28 +74,28 @@ exports.setApp = function (app, admin) {
     res.status(200).json(ret);
   });
 
-  app.post('/api/getbasicuser', async (req, res) => {
-    const user = req['currentUser'];
+  app.post("/api/getbasicuser", async (req, res) => {
+    const user = req["currentUser"];
     if (!user) {
-      responseObj = { error: 'You must be logged in.' };
+      responseObj = { error: "You must be logged in." };
 
       var ret = responseObj;
       res.status(403).json(ret);
       return;
     }
     var obj = ({ uid: uid } = req.body);
-    console.log('fetched basic user details for ' + uid);
-    var err = '';
-    var response = '';
+    console.log("fetched basic user details for " + uid);
+    var err = "";
+    var response = "";
     var responseObj = {};
     try {
       const doc = await admin
         .firestore()
-        .collection('users')
+        .collection("users")
         .doc(obj.uid)
         .get();
       if (!doc.exists) {
-        err = 'No user';
+        err = "No user";
         responseObj = { error: err };
       } else {
         var data = doc.data();
@@ -131,20 +131,20 @@ exports.setApp = function (app, admin) {
   });
 
   // This retrieves the messages when users heart eachother.
-  app.post('/api/getendmessages', async (req, res) => {
-    const user = req['currentUser'];
+  app.post("/api/getendmessages", async (req, res) => {
+    const user = req["currentUser"];
     var obj = ({ user_uid: user_uid, match_uid: match_uid } = req.body);
 
     if (!user) {
-      responseObj = { error: 'You must be logged in.' };
+      responseObj = { error: "You must be logged in." };
 
       var ret = responseObj;
       res.status(403).json(ret);
       return;
     }
 
-    if (obj.user_uid === '' || obj.match_uid === '') {
-      responseObj = { error: 'Missing specification.' };
+    if (obj.user_uid === "" || obj.match_uid === "") {
+      responseObj = { error: "Missing specification." };
 
       var ret = responseObj;
       res.status(204).json(ret);
@@ -152,16 +152,16 @@ exports.setApp = function (app, admin) {
     }
 
     if (obj.user_uid !== user.user_id) {
-      responseObj = { error: 'Not authorized.' };
+      responseObj = { error: "Not authorized." };
 
       var ret = responseObj;
       res.status(403).json(ret);
       return;
     }
 
-    console.log(obj.user_uid, 'is fetching other details for', obj.match_uid);
-    var err = '';
-    var response = '';
+    console.log(obj.user_uid, "is fetching other details for", obj.match_uid);
+    var err = "";
+    var response = "";
     var responseObj = {};
     try {
       var user_in_match = false;
@@ -169,12 +169,12 @@ exports.setApp = function (app, admin) {
 
       var match_doc = await admin
         .firestore()
-        .collection('users')
+        .collection("users")
         .doc(obj.match_uid)
         .get();
       var user_doc = await admin
         .firestore()
-        .collection('users')
+        .collection("users")
         .doc(obj.user_uid)
         .get();
 
@@ -196,7 +196,7 @@ exports.setApp = function (app, admin) {
           matchPhone: match_doc.data().phone,
         };
       } else {
-        responseObj = { error: 'Not authorized; missing from matches' };
+        responseObj = { error: "Not authorized; missing from matches" };
 
         var ret = responseObj;
         res.status(200).json(ret);
@@ -212,12 +212,12 @@ exports.setApp = function (app, admin) {
   });
 
   // This retrieves the messages when users heart eachother.
-  app.post('/api/getmatches', async (req, res) => {
-    const user = req['currentUser'];
+  app.post("/api/getmatches", async (req, res) => {
+    const user = req["currentUser"];
     var obj = ({ uid: uid, query: query } = req.body);
 
     if (!user) {
-      responseObj = { error: 'You must be logged in.' };
+      responseObj = { error: "You must be logged in." };
 
       var ret = responseObj;
       res.status(403).json(ret);
@@ -225,21 +225,20 @@ exports.setApp = function (app, admin) {
     }
 
     if (obj.uid !== user.user_id) {
-      responseObj = { error: 'Not authorized.' };
+      responseObj = { error: "Not authorized." };
 
       var ret = responseObj;
       res.status(403).json(ret);
       return;
     }
 
-    async function getMatchesData(matches_array, query = '', myid) {
+    async function getMatchesData(matches_array, query = "", myid) {
       var jsonReturn = [];
       for (let index = 0; index < matches_array.length; index++) {
         // console.log("ran once");
-        if (index === 9) break;
         var match_data = await admin
           .firestore()
-          .collection('users')
+          .collection("users")
           .doc(matches_array[index])
           .get();
 
@@ -247,14 +246,14 @@ exports.setApp = function (app, admin) {
           try {
             await admin
               .firestore()
-              .collection('users')
+              .collection("users")
               .doc(myid)
               .update({
                 SuccessMatch: admin.firestore.FieldValue.arrayRemove(
                   matches_array[index]
                 ),
               });
-            console.log('deleted a record!');
+            console.log("deleted a record!");
           } catch (error) {
             console.log(error);
           }
@@ -273,9 +272,9 @@ exports.setApp = function (app, admin) {
         };
         var fname = obj.firstName.toLowerCase();
         var lname = obj.lastName.toLowerCase();
-        var flname = fname + ' ' + lname;
+        var flname = fname + " " + lname;
         if (
-          query === '' ||
+          query === "" ||
           fname.indexOf(query.toLowerCase()) >= 0 ||
           lname.indexOf(query.toLowerCase()) >= 0 ||
           flname.indexOf(query.toLowerCase()) >= 0
@@ -286,13 +285,13 @@ exports.setApp = function (app, admin) {
       return jsonReturn;
     }
 
-    var err = '';
-    var response = '';
+    var err = "";
+    var response = "";
     var responseObj = {};
     try {
       var user_doc = await admin
         .firestore()
-        .collection('users')
+        .collection("users")
         .doc(obj.uid)
         .get();
 
@@ -311,12 +310,12 @@ exports.setApp = function (app, admin) {
     res.status(200).json(ret);
   });
 
-  app.post('/api/getemailverified', async (req, res) => {
-    const user = req['currentUser'];
+  app.post("/api/getemailverified", async (req, res) => {
+    const user = req["currentUser"];
     var obj = ({ uid: uid } = req.body);
 
     if (!user) {
-      responseObj = { error: 'You must be logged in.' };
+      responseObj = { error: "You must be logged in." };
 
       var ret = responseObj;
       res.status(403).json(ret);
@@ -324,15 +323,15 @@ exports.setApp = function (app, admin) {
     }
 
     if (obj.uid !== user.user_id) {
-      responseObj = { error: 'Not authorized.' };
+      responseObj = { error: "Not authorized." };
 
       var ret = responseObj;
       res.status(403).json(ret);
       return;
     }
 
-    var err = '';
-    var response = '';
+    var err = "";
+    var response = "";
     var responseObj = {};
     try {
       var user_doc = await admin.auth().getUser(obj.uid);
@@ -352,7 +351,7 @@ exports.setApp = function (app, admin) {
     res.status(200).json(ret);
   });
 
-  app.post('/api/newuser', async (req, res) => {
+  app.post("/api/newuser", async (req, res) => {
     const obj = ({
       email,
       sex,
@@ -382,16 +381,16 @@ exports.setApp = function (app, admin) {
       ageRangeMax,
     } = req.body);
 
-    var err = '';
+    var err = "";
 
-    if (!req.body.userID || req.body.userID === '') {
-      res.status(400).json({ error: 'malformed' });
+    if (!req.body.userID || req.body.userID === "") {
+      res.status(400).json({ error: "malformed" });
       return;
     }
     try {
       const snapshot = await admin
         .firestore()
-        .collection('users')
+        .collection("users")
         .doc(userID)
         .set(obj);
     } catch (error) {
