@@ -760,6 +760,7 @@ export default function Home() {
           !doc.data().searchingSuccessMatch.includes(currentUser.uid)
         ) {
           fillMatch(doc.id);
+          return;
         }
       });
       //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
