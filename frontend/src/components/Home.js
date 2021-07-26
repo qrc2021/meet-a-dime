@@ -503,6 +503,17 @@ export default function Home() {
     history.push('/profile');
   }
 
+  function shuffle(a) {
+    var j, x, i;
+    for (i = a.length - 1; i > 0; i--) {
+      j = Math.floor(Math.random() * (i + 1));
+      x = a[i];
+      a[i] = a[j];
+      a[j] = x;
+    }
+    return a;
+  }
+
   function clearAllTimeouts() {
     clearTimeout(timeout5.current);
   }
@@ -741,28 +752,71 @@ export default function Home() {
       // Find what sex we are seeking.
       var searchingSex = getSearchingSex();
 
-      // The database query. Check all docs for possible matches.
-      var snapshot = await firestore.collection('searching').get();
-      snapshot.forEach((doc) => {
-        var myAge = moment().diff(userInfoRef.current.birth, 'years');
+      var users_snapshot = await firestore.collection('users').get();
 
-        if (
-          doc.id !== currentUser.uid &&
-          doc.data().match === '' &&
-          searchingSex.includes(doc.data().sex) &&
-          doc.data().search_sex.includes(userInfoRef.current.sex) &&
-          myAge <= doc.data().search_age_end &&
-          myAge >= doc.data().search_age_start &&
-          doc.data().age >= userInfoRef.current.ageRangeMin &&
-          doc.data().age <= userInfoRef.current.ageRangeMax &&
-          doc.data().isChatting === 0 &&
-          !doc.data().searchingFailMatch.includes(currentUser.uid) &&
-          !doc.data().searchingSuccessMatch.includes(currentUser.uid)
-        ) {
-          fillMatch(doc.id);
-          return;
+      var all_users___ = [];
+      users_snapshot.forEach((doc) => {
+        if (doc.id !== currentUser.uid) {
+          all_users___.push(doc.id);
         }
       });
+
+      var all_users = shuffle(all_users___);
+      console.log(all_users);
+      // all_users = all_users.sort(() => Math.random() - 0.5);
+
+      for (var i = 0; i < all_users.length; i++) {
+        var doc = await firestore
+          .collection('searching')
+          .doc(all_users[i])
+          .get();
+        if (!doc.exists) continue;
+        else {
+          var myAge = moment().diff(userInfoRef.current.birth, 'years');
+
+          if (
+            doc.id !== currentUser.uid &&
+            doc.data().match === '' &&
+            searchingSex.includes(doc.data().sex) &&
+            doc.data().search_sex.includes(userInfoRef.current.sex) &&
+            myAge <= doc.data().search_age_end &&
+            myAge >= doc.data().search_age_start &&
+            doc.data().age >= userInfoRef.current.ageRangeMin &&
+            doc.data().age <= userInfoRef.current.ageRangeMax &&
+            doc.data().isChatting === 0 &&
+            !doc.data().searchingFailMatch.includes(currentUser.uid) &&
+            !doc.data().searchingSuccessMatch.includes(currentUser.uid)
+          ) {
+            fillMatch(doc.id);
+            return;
+          }
+        }
+      }
+
+      // The database query. Check all docs for possible matches.
+      // var snapshot = await firestore.collection('searching').get();
+
+      // snapshot.forEach((doc) => {
+      //   var myAge = moment().diff(userInfoRef.current.birth, 'years');
+
+      //   if (
+      //     doc.id !== currentUser.uid &&
+      //     doc.data().match === '' &&
+      //     searchingSex.includes(doc.data().sex) &&
+      //     doc.data().search_sex.includes(userInfoRef.current.sex) &&
+      //     myAge <= doc.data().search_age_end &&
+      //     myAge >= doc.data().search_age_start &&
+      //     doc.data().age >= userInfoRef.current.ageRangeMin &&
+      //     doc.data().age <= userInfoRef.current.ageRangeMax &&
+      //     doc.data().isChatting === 0 &&
+      //     !doc.data().searchingFailMatch.includes(currentUser.uid) &&
+      //     !doc.data().searchingSuccessMatch.includes(currentUser.uid)
+      //   ) {
+      //     fillMatch(doc.id);
+      //     return;
+      //   }
+      // });
+
       //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       // Still part of phase two. Listen for changes to the doc we
       // just filled in. Its possible the doc owner drops out,
