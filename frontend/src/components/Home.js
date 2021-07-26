@@ -650,6 +650,21 @@ export default function Home() {
 
     // Lock the search button for now, until tasks are done.
     setLockout(true);
+
+    var user_FailMatch = [];
+    var user_SuccessMatch = [];
+    try {
+      var user_userDoc = await firestore
+        .collection('users')
+        .doc(currentUser.uid)
+        .get();
+      user_FailMatch = user_userDoc.data().FailMatch;
+      user_SuccessMatch = user_userDoc.data().SuccessMatch;
+    } catch (error) {
+      console.log(error);
+      return;
+    }
+
     var matchFound = false; // Match found boolean, for this only.
     var matchInternal = ''; // ID of found, for this function only.
 
@@ -740,7 +755,9 @@ export default function Home() {
           myAge >= doc.data().search_age_start &&
           doc.data().age >= userInfoRef.current.ageRangeMin &&
           doc.data().age <= userInfoRef.current.ageRangeMax &&
-          doc.data().isChatting === 0
+          doc.data().isChatting === 0 &&
+          !doc.data().searchingFailMatch.includes(currentUser.uid) &&
+          !doc.data().searchingSuccessMatch.includes(currentUser.uid)
         ) {
           fillMatch(doc.id);
         }
@@ -820,6 +837,8 @@ export default function Home() {
             seekerTail: 'false',
             matchTail: 'false',
             isChatting: 0,
+            searchingFailMatch: user_FailMatch,
+            searchingSuccessMatch: user_SuccessMatch,
           });
         // Just posted the new doc to the 'searching' collection.
         console.log('DOC CREATED');
