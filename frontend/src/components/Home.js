@@ -383,7 +383,7 @@ export default function Home() {
         ) {
           document
             .getElementById('home-scrolling')
-            .scrollBy(e.deltaY / 3, 0, 'smooth');
+            .scrollBy(e.deltaY, 0, 'smooth');
         }
         if (
           e.deltaY < 0 &&
@@ -391,7 +391,7 @@ export default function Home() {
         ) {
           document
             .getElementById('home-scrolling')
-            .scrollBy(e.deltaY / 3, 0, 'smooth');
+            .scrollBy(e.deltaY, 0, 'smooth');
         }
       }
     }
